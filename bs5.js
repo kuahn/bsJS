@@ -67,6 +67,7 @@ function init(doc){
 				return r;
 			}
 		}
+		bs.sel = sel;
 		return bs;
 	})(doc);
 	var factory = (function(bs){
@@ -966,7 +967,517 @@ function init(doc){
 			})();
 			return d;
 		})( bs, style, doc ) );
+		bs.w = (function(){
+			var win;
+			function ev( e, k, v ){
+				var t0, i, j;
+				if( v ){
+					t0 = ev[e] || ( ev[e] = [] );
+					t0[t0.length] = t0[k] = $v;
+					if( !W['on'+e] ) W['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
+						var t0, i;
+						t0 = ev[e], i = t0.length;
+						while( i-- ) t0[i]( e );
+					} );
+				}else if( ( t0 = ev[e] ) && t0[k] ){
+					t0.splice( t0.indexOf( t0[k] ), 1 );
+					if( !t0.length ) W['on'+e] = null;
+				}
+			}
+			function hash( e, k, v ){
+				var old, w, h;
+				if( v ){
+					t0 = ev[e] || ( ev[e] = [] );
+					t0[t0.length] = t0[k] = v;
+					if( !ev['@'+e] ){
+						old = location.hash;
+						ev['@'+e] = setInterval( function(){
+							var t0, i, j;
+							if( old != location.hash ){
+								old = location.hash, t0 = ev[e], i = t0.length;
+								while( i-- ) t0[i]();
+							}
+						}, 50 );
+					}
+				}else if( ( t0 = ev[e] ) && t0[k] ){
+					t0.splice( t0.indexOf( t0[k] ), 1 );
+					if( !t0.length ){
+						clearInterval( this['@'+e] );
+						this['@'+e] = null;
+					}
+				}
+			}
+			function sizer( $wh ){
+				win.on( 'resize', 'wh', $wh );
+				if( bs.detect.eventRotate ) win.on( 'resize', 'wh', $wh );
+				$wh();
+			}
+			win = {
+				on:function( e, k, v ){
+					if( k == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
+					else if( k == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					ev( e, k, v );
+				},
+				is:(function( sel ){
+					return function( $sel ){
+						var t0;
+						return ( t0 = sel( $sel ) ) && t0.length;
+					};
+				} )( bs.sel ),
+				touchScroll:(function( doc, isTouch ){
+					var i;
+					function prevent( e ){
+						e.preventDefault();
+						return false;
+					}
+					return function(v){
+						if( v ) doc.removeEventListener( 'touchmove', prevent, true);
+						else if( isTouch && !i++ ) doc.addEventListener( 'touchmove', prevent, true);
+					};
+				})( doc, bs.detect.eventTouch ),
+				scroll:(function( W, doc, root ){
+					return function scroll(){
+						switch( arguments[0].charAt(0) ){
+						case'w': return root.scrollWidth;
+						case'h': return root.scrollHeight;
+						case'l': return doc.documentElement.scrollLeft || W.pageXOffset || 0;
+						case't': return doc.documentElement.scrollTop || W.pageYOffset || 0;
+						}
+						W.scrollTo( arguments[0], arguments[1] );
+					};
+				})( W, doc, bs.detect.root ),
+				w:0, h:0,
+				sizer:(function( W, doc ){
+					return function sizer( $end ){
+						var wh, r, s;
+						if( !ex.is( '#bsSizer' ) ) bs.d( '<div id=""bsSizer""></div>' ).$('display','none','width','100%','height','100%','position','absolute','<','body' );
+						s = bs.d('#bsSizer');
+						switch( bs.detect.browser ){
+						case'iphone':
+							s.$( 'display', 'block', 'height', '120%' );
+							W.onscroll = function( $e ){
+								W.onscroll = null, W.scrollTo( 0, 0 );
+								s.$( 'display', 'none', 'height', W.innerHeight+1 );
+								sizer( function wh( $e ){
+									$end( win.w = innerWidth, win.h = innerHeight );
+								} );
+							};
+							W.scrollTo( 0, 1000 );
+							break;
+						case'android':case'androidTablet':
+							if( bs.detect.sony ){
+								sizer( function(){
+									$end( win.w = s.$('w'), win.h = s.$('h') );
+								} );
+							}else{
+								r = outerWidth == screen.width || screen.width == s.$('w') ? devicePixelRatio : 1;
+								sizer( function wh(){
+									$end( win.w = outerWidth / r, win.h = outerHeight / r + 1 );
+								} );
+							}
+							break;
+						default:
+							if( W.innerHeight === undefined ){
+								sizer( function(){
+									$end( win.w = doc.documentElement.clientWidth || doc.body.clientWidth,
+										win.h = doc.documentElement.clientHeight || doc.body.clientHeight );
+								} );
+							}else{
+								sizer( function(){
+									$end( win.w = W.innerWidth, win.h = W.innerHeight );
+								} );
+							}
+						}
+					}
+				})( W, doc )
+			};
+			return win;
+		})();
 	})( W.document );
+	bs.tw = ( function(){
+		var tw, l, timer, time, isLive, start, end, loop, tid, isPause;
+		tw = {},l = tid = 0;
+		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
+		if( timer ){
+			start = function(){
+				if( isLive ) return;
+				isLive = 1;
+				loop();
+			};
+			end = function(){
+				isLive = 0;
+			};
+			timer( function( $time ){
+				if( Math.abs( $time - Date.now() ) < 1 ) time = 1;
+			} );
+			loop = function loop( $time ){
+				var t, i;
+				if( isPause ) return;
+				if( isLive ){
+					t = time ? $time : +new Date;
+					for( i in tw ){
+						if( tw[i].loop( t ) ){
+							delete tw[i];
+							l--;
+						}
+					}
+					l ? timer( loop ) : end();
+				}
+			};
+		}else{
+			start = function start(){
+				if( isLive ) return;
+				isLive = setInterval( loop, 17 );
+			};
+			end = function end(){
+				if( !isLive ) return;
+				isLive = 0;
+				clearInterval( isLive );
+			};
+			loop = function loop(){
+				var t, i;
+				if( isPause ) return;
+				if( isLive ){
+					t = +new Date;
+					for( i in tw ){
+						if( tw[i].loop( t ) ){
+							delete tw[i];
+							l--;
+						}
+					}
+					if( !l ) end();
+				}
+			};
+		}
+		/*
+		var tw, detect, trans, trans3, tend, dom, style, OBJ;
+		OBJ = run.OBJ;
+		dom = run.protocol.d;
+		style = run.style;
+		detect = run( 'D:detect' );
+		trans = detect.transition;
+		trans3 = detect.transform3D;
+		if( !timer ) timer = function( $func ){ setTimeout( $func, 16 ); };
+		tw = ( function(){
+			var PI, HPI, i;
+			PI = Math.PI;
+			HPI = PI * .5;
+			i = 'cubic-bezier(';
+			return {
+				li:function(a,c,b){return b*a+c},
+				baI:function(a,c,b){return b*a*a*(2.70158*a-1.70158)+c},
+				baO:function(a,c,b){a-=1;return b*(a*a*(2.70158*a+1.70158)+1)+c},
+				baIO:function(a,c,b){a*=2;if(1>a)return 0.5*b*a*a*(3.5949095*a-2.5949095)+c;a-=2;return 0.5*b*(a*a*(3.70158*a+2.70158)+2)+c},
+				boI:function(a,c,b,d,e){return b-ease[3]((e-d)/e,0,b)+c},
+				boO:function(a,c,b){if(0.363636>a)return 7.5625*b*a*a+c;if(0.727272>a)return a-=0.545454,b*(7.5625*a*a+0.75)+c;if(0.90909>a)return a-=0.818181,b*(7.5625*a*a+0.9375)+c;a-=0.95454;return b*(7.5625*a*a+0.984375)+c},
+				boIO:function(a,c,b,d,e){if(d<0.5*e)return d*=2,0.5*ease[13](d/e,0,b,d,e)+c;d=2*d-e;return 0.5*ease[14](d/e,0,b,d,e)+0.5*b+c},
+				siI:function(a,c,b){return -b*Math.cos(a*HPI)+b+c},
+				siO:function(a,c,b){return b*Math.sin(a*HPI)+c},
+				siIO:function(a,c,b){return 0.5*-b*(Math.cos(PI*a)-1)+c},
+				ciI:function(a,c,b){return -b*(Math.sqrt(1-a*a)-1)+c},
+				ciO:function(a,c,b){a-=1;return b*Math.sqrt(1-a*a)+c},
+				ciIO:function(a,c,b){a*=2;if(1>a)return 0.5*-b*(Math.sqrt(1-a*a)-1)+c;a-=2;return 0.5*b*(Math.sqrt(1-a*a)+1)+c},
+				quI:function(a,c,b){return b*a*a*a+c},
+				quO:function(a,c,b){a-=1;return b*(a*a*a+1)+c},
+				quIO:function(a,c,b){a*=2;if(1>a)return 0.5*b*a*a*a+c;a-=2;return 0.5*b*(a*a*a+2)+c},
+				_li:i+'0.250,0.250,0.750,0.750)',
+				_baI:i+'0.600,-0.280,0.735,0.045)',_baO:i+'0.175,0.885,0.320,1.275)',_baIO:i+'0.680,-0.550,0.265,1.550)',
+				_boI:i+'0.600,-0.280,0.735,0.045)',_boO:i+'0.175,0.885,0.320,1.275)',_boIO:i+'0.680,-0.550,0.265,1.550)',
+				_siI:i+'0.470,0.000,0.745,0.715)',_siO:i+'0.390,0.575,0.565,1.000)',_siIO:i+'0.445,0.050,0.550,0.950)',
+				_ciI:i+'0.600,0.040,0.980,0.335)',_ciO:i+'0.075,0.820,0.165,1.000)',_ciIO:i+'0.785,0.135,0.150,0.860)',
+				_quI:i+'0.895,0.030,0.685,0.220)',_quO:i+'0.165,0.840,0.440,1.000)',_quIO:i+'0.770,0.000,0.175,1.000'
+			};
+		} )();
+		bs( 'C:Ttw',
+		'clear', function clear(){
+			if( this.__start ){
+				this.__start = 0;
+				if( this.loop ){
+					this.loop = this.clearLoop;
+				}else{
+					this.__original.run( 'TEND', null );
+					this.__original.run( 'transition', null );
+					this.end();
+				}
+			}
+		},
+		'clearLoop', function clearLoop(){
+			return -1;
+		},
+		'stop', function stop(){
+			if( this.__start ){
+				this.__start = 0;
+				if( this.loop ){
+					this.loop = this.stopLoop;
+				}else{
+					this.__cssState = 0;
+					this.__original.run( 'TEND', null );
+					this.__original.run( 'transition', null );
+				}
+			}
+		},
+		'stopLoop', function stopLoop(){
+			return 1;
+		},
+		'K', function k( $val ){
+			var t0;
+			if( !( t0 = cache[$val] ) ) cache[$val] = t0 = OBJ.N();
+			t0[t0.length++] = this;
+		},
+		'T', function T( $val ){
+			this.__T = $val;
+			this.__time = parseInt( $val * 1000 );
+			this.__t = 1 / this.__time;
+		},
+		'run', function TtwR( $key, $val, $isEdit ){
+			var to, i, j;
+			switch( $key ){
+			case'T':case'K': this[$key]( $val ); break;
+			case'R':case'E':case'END':case'UP': this['__' + $key] = $val; break;
+			case'D': this.__delay = parseInt( $val * 1000 ); break;
+			default:
+				if( !( to = this.__to ) ) to = this.__to = [];
+				switch( $key.charAt(0) ){
+				case'B':case'C': to[$key] = $val; break;
+				default:
+					to[$key] = $val;
+					if( $isEdit ){
+						for( i = 0, j = to.length ; i < j ; i += 2 ) if( to[i] == $key ){
+							to[i+1] = $val;
+							break;
+						}
+					}else{
+						to[to.length] = $key;
+						to[to.length] = $val;
+					}
+				}
+			}
+		},
+		'S', function S( $val ){
+			if( this.__start ) return;
+			this.__start = 1;
+			
+			this.__original = $val;
+			if( $val instanceof dom ){
+				this.__target = $val[0].bsStyle;
+			}else if( $val.bsStyle ){
+				this.__target = $val.bsStyle;
+			}else if( $val.runs ){
+				this.__target = $val;
+			}else{
+				throw'TtwTarget';
+			}
+			
+			if( !this.__T ) this.T( 1 );
+			if( !this.__delay ) this.__delay = 0;
+			if( this.__R === undefined ) this.__R = 1;
+			this.__repeat = this.__R;
+			if( !this.__from ) this.__from = OBJ.N();
+			if( !this.__curr ) this.__curr = OBJ.N();
+			switch( this.__E || ( this.__E = 'li' ) ){
+			case'B':case'C':
+				return this[this.__E]( this.__target, this.__to, this.__from, this.__curr );
+			default:
+				if( TtwPool.css3 && this.__target instanceof style && trans ){
+					this.cssEase( this.__target, this.__to, this.__from, this.__curr );
+				}else{
+					this.ease( this.__target, this.__to, this.__from, this.__curr );
+				}
+			}
+		},
+		'start', function start(){
+			this.loopEnd = this.end;
+			this.__sTime = Date.now() + this.__delay;
+			this.__eTime = this.__sTime + this.__time;
+			loop( this );
+		},
+		'cssEase', function cssEase( $target, $to, $from, $curr ){
+			var self, i, j;
+			this.__ease = 'all ' + this.__time + 'ms ' + tw['_'+this.__E];
+			if( trans3 && $target.__css['transform'] === undefined ) $target.run( 'transform', 'rotateX(0)' );
+			if( this.__repeat != 1 ) for( i = 0, $from.length = j = $to.length ; i < j ; i += 2 )
+				 $from[i + 1] = $target.run( $from[i] = $to[i] );
+			this.__cssState = 0;
+			if( !this.cssStater ){
+				self = this;
+				this.cssStater = function cssStater(){
+					self.cssLoop();
+				};
+			}
+			this.loop = this.loopEnd = null;
+			this.cssLoop();
+		},
+		'ease', function ease( $target, $to, $from, $curr ){
+			var i, j;
+			this.__ease = tw[this.__E];
+			for( i = 0, $curr.length = j = $to.length ; i < j ; i += 2 ) $from[( i + 1 ) + 'A'] = $to[$to[i]] - ( $from[i + 1] = $target.run( $curr[i] = $from[i] = $to[i] ) );
+			this.loop = this.easeLoop;
+			this.start();
+		},
+		'B', function bezier( $target, $to, $from, $curr ){
+			var i, j;
+			for( i = 0, $curr.length = j = $to.length ; i < j ; i += 2 ) $from[i + 1] = $target.run( $curr[i] = $from[i] = $to[i] );
+			this.loop = this.bezierLoop;
+			this.start();
+		},
+		'C', (function(){
+		var toRadian = Math.PI/180;
+		return function circle( $target, $to, $from, $curr ){
+			this.__ease = tw[$to.Cease || 'li'];
+			$curr.length = 4;
+			$curr[0] = $to.Cx;
+			$curr[2] = $to.Cy;
+			$curr[3] = $curr[1] = 0;
+			$to.C0 *= toRadian;
+			$to.C1 *= toRadian;
+			$to.CA = $to.C1 - $to.C0;
+			this.loop = this.circleLoop;
+			this.start();
+		};})(),
+		'loopCheck', function loopCheck( $time ){
+			var du;
+			if( ( du = $time - this.__sTime ) < 0 ) return;
+			if( $time > this.__eTime ){
+				if( --this.__repeat ){
+					this.__sTime = $time + this.__delay;
+					this.__eTime = this.__sTime + this.__time;
+				}else{
+					this.__target.runs( this.__to );
+					return -1;
+				}
+			}else{
+				return du;
+			}
+		},
+		'bezierLoop',function bezierLoop( $time ){
+			var to, from, curr, du, a, v0, v1, v2, i, j;
+			if( !this.__start ) return 1;
+			du = this.loopCheck( $time );
+			if( !du || du == -1) return du;
+			to = this.__to;
+			from = this.__from;
+			curr = this.__curr;
+			a = du * this.__t;
+			v0 = a * a;
+			v1 = 2 * ( a - v0 );
+			v2 = 1 - 2 * a + v0;
+			for( i = 1, j = to.length; i < j ; i += 2 ) curr[i] = to[i]*v0 + to['B'+to[(i-1)]]*v1 + from[i]*v2;
+			this.__target.runs( curr );
+			if( this.__UP ) this.__UP( this );
+		},
+		'easeLoop', function easeLoop( $time ){
+			var ease, from, curr, time, du, a, i, j;
+			if( !this.__start ) return 1;
+			du = this.loopCheck( $time );
+			if( !du || du == -1) return du;
+			ease = this.__ease
+			from = this.__from;
+			curr = this.__curr;
+			time = this.__time;
+			a = du * this.__t;
+			for( i = 1, j = this.__to.length ; i < j ; i += 2 ) curr[i] = ease( a, from[i], from[i+'A'], du, time );
+			this.__target.runs( curr );
+			if( this.__UP ) this.__UP( this );
+		},
+		'circleLoop', function circleLoop( $time ){
+			var to, from, curr, du, a, i;
+			if( !this.__start ) return 1;
+			du = this.loopCheck( $time );
+			if( !du || du == -1) return du;
+			to = this.__to;
+			curr = this.__curr;
+			from = this.__from;
+			a = du * this.__t;
+			i = this.__ease( a, to.C0, to.CA, du, this.__time );
+			curr[1] = to.Ccx + Math.cos( i ) * to.Cr;
+			curr[3] = to.Ccy + Math.sin( i ) * to.Cr;
+			this.__target.runs( curr );
+			if( this.__UP ) this.__UP( this );
+		},
+		'cssLoop', function cssLoop(){
+			var dom;
+			if( !this.__start ) return;
+			dom = this.__original;
+			if( this.__cssState == 0 ){
+				this.__cssState = 1;
+				dom.run( 'TEND', this.cssStater );
+				dom.run( 'transition', this.__ease );
+				if( this.__delay ){
+					setTimeout( this.cssStater, this.__delay );
+				}else{
+					timer( this.cssStater );
+				}
+			}else if( this.__cssState == 1 ){
+				this.__cssState = 2;
+				this.__target.runs( this.__to );
+			}else{
+				dom.run( 'TEND', null );
+				dom.run( 'transition', null );
+				if( --this.__repeat ){
+					this.__cssState = 0;
+					this.__target.runs( this.__from );
+					timer( this.cssStater );
+				}else this.end();
+			}
+		},
+		'end', function end(){
+			var end, target;
+			if( !this.__start ) return;
+			if( this.__UP ) this.__UP( this );
+			end = this.__END;
+			target = this.__original;
+			OBJ._( this.__from );
+			OBJ._( this.__curr );
+			this.__to.length = this.__start = this.__delay = 0;
+			this.__orginal = this.__target = this.__END = this.__UP = this.__from = this.__curr = null;
+			this.__E = 'li';
+			this.__R = 1;
+			this.T( 1 );
+			TtwPool[TtwPool.length++] = this;
+			if( end ){
+				if( typeof end == 'function' ){
+					end( target );
+				}else{
+					run( end );
+				}
+			}
+		} );
+		*/
+		return {
+			'+':function( $tw ){if( $tw.loop ) tw[arguments[1]||tid++] = $tw, l++, start();},
+			'-':function( $k ){
+				var i;
+				if( tw[$k] ){
+					delete tw[$k];
+					l--;
+				}else{
+					for( i in tw )
+						if( tw[i] === $k ){
+							delete tw[i];
+							l--;
+							return;
+						}
+					throw 't-'+$k;
+				}
+			},
+			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
+			stop:function(){end(), tw = {}, tid = l = 0;},
+			delay:(function(){
+				var delay = [];
+				return function( $f ){
+					var i;
+					if( (i = deley.indexOf( $f ) ) == -1 ){
+						delay[delay.length] = $f;
+						$f.bsDelay = setTimeout( $f, ( arguments[1] || 1 ) * 1000 );
+					}else{
+						delay.splice( i, 1 );
+						clearTimeout( $f.bsDelay );
+						delete $f.bsDelay;
+					}
+				};
+			})()
+		};
+	})();
 	W[N||'bs'] = bs;
 }
 init.len = 0;
