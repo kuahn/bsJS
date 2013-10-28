@@ -871,6 +871,17 @@ function init(doc){
 					i = k.length;
 					while( i-- ) k[i].substr(0,2) == 'on' ? ( ev$[k[i].substr(2).toLowerCase()] = 1 ) : 0;
 				}
+				if( bs.detect.device =='tablet' || bs.detect.device=='mobile' ){
+					ev$.down = 'touchstart', ev$.up = 'touchend', ev$.move = 'touchmove';
+				}else{
+					ev$.down = 'mousedown', ev$.up = 'mouseup', ev$.move = 'mousemove';
+					ev$.rollover = function( $e ){
+						if( !isChild( this, $e.event.fromElement || $e.event.relatedTarget ) ) $.type = 'rollover', $v.call( this, $e );
+					};
+					ev$.rollout = function( $e ){
+						if( !isChild( this, $e.event.toElement || $e.event.explicitOriginalTarget ) ) $.type = 'rollout', $v.call( this, $e );
+					};
+				}
 				ev = ( function( x, y ){
 					var pageX, pageY, evType, prevent;
 					evType = {
@@ -882,7 +893,6 @@ function init(doc){
 					}else{
 						pageX = 'pageX', pageY = 'pageY';
 					}
-					
 					function ev( $dom ){
 						this.dom = $dom;
 					}
@@ -896,13 +906,21 @@ function init(doc){
 						for( k in this ) if( this.hasOwnProperty[k] && typeof this[k] == 'function' ) dom['on'+k] = null;
 						return null;
 					};
+					function isChild( $p, $c ){
+						if( $c )
+							do if( $c == $p ) return 1;
+							while( $c = $c.parentNode )
+						return 0;
+					}
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
 						self = this, dom = self.dom;
 						if( $v === null ){
 							dom['on'+$k] = null;
 							delete self[$k];
-						}else{
+						}else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
+						else if( $k == 'rollout' ) self.$( 'mouseout', ev$.rollout );
+						else{
 							self[$k] = $v;
 							dom['on'+$k] = function( $e ){
 								var type, start, dx, dy, t0, t1, t2, i, j, X, Y;
@@ -952,10 +970,7 @@ function init(doc){
 	W[N||'bs'] = bs;
 }
 init.len = 0;
-W[N||'bs'] = function(){
-
-	init[init.len++] = arguments[0];
-};
+W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 (function( doc ){
 	var isReady;
 	function loaded(){
