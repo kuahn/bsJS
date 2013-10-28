@@ -43,12 +43,15 @@ bs.D( 'data1' ).$(<br>
 <script src="/bs/bs5/bsTest.js"></script>
 <script>
 bs( function(){
+	function printer(r){
+		document.getElementById('stage').innerHTML += r;
+	}
 bs.D( 'data1' ).$( 'a', 3, 'b', function( a ){ return a;},
 	'c', function(){return this.a;},
 	'd', [0,1,2,3]
 );
 bs.$xml( document.getElementById('xml').text, function( $d ){
-	bsTest( function( r ){ document.getElementById('stage').innerHTML += r; },
+	bsTest( printer,
 
 	"$d.topics.volume[0].title", 'title1', $d.topics.volume[0].title.value
 	);
@@ -58,8 +61,28 @@ bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%
 bs.c( '#stage' ).$( 'width', 100 );
 bs.d( '#stage' ).$( 'background-color', '#eee' );
 
+(function(){
+	var i;
+	bs.d( '#stage' ).$(
+	'mousedown', function( $e ){
+		i = 1;
+		bsTest( printer,
+			"mousedown<br>this.id", 'stage', this.id,
+			"$e.x",[0,this.offsetWidth],$e.x
+		);
+	},
+	'mousemove', function( $e ){
+		if( i++ == 1 ) bsTest( printer,
+			"mousemove<br>typeof $e.dx", 'number', typeof $e.dx
+		);
+	},
+	'mouseup', function( $e ){
+		bs.d( '#stage' ).$( 'mousedown', null, 'mousemove', null );
+	}
+	);
+} )();
 
-bsTest( function( r ){ document.getElementById('stage').innerHTML += r; },
+bsTest( printer,
 
 "bs.D.data1.a", 3, bs.D.data1.a,
 
