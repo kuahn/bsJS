@@ -105,6 +105,7 @@ function init(doc){
 		bs.module = function(){
 			bs[arguments[0]] = new cls(arguments);
 		};
+		bs.factory = factory;
 		return factory;
 	})(bs);
 	bs.module( 'D', (function(){
@@ -717,7 +718,8 @@ function init(doc){
 			return css;
 		})( style ) );
 		bs.module( 'd', (function( bs, style, doc ){
-			var d, ds, ev;
+			var d, ds, ev, t;
+			t = /^\s*|\s*$/g;
 			function x( $dom ){
 				var i = 0; do i += $dom.offsetLeft; while( $dom = $dom.offsetParent )
 				return i;
@@ -835,20 +837,40 @@ function init(doc){
 					return $dom.parentNode;
 				}
 			};
-			d.html = function( $dom ){ return $dom.innerHTML; };
-			d.text = function( $dom ){ return $dom[attrs.text]; };
-			d.style = function( $dom ){ return $dom.bsStyle || $dom.style; };
-			d['class'] = function( $dom ){ return $dom.className; };
+			d.html = function( $dom, $v ){return $v === undefined ? $dom.innerHTML : ( $dom.innerHTML = $v );};
+			d['html+'] = function( $dom, $v ){return $dom.innerHTML += $v;};
+			d['+html'] = function( $dom, $v ){return $dom.innerHTML = $v + $dom.innerHTML;};
+			(function(){
+				var t = bs.detect.text;
+				d.text = function( $dom ){return $v === undefined ? $dom[t] : ($dom[t]=$v);};
+				d['text+'] = function( $dom ){return $dom[t] += $v;};
+				d['+text'] = function( $dom ){return $dom[t] = $v + $dom[t];};
+			})();
+			d.style = function( $dom ){return $dom.bsS;};
+			d['class'] = function( $dom, $v ){return $v === undefined ? $dom.className : ($dom.className = $v);};
+			d['class+'] = function( $dom, $v ){
+				var t0 = $dom.className;
+				return ( t0 && t0.indexOf( $v ) == -1 ) ? ( $dom.className = $val + ' ' + t0.replace( t, '' ) ) : $dom.className;
+			};
+			d['class-'] = function( $dom, $v ){return $dom.className = $dom.className.replace( $v, '' ).replace( '  ', ' ' );};
 			d.id = function( $dom ){ return $dom.id };
 			d.src = function( $dom ){ return $dom.src; };
 			ev = (function(){
-				var k, ev;
+				var k, ev, i;
 				function ev$( $dom, $k, $v ){
+					var t0;
 					if( $v ) return ( $dom.bsE || ( $dom.bsE = new ev( $dom ) ) ).$( $k, $v );
-					if( $v === undefined ) return ( t0 = $dom.bsEvent ) ? t0[$k] : $dom[$k];
-					if( $v === null ) return ( t0 = $dom.bsEvent ) ? t0.$( $k, null ) : ( $dom[$k] = null );
+					if( $v === undefined ) return ( t0 = $dom.bsE ) ? t0[$k] : $dom[$k];
+					if( $v === null ) return ( t0 = $dom.bsE ) ? t0.$( $k, null ) : ( $dom[$k] = null );
 				}
-				for( k in doc.body ) k.substr(0,2) == 'on' ? ev$[k.substr(2).toLowerCase()] = 1 : 0;
+				for( k in doc.createElement('div') ) k.substr(0,2) == 'on' ? ( i = 1,ev$[k.substr(2).toLowerCase()] = 1 ) : 0;
+				if( !i ){
+					k = Object.getOwnPropertyNames(doc)
+						.concat(Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(doc))))
+						.concat(Object.getOwnPropertyNames(Object.getPrototypeOf(W)));
+					i = k.length;
+					while( i-- ) k[i].substr(0,2) == 'on' ? ( ev$[k[i].substr(2).toLowerCase()] = 1 ) : 0;
+				}
 				ev = ( function( x, y ){
 					var pageX, pageY, evType, prevent;
 					evType = {
