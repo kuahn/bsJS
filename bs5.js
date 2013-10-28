@@ -18,7 +18,7 @@ function init(doc){
 			sel = function( $sel ){
 				return doc.querySelectorAll( $sel );
 			};
-		}else if( sz = Sizzle ){
+		}else if( sz = W['Sizzle'] ){
 			sel = function( $sel ){
 				return sz( $sel );
 			};
