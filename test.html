@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<title>v</title>
+<meta name="keywords" content="a" />
+<meta name="description" content="a" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="xxx.ico" type="image/x-icon">
+<script id="xml" type="text/template"><![CDATA[
+<topics>
+	<volume>
+		<category>cat1</category>
+		<title>title1</title>
+		<time>2013.08.09.</time>
+		<img_list><![CDATA[m/1.png]]></img_list>
+	</volume>
+	<volume>
+		<category>cat2</category>
+		<title>title2</title>
+		<time>2013.10.09.</time>
+		<img_list><![CDATA[m/2.png]]></img_list>
+	</volume>
+</topics>
+]]></script>
+</head>
+<body>
+<div id="a"></div>
+<div id="stage">
+bs.D( 'data1' ).$(<br>
+&nbsp;&nbsp;'a', 3,<br>
+&nbsp;&nbsp;'b', function( a ){ return a;},<br>
+&nbsp;&nbsp;'c', function(){return this.a;},<br>
+&nbsp;&nbsp;'d', [0,1,2,3]<br>
+);
+<hr>
+<br>
+</div>
+<script src="/bs/bs5/bs5.js"></script>
+<script src="/bs/bs5/bsTest.js"></script>
+<script>
+bs( function(){
+bs.D( 'data1' ).$( 'a', 3, 'b', function( a ){ return a;},
+	'c', function(){return this.a;},
+	'd', [0,1,2,3]
+);
+bs.$xml( document.getElementById('xml').text, function( $d ){
+	bsTest( function( r ){ document.getElementById('stage').innerHTML += r; },
+
+	"$d.topics.volume[0].title", 'title1', $d.topics.volume[0].title.value
+	);
+
+} );
+bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%' );
+bs.c( '#stage' ).$( 'width', 100 );
+bs.d( '#stage' ).$( 'background-color', '#eee' );
+
+
+bsTest( function( r ){ document.getElementById('stage').innerHTML += r; },
+
+"bs.D.data1.a", 3, bs.D.data1.a,
+
+"bs.D.data1.$( 'a' )", 3, bs.D.data1.$( 'a' ),
+
+"bs.D.data1.b(5)", 5, bs.D.data1.b(5),
+
+"bs.D.data1.$( '=b', 5 )", 5, bs.D.data1.$( '=b', 5 ),
+
+"bs.D.data1.$( '~c' )() == bs.D.data1.a", bs.D.data1.a,bs.D.data1.$( '~c' )(), 
+
+"bs.D.data1.$( 'd.2' )", 2, bs.D.data1.$( 'd.2' ),
+
+"bs.$ex( 5, '~', 10 )", [5,10], bs.$ex( 5, '~', 10 ),
+"bs.$xml(xml).topics.volume[1].title.value", 'title2', bs.$xml( document.getElementById('xml').text ).topics.volume[1].title.value,
+"bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
+"bs.d( '#stage' ).$( 'background-color' )", '#eee', bs.d( '#stage' ).$( 'background-color' )
+);
+
+
+
+} );
+</script>
+</body>
+</html>
