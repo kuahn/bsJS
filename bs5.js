@@ -1099,7 +1099,7 @@ function init(doc){
 			return win;
 		})();
 	})( W.document );
-	bs.TW = ( function(){
+	bs.ANI = ( function(){
 		var tw, l, timer, time, isLive, start, end, loop, tid, isPause;
 		tw = {},l = tid = 0;
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
