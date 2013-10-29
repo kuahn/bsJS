@@ -104,12 +104,17 @@ function init(doc){
 			return F;
 		}
 		bs.module = function(){
-			bs[arguments[0]] = new cls(arguments);
+			var t0,t1,i;
+			t0 = arguments[0].split(',');
+			arguments[0] = t0[0];
+			t1 = new cls(arguments);
+			i = t0.length;
+			while( i-- ) bs[t0[i]] = t1;
 		};
 		bs.factory = factory;
 		return factory;
 	})(bs);
-	bs.module( 'D', (function(){
+	bs.module( 'D,data', (function(){
 		function b(c,f){return function(){return f.apply(c,arguments);};}
 		var D = factory( 'D' );
 		D.$ = function D$(){
@@ -559,7 +564,7 @@ function init(doc){
 		default: cssPrefix = '-webkit-', stylePrefix = 'webkit'; transform3D = os == 'android' ? ( osVersion < 4 ? 0 : 1 ) : 0;
 		}
 		
-		bs.detect = {
+		bs.DETECT = {
 			'device':device, 'browser':browser, 'browserVer':bVersion, 'os':os, 'osVer':osVersion, 'flash':flash, 'sony':agent.indexOf( 'sony' ) > -1,
 			//dom
 			'root':b.scrollHeight ? b : doc.documentElement,
@@ -614,7 +619,7 @@ function init(doc){
 			filter = (function(){
 				var filter;
 				filter = {};
-				if( !bs.detect.opacity )
+				if( !bs.DETECT.opacity )
 					filter.opacity = function($s){
 						var v;
 						switch( v = arguments[0] ){
@@ -634,7 +639,7 @@ function init(doc){
 			function style(){this.s = arguments[0];}
 			(function(){
 				var p, pf, pfL, i, j, k, kk, l;
-				pf = bs.detect.stylePrefix, pfL = pf.length;
+				pf = bs.DETECT.stylePrefix, pfL = pf.length;
 				for( k in doc.body.style ){
 					if( k == 'length' ) continue;
 					if( k.substr( 0, pfL ) == pf ){
@@ -680,7 +685,7 @@ function init(doc){
 			};
 			return style;
 		})();
-		bs.module( 'c', ( function( style ){
+		bs.module( 'c,css', ( function( style ){
 			var css, sheet, rule, del;
 			sheet = doc.createElement( 'style' );
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet );
@@ -718,7 +723,7 @@ function init(doc){
 			}
 			return css;
 		})( style ) );
-		bs.module( 'd', (function( bs, style, doc ){
+		bs.module( 'd,dom', (function( bs, style, doc ){
 			var d, ds, ev, t;
 			t = /^\s*|\s*$/g;
 			function x( $dom ){
@@ -801,7 +806,7 @@ function init(doc){
 					return $v === undefined ? $dom[$k] : ($dom[$k] = $v);
 				},
 				'_':( function( view, style ){
-					return bs.detect.cstyle ? function( $dom, $k ){
+					return bs.DETECT.cstyle ? function( $dom, $k ){
 						var t0 = view.getComputedStyle($dom,'').getPropertyValue($k);
 						return t0.substr( t0.length - 2 ) == 'px' ? parseFloat( t0.substring( 0, t0.length - 2 ) ) : t0;
 					} : function( $dom, $k ){
@@ -842,7 +847,7 @@ function init(doc){
 			d['html+'] = function( $dom, $v ){return $dom.innerHTML += $v;};
 			d['+html'] = function( $dom, $v ){return $dom.innerHTML = $v + $dom.innerHTML;};
 			(function(){
-				var t = bs.detect.text;
+				var t = bs.DETECT.text;
 				d.text = function( $dom ){return $v === undefined ? $dom[t] : ($dom[t]=$v);};
 				d['text+'] = function( $dom ){return $dom[t] += $v;};
 				d['+text'] = function( $dom ){return $dom[t] = $v + $dom[t];};
@@ -872,7 +877,7 @@ function init(doc){
 					i = k.length;
 					while( i-- ) k[i].substr(0,2) == 'on' ? ( ev$[k[i].substr(2).toLowerCase()] = 1 ) : 0;
 				}
-				if( bs.detect.device =='tablet' || bs.detect.device=='mobile' ){
+				if( bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ){
 					ev$.down = 'touchstart', ev$.up = 'touchend', ev$.move = 'touchmove';
 				}else{
 					ev$.down = 'mousedown', ev$.up = 'mouseup', ev$.move = 'mousemove';
@@ -889,7 +894,7 @@ function init(doc){
 						'touchstart':2,'touchend':1,'touchmove':1,
 						'mousedown':4,'mouseup':3,'mousemove':3,'click':3,'mouseover':3,'mouseout':3
 					};
-					if( bs.detect.browser == 'ie' && bs.detect.browserVer < 9 ){
+					if( bs.DETECT.browser == 'ie' && bs.DETECT.browserVer < 9 ){
 						pageX = 'x', pageY = 'y';
 					}else{
 						pageX = 'pageX', pageY = 'pageY';
@@ -897,7 +902,7 @@ function init(doc){
 					function ev( $dom ){
 						this.dom = $dom;
 					}
-					ev.prototype.prevent = bs.detect.event ? function(){
+					ev.prototype.prevent = bs.DETECT.event ? function(){
 						this.event.preventDefault(), this.event.stopPropagation();
 					} : function( $e ){
 						this.event.returnValue = false, this.event.cancelBubble = true;
@@ -967,7 +972,7 @@ function init(doc){
 			})();
 			return d;
 		})( bs, style, doc ) );
-		bs.w = (function(){
+		bs.WIN = (function(){
 			var win;
 			function ev( e, k, v ){
 				var t0, i, j;
@@ -1009,7 +1014,7 @@ function init(doc){
 			}
 			function sizer( $wh ){
 				win.on( 'resize', 'wh', $wh );
-				if( bs.detect.eventRotate ) win.on( 'resize', 'wh', $wh );
+				if( bs.DETECT.eventRotate ) win.on( 'resize', 'wh', $wh );
 				$wh();
 			}
 			win = {
@@ -1034,7 +1039,7 @@ function init(doc){
 						if( v ) doc.removeEventListener( 'touchmove', prevent, true);
 						else if( isTouch && !i++ ) doc.addEventListener( 'touchmove', prevent, true);
 					};
-				})( doc, bs.detect.eventTouch ),
+				})( doc, bs.DETECT.eventTouch ),
 				scroll:(function( W, doc, root ){
 					return function scroll(){
 						switch( arguments[0].charAt(0) ){
@@ -1045,14 +1050,14 @@ function init(doc){
 						}
 						W.scrollTo( arguments[0], arguments[1] );
 					};
-				})( W, doc, bs.detect.root ),
+				})( W, doc, bs.DETECT.root ),
 				w:0, h:0,
 				sizer:(function( W, doc ){
 					return function sizer( $end ){
 						var wh, r, s;
 						if( !ex.is( '#bsSizer' ) ) bs.d( '<div id=""bsSizer""></div>' ).$('display','none','width','100%','height','100%','position','absolute','<','body' );
 						s = bs.d('#bsSizer');
-						switch( bs.detect.browser ){
+						switch( bs.DETECT.browser ){
 						case'iphone':
 							s.$( 'display', 'block', 'height', '120%' );
 							W.onscroll = function( $e ){
@@ -1065,7 +1070,7 @@ function init(doc){
 							W.scrollTo( 0, 1000 );
 							break;
 						case'android':case'androidTablet':
-							if( bs.detect.sony ){
+							if( bs.DETECT.sony ){
 								sizer( function(){
 									$end( win.w = s.$('w'), win.h = s.$('h') );
 								} );
@@ -1094,7 +1099,7 @@ function init(doc){
 			return win;
 		})();
 	})( W.document );
-	bs.tw = ( function(){
+	bs.TW = ( function(){
 		var tw, l, timer, time, isLive, start, end, loop, tid, isPause;
 		tw = {},l = tid = 0;
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
@@ -1150,13 +1155,13 @@ function init(doc){
 			};
 		}
 		/*
-		var tw, detect, trans, trans3, tend, dom, style, OBJ;
+		var tw, DETECT, trans, trans3, tend, dom, style, OBJ;
 		OBJ = run.OBJ;
 		dom = run.protocol.d;
 		style = run.style;
-		detect = run( 'D:detect' );
-		trans = detect.transition;
-		trans3 = detect.transform3D;
+		DETECT = run( 'D:DETECT' );
+		trans = DETECT.transition;
+		trans3 = DETECT.transform3D;
 		if( !timer ) timer = function( $func ){ setTimeout( $func, 16 ); };
 		tw = ( function(){
 			var PI, HPI, i;
