@@ -745,17 +745,13 @@ function init(doc){
 								ds[0] = k;
 								ds[1] = undefined;
 								return dom.bsS ? dom.bsS.$(ds) : undefined;
-							}else if( ev[k] ){
-								return ev( dom, k );
-							}else{
-								return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
-							}
-						}else{
-							style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
-							ev[k] ? ev( dom, k, v ) :
-							( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v ) :
-							d[k]( dom, v );
+							}else if( ev[k] ) return ev( dom, k );
+							else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : k == 'this' ? this : d[k]( dom );
 						}
+						style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
+						ev[k] ? ev( dom, k, v ) :
+						( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v ) :
+						d[k]( dom, v );
 					}
 					if( ds.length ){
 						if( !dom.bsS ) dom.bsS = new style( dom.style );
