@@ -50,7 +50,7 @@ bs.$xml( document.getElementById('xml').text, function( $d ){
 
 } );
 bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
-bs.c( '#stage' ).$( 'width', 100 );
+bs.css( '#stage' ).$( 'width', 100 );
 bs.d( '#stage' ).$( 'background-color', '#eee' );
 
 (function(){
@@ -88,7 +88,7 @@ bsTest( printer, 'function',
 );
 bsTest( printer, 'dom',
 "bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
-"bs.d( '#stage' ).$( 'background-color' )", '#eee', bs.d( '#stage' ).$( 'background-color' )
+"bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' )
 );
 
 

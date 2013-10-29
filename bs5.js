@@ -1,6 +1,5 @@
 ( function( W, N ){
 'use strict';
-if( !Date.now ) Date.now = function(){return +new Date;};
 if( !W['console'] )	W['console'] = {log:function(){alert( arguments.join() );}};
 if( !Array.prototype.indexOf )
 	Array.prototype.indexOf = function( $v, i ){
@@ -14,31 +13,20 @@ if( !Array.prototype.indexOf )
 function init(doc){
 	var bs = (function(doc){
 		var sel,sz,t0,div;
-		if( doc.querySelectorAll ){
-			sel = function( $sel ){
-				return doc.querySelectorAll( $sel );
-			};
-		}else if( sz = W['Sizzle'] ){
-			sel = function( $sel ){
-				return sz( $sel );
-			};
-		}else if( sz = doc.getElementById('sizzle') ){
+		if( doc.querySelectorAll ) sel = function( $sel ){return doc.querySelectorAll( $sel );};
+		else if( sz = W['Sizzle'] ) sel = function( $sel ){return sz( $sel );};
+		else if( sz = doc.getElementById('sizzle') ){
 			t0 = doc.createElement( 'script' );
 			doc.getElementsByTagName('head')[0].appendChild( t0 );
 			t0.text = sz.text;
 			sz = Sizzle;
-			sel = function( $sel ){
-				return sz( $sel );
-			};
+			sel = function( $sel ){return sz( $sel );};
 		}else{
 			sel = function( $sel ){
 				var t0, t1, i, j;
 				switch( $sel.charAt(0) ){
 				case'#':return {0:doc.getElementById($sel.substr(1)),length:1};
-				case'.':
-					$sel = $sel.substr(1);
-					t0 = doc.getElementsByTagName('*');
-					t1 = {length:0};
+				case'.': $sel = $sel.substr(1), t0 = doc.getElementsByTagName('*'), t1 = {length:0};
 					for( i = 0, j = t0.length ; i < j ; i++ ) if( t0[i].className.indexOf( $sel ) > -1 ) t1[t1.length++] = t0[i];
 					return t1;
 				}
@@ -281,11 +269,8 @@ function init(doc){
 					var t1, w, h, i, j;
 					if( ++t0.count == ( j = t0.length ) ){
 						i = 0;
-						while( i < j ){
-							t1 = t0[i++];
-							t1.bs = {w:w = t1.width, h:h = t1.height};
-						}
-						if( $end ) $end( t0 );
+						while( i < j ) t1 = t0[i++], t1.bsImg = {w:w = t1.width, h:h = t1.height};
+						$end( t0 );
 					}
 				}
 			};
@@ -1113,7 +1098,7 @@ function init(doc){
 				isLive = 0;
 			};
 			timer( function( $time ){
-				if( Math.abs( $time - Date.now() ) < 1 ) time = 1;
+				if( Math.abs( $time - (new Date) ) < 1 ) time = 1;
 			} );
 			loop = function loop( $time ){
 				var t, i;
