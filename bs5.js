@@ -727,15 +727,11 @@ function init(doc){
 				while( i-- ) this[i] = t0[i];
 			};
 			d.$ = function d$(){
-				var dom, t0, l, s, i, j, k, v;
-				if( typeof arguments[0] == 'number' ){
-					s = l = 1;
-				}else{
-					l = this.length, s = 0;
-				}
+				var dom, target, t0, l, s, i, j, k, v;
+				typeof arguments[0] == 'number'?( s = l = 1, target = this[arguments[0]] ):(l = this.length, s = 0 );
 				j = arguments.length;
 				while( l-- ){
-					dom = this[l], i = s, ds.length = 0;
+					dom = target || this[l], i = s, ds.length = 0;
 					while( i < j ){
 						k = arguments[i++], v = arguments[i++];
 						if( k === null ) return this._();
@@ -1081,33 +1077,28 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var tw, l, timer, time, isLive, start, end, loop, tid, isPause;
-		tw = {},l = tid = 0;
+		var ani, anilen, timer, time, isLive, start, end, loop, tid, isPause, ease, tweenPool;
+		ani = {},anilen = tid = 0;
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
 			start = function(){
 				if( isLive ) return;
-				isLive = 1;
-				loop();
+				isLive = 1, loop();
 			};
-			end = function(){
-				isLive = 0;
-			};
-			timer( function( $time ){
-				if( Math.abs( $time - (new Date) ) < 1 ) time = 1;
-			} );
+			end = function(){isLive = 0;};
+			timer( function( $time ){if( Math.abs( $time - (new Date) ) < 1 ) time = 1;} );
 			loop = function loop( $time ){
 				var t, i;
 				if( isPause ) return;
 				if( isLive ){
 					t = time ? $time : +new Date;
-					for( i in tw ){
-						if( tw[i].loop( t ) ){
-							delete tw[i];
-							l--;
+					for( i in ani ){
+						if( ani[i].ANI(t) ){
+							delete ani[i];
+							anilen--;
 						}
 					}
-					l ? timer( loop ) : end();
+					anilen ? timer( loop ) : end();
 				}
 			};
 		}else{
@@ -1117,330 +1108,115 @@ function init(doc){
 			};
 			end = function end(){
 				if( !isLive ) return;
-				isLive = 0;
-				clearInterval( isLive );
+				clearInterval( isLive ), isLive = 0;
 			};
 			loop = function loop(){
 				var t, i;
 				if( isPause ) return;
 				if( isLive ){
 					t = +new Date;
-					for( i in tw ){
-						if( tw[i].loop( t ) ){
-							delete tw[i];
-							l--;
+					for( i in ani ){
+						if( tw[i].ANI(t) ){
+							delete ani[i];
+							anilen--;
 						}
 					}
-					if( !l ) end();
+					if( !anilen ) end();
 				}
 			};
 		}
-		/*
-		var tw, DETECT, trans, trans3, tend, dom, style, OBJ;
-		OBJ = run.OBJ;
-		dom = run.protocol.d;
-		style = run.style;
-		DETECT = run( 'D:DETECT' );
-		trans = DETECT.transition;
-		trans3 = DETECT.transform3D;
-		if( !timer ) timer = function( $func ){ setTimeout( $func, 16 ); };
-		tw = ( function(){
+		ease = (function(){
 			var PI, HPI, i;
-			PI = Math.PI;
-			HPI = PI * .5;
-			i = 'cubic-bezier(';
-			return {
-				li:function(a,c,b){return b*a+c},
-				baI:function(a,c,b){return b*a*a*(2.70158*a-1.70158)+c},
-				baO:function(a,c,b){a-=1;return b*(a*a*(2.70158*a+1.70158)+1)+c},
-				baIO:function(a,c,b){a*=2;if(1>a)return 0.5*b*a*a*(3.5949095*a-2.5949095)+c;a-=2;return 0.5*b*(a*a*(3.70158*a+2.70158)+2)+c},
-				boI:function(a,c,b,d,e){return b-ease[3]((e-d)/e,0,b)+c},
-				boO:function(a,c,b){if(0.363636>a)return 7.5625*b*a*a+c;if(0.727272>a)return a-=0.545454,b*(7.5625*a*a+0.75)+c;if(0.90909>a)return a-=0.818181,b*(7.5625*a*a+0.9375)+c;a-=0.95454;return b*(7.5625*a*a+0.984375)+c},
-				boIO:function(a,c,b,d,e){if(d<0.5*e)return d*=2,0.5*ease[13](d/e,0,b,d,e)+c;d=2*d-e;return 0.5*ease[14](d/e,0,b,d,e)+0.5*b+c},
-				siI:function(a,c,b){return -b*Math.cos(a*HPI)+b+c},
-				siO:function(a,c,b){return b*Math.sin(a*HPI)+c},
-				siIO:function(a,c,b){return 0.5*-b*(Math.cos(PI*a)-1)+c},
-				ciI:function(a,c,b){return -b*(Math.sqrt(1-a*a)-1)+c},
-				ciO:function(a,c,b){a-=1;return b*Math.sqrt(1-a*a)+c},
-				ciIO:function(a,c,b){a*=2;if(1>a)return 0.5*-b*(Math.sqrt(1-a*a)-1)+c;a-=2;return 0.5*b*(Math.sqrt(1-a*a)+1)+c},
-				quI:function(a,c,b){return b*a*a*a+c},
-				quO:function(a,c,b){a-=1;return b*(a*a*a+1)+c},
-				quIO:function(a,c,b){a*=2;if(1>a)return 0.5*b*a*a*a+c;a-=2;return 0.5*b*(a*a*a+2)+c},
+			PI = Math.PI, HPI = PI * .5, i = 'cubic-bezier(';
+			return {	
+				linear:function(a,c,b){return b*a+c},//rate,start,term
+				backIn:function(a,c,b){return b*a*a*(2.70158*a-1.70158)+c},
+				backOut:function(a,c,b){a-=1;return b*(a*a*(2.70158*a+1.70158)+1)+c},
+				backInOut:function(a,c,b){a*=2;if(1>a)return 0.5*b*a*a*(3.5949095*a-2.5949095)+c;a-=2;return 0.5*b*(a*a*(3.70158*a+2.70158)+2)+c},
+				boundIn:function(a,c,b,d,e){return b-ease[3]((e-d)/e,0,b)+c},
+				boundOut:function(a,c,b){if(0.363636>a)return 7.5625*b*a*a+c;if(0.727272>a)return a-=0.545454,b*(7.5625*a*a+0.75)+c;if(0.90909>a)return a-=0.818181,b*(7.5625*a*a+0.9375)+c;a-=0.95454;return b*(7.5625*a*a+0.984375)+c},
+				boundInOut:function(a,c,b,d,e){if(d<0.5*e)return d*=2,0.5*ease[13](d/e,0,b,d,e)+c;d=2*d-e;return 0.5*ease[14](d/e,0,b,d,e)+0.5*b+c},
+				sineIn:function(a,c,b){return -b*Math.cos(a*HPI)+b+c},
+				sineOut:function(a,c,b){return b*Math.sin(a*HPI)+c},
+				sineInOut:function(a,c,b){return 0.5*-b*(Math.cos(PI*a)-1)+c},
+				circleIn:function(a,c,b){return -b*(Math.sqrt(1-a*a)-1)+c},
+				circleOut:function(a,c,b){a-=1;return b*Math.sqrt(1-a*a)+c},
+				circleInOut:function(a,c,b){a*=2;if(1>a)return 0.5*-b*(Math.sqrt(1-a*a)-1)+c;a-=2;return 0.5*b*(Math.sqrt(1-a*a)+1)+c},
 				_li:i+'0.250,0.250,0.750,0.750)',
 				_baI:i+'0.600,-0.280,0.735,0.045)',_baO:i+'0.175,0.885,0.320,1.275)',_baIO:i+'0.680,-0.550,0.265,1.550)',
 				_boI:i+'0.600,-0.280,0.735,0.045)',_boO:i+'0.175,0.885,0.320,1.275)',_boIO:i+'0.680,-0.550,0.265,1.550)',
 				_siI:i+'0.470,0.000,0.745,0.715)',_siO:i+'0.390,0.575,0.565,1.000)',_siIO:i+'0.445,0.050,0.550,0.950)',
 				_ciI:i+'0.600,0.040,0.980,0.335)',_ciO:i+'0.075,0.820,0.165,1.000)',_ciIO:i+'0.785,0.135,0.150,0.860)',
-				_quI:i+'0.895,0.030,0.685,0.220)',_quO:i+'0.165,0.840,0.440,1.000)',_quIO:i+'0.770,0.000,0.175,1.000'
 			};
-		} )();
-		bs( 'C:Ttw',
-		'clear', function clear(){
-			if( this.__start ){
-				this.__start = 0;
-				if( this.loop ){
-					this.loop = this.clearLoop;
-				}else{
-					this.__original.run( 'TEND', null );
-					this.__original.run( 'transition', null );
-					this.end();
+		})();
+		tweenPool = {length:0};
+		function tween(){}
+		tween.prototype.$ = function( $arg ){
+			var t0, l, i, j, k, v, isDom, v0;
+			
+			this.t = t0 = $arg[0], isDom = t0.isDom, this.start = 1,
+			this.time = 1000, this.timeR = .001, this.delay = 0, this.loop = this.loopC = 1,
+			this.k = this.end = this.update = null, this.ease = ease.linear,
+			
+			this.length = i = t0.length || 1;
+			while(i--) this[i]?(this[i].length=0):(this[i]=[]),this[i][0] = isDom?t0[i].bsS:(t0[i] || t0);
+			
+			i = 1, j = $arg.length;
+			while( i < j ){
+				k = $arg[i++], v = $arg[i++];
+				if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
+				else if( k == 'ease' ) this.ease = ease[v];
+				else if( k == 'delay' ) this.delay = parseInt(v*1000);
+				else if( k == 'loop' ) this.loop = this.loopC = v;
+				else if( k == 'end' || k == 'update' ) this[k] = v;
+				else if( k == 'key' ) tween[v] = this;
+				else{
+					l = this.length; while( l-- ) this[l].push( k, ( v0 = isDom?this[l][0].$(k):this[l][0][k] ), v - v0 );
 				}
 			}
-		},
-		'clearLoop', function clearLoop(){
-			return -1;
-		},
-		'stop', function stop(){
-			if( this.__start ){
-				this.__start = 0;
-				if( this.loop ){
-					this.loop = this.stopLoop;
-				}else{
-					this.__cssState = 0;
-					this.__original.run( 'TEND', null );
-					this.__original.run( 'transition', null );
-				}
-			}
-		},
-		'stopLoop', function stopLoop(){
-			return 1;
-		},
-		'K', function k( $val ){
-			var t0;
-			if( !( t0 = cache[$val] ) ) cache[$val] = t0 = OBJ.N();
-			t0[t0.length++] = this;
-		},
-		'T', function T( $val ){
-			this.__T = $val;
-			this.__time = parseInt( $val * 1000 );
-			this.__t = 1 / this.__time;
-		},
-		'run', function TtwR( $key, $val, $isEdit ){
-			var to, i, j;
-			switch( $key ){
-			case'T':case'K': this[$key]( $val ); break;
-			case'R':case'E':case'END':case'UP': this['__' + $key] = $val; break;
-			case'D': this.__delay = parseInt( $val * 1000 ); break;
-			default:
-				if( !( to = this.__to ) ) to = this.__to = [];
-				switch( $key.charAt(0) ){
-				case'B':case'C': to[$key] = $val; break;
-				default:
-					to[$key] = $val;
-					if( $isEdit ){
-						for( i = 0, j = to.length ; i < j ; i += 2 ) if( to[i] == $key ){
-							to[i+1] = $val;
-							break;
-						}
-					}else{
-						to[to.length] = $key;
-						to[to.length] = $val;
+			
+			this.stime = this.delay + new Date, this.etime = this.stime + this.time;
+			
+			ani[arguments[1]||tid++] = this, anilen++, start();
+		};
+		tween.prototype.ANI = function( $time ){
+			var t0, term, time, rate, i, j, l, k, v;
+			if( !this.start ) return 1;
+			if( ( term = $time - this.stime ) < 0 ) return;
+			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			if( term > this.time )
+				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
+				else{
+					while( l-- ){
+						i = 1; while( i < j ) t0 = this[l], k = t0[i++], v = t0[i++]+t0[i++], isDom ? t0[0].$( k, v ) : t0[0][k] = v;
 					}
+					tweenPool[tweenPool.length++] = this;
+					if( this.end ) this.end();
+					return 1;
 				}
+			while( l-- ){
+				i = 1; while( i < j ) t0 = this[l], k = t0[i++], v = e(rate,t0[i++],t0[i++],term,time), isDom ? t0[0].$( k, v ) : t0[0][k] = v;
 			}
-		},
-		'S', function S( $val ){
-			if( this.__start ) return;
-			this.__start = 1;
-			
-			this.__original = $val;
-			if( $val instanceof dom ){
-				this.__target = $val[0].bsStyle;
-			}else if( $val.bsStyle ){
-				this.__target = $val.bsStyle;
-			}else if( $val.runs ){
-				this.__target = $val;
-			}else{
-				throw'TtwTarget';
-			}
-			
-			if( !this.__T ) this.T( 1 );
-			if( !this.__delay ) this.__delay = 0;
-			if( this.__R === undefined ) this.__R = 1;
-			this.__repeat = this.__R;
-			if( !this.__from ) this.__from = OBJ.N();
-			if( !this.__curr ) this.__curr = OBJ.N();
-			switch( this.__E || ( this.__E = 'li' ) ){
-			case'B':case'C':
-				return this[this.__E]( this.__target, this.__to, this.__from, this.__curr );
-			default:
-				if( TtwPool.css3 && this.__target instanceof style && trans ){
-					this.cssEase( this.__target, this.__to, this.__from, this.__curr );
-				}else{
-					this.ease( this.__target, this.__to, this.__from, this.__curr );
-				}
-			}
-		},
-		'start', function start(){
-			this.loopEnd = this.end;
-			this.__sTime = Date.now() + this.__delay;
-			this.__eTime = this.__sTime + this.__time;
-			loop( this );
-		},
-		'cssEase', function cssEase( $target, $to, $from, $curr ){
-			var self, i, j;
-			this.__ease = 'all ' + this.__time + 'ms ' + tw['_'+this.__E];
-			if( trans3 && $target.__css['transform'] === undefined ) $target.run( 'transform', 'rotateX(0)' );
-			if( this.__repeat != 1 ) for( i = 0, $from.length = j = $to.length ; i < j ; i += 2 )
-				 $from[i + 1] = $target.run( $from[i] = $to[i] );
-			this.__cssState = 0;
-			if( !this.cssStater ){
-				self = this;
-				this.cssStater = function cssStater(){
-					self.cssLoop();
-				};
-			}
-			this.loop = this.loopEnd = null;
-			this.cssLoop();
-		},
-		'ease', function ease( $target, $to, $from, $curr ){
-			var i, j;
-			this.__ease = tw[this.__E];
-			for( i = 0, $curr.length = j = $to.length ; i < j ; i += 2 ) $from[( i + 1 ) + 'A'] = $to[$to[i]] - ( $from[i + 1] = $target.run( $curr[i] = $from[i] = $to[i] ) );
-			this.loop = this.easeLoop;
-			this.start();
-		},
-		'B', function bezier( $target, $to, $from, $curr ){
-			var i, j;
-			for( i = 0, $curr.length = j = $to.length ; i < j ; i += 2 ) $from[i + 1] = $target.run( $curr[i] = $from[i] = $to[i] );
-			this.loop = this.bezierLoop;
-			this.start();
-		},
-		'C', (function(){
-		var toRadian = Math.PI/180;
-		return function circle( $target, $to, $from, $curr ){
-			this.__ease = tw[$to.Cease || 'li'];
-			$curr.length = 4;
-			$curr[0] = $to.Cx;
-			$curr[2] = $to.Cy;
-			$curr[3] = $curr[1] = 0;
-			$to.C0 *= toRadian;
-			$to.C1 *= toRadian;
-			$to.CA = $to.C1 - $to.C0;
-			this.loop = this.circleLoop;
-			this.start();
-		};})(),
-		'loopCheck', function loopCheck( $time ){
-			var du;
-			if( ( du = $time - this.__sTime ) < 0 ) return;
-			if( $time > this.__eTime ){
-				if( --this.__repeat ){
-					this.__sTime = $time + this.__delay;
-					this.__eTime = this.__sTime + this.__time;
-				}else{
-					this.__target.runs( this.__to );
-					return -1;
-				}
-			}else{
-				return du;
-			}
-		},
-		'bezierLoop',function bezierLoop( $time ){
-			var to, from, curr, du, a, v0, v1, v2, i, j;
-			if( !this.__start ) return 1;
-			du = this.loopCheck( $time );
-			if( !du || du == -1) return du;
-			to = this.__to;
-			from = this.__from;
-			curr = this.__curr;
-			a = du * this.__t;
-			v0 = a * a;
-			v1 = 2 * ( a - v0 );
-			v2 = 1 - 2 * a + v0;
-			for( i = 1, j = to.length; i < j ; i += 2 ) curr[i] = to[i]*v0 + to['B'+to[(i-1)]]*v1 + from[i]*v2;
-			this.__target.runs( curr );
-			if( this.__UP ) this.__UP( this );
-		},
-		'easeLoop', function easeLoop( $time ){
-			var ease, from, curr, time, du, a, i, j;
-			if( !this.__start ) return 1;
-			du = this.loopCheck( $time );
-			if( !du || du == -1) return du;
-			ease = this.__ease
-			from = this.__from;
-			curr = this.__curr;
-			time = this.__time;
-			a = du * this.__t;
-			for( i = 1, j = this.__to.length ; i < j ; i += 2 ) curr[i] = ease( a, from[i], from[i+'A'], du, time );
-			this.__target.runs( curr );
-			if( this.__UP ) this.__UP( this );
-		},
-		'circleLoop', function circleLoop( $time ){
-			var to, from, curr, du, a, i;
-			if( !this.__start ) return 1;
-			du = this.loopCheck( $time );
-			if( !du || du == -1) return du;
-			to = this.__to;
-			curr = this.__curr;
-			from = this.__from;
-			a = du * this.__t;
-			i = this.__ease( a, to.C0, to.CA, du, this.__time );
-			curr[1] = to.Ccx + Math.cos( i ) * to.Cr;
-			curr[3] = to.Ccy + Math.sin( i ) * to.Cr;
-			this.__target.runs( curr );
-			if( this.__UP ) this.__UP( this );
-		},
-		'cssLoop', function cssLoop(){
-			var dom;
-			if( !this.__start ) return;
-			dom = this.__original;
-			if( this.__cssState == 0 ){
-				this.__cssState = 1;
-				dom.run( 'TEND', this.cssStater );
-				dom.run( 'transition', this.__ease );
-				if( this.__delay ){
-					setTimeout( this.cssStater, this.__delay );
-				}else{
-					timer( this.cssStater );
-				}
-			}else if( this.__cssState == 1 ){
-				this.__cssState = 2;
-				this.__target.runs( this.__to );
-			}else{
-				dom.run( 'TEND', null );
-				dom.run( 'transition', null );
-				if( --this.__repeat ){
-					this.__cssState = 0;
-					this.__target.runs( this.__from );
-					timer( this.cssStater );
-				}else this.end();
-			}
-		},
-		'end', function end(){
-			var end, target;
-			if( !this.__start ) return;
-			if( this.__UP ) this.__UP( this );
-			end = this.__END;
-			target = this.__original;
-			OBJ._( this.__from );
-			OBJ._( this.__curr );
-			this.__to.length = this.__start = this.__delay = 0;
-			this.__orginal = this.__target = this.__END = this.__UP = this.__from = this.__curr = null;
-			this.__E = 'li';
-			this.__R = 1;
-			this.T( 1 );
-			TtwPool[TtwPool.length++] = this;
-			if( end ){
-				if( typeof end == 'function' ){
-					end( target );
-				}else{
-					run( end );
-				}
-			}
-		} );
-		*/
+			if( this.update ) this.update( rate, $time, this );
+		};
+		
 		return {
-			'+':function( $tw ){if( $tw.loop ) tw[arguments[1]||tid++] = $tw, l++, start();},
-			'-':function( $k ){
+			tween:function(){
+				var t0;
+				t0 = tweenPool.length ? tweenPool[--tweenPool.length] : new tween;
+				t0.$( arguments );
+			},
+			ani:function( $ani ){if( $ani.ANI )ani[arguments[1]||tid++] = $ani,anilen++,start();},
+			del:function( $k ){
 				var i;
-				if( tw[$k] ){
-					delete tw[$k];
+				if( ani[$k] ){
+					delete ani[$k];
 					l--;
 				}else{
-					for( i in tw )
-						if( tw[i] === $k ){
-							delete tw[i];
-							l--;
+					for( i in ani )
+						if( ani[i] === $k ){
+							delete ani[i];
+							anilen--;
 							return;
 						}
 					throw 't-'+$k;
