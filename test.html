@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ja">
-<title>v</title>
-<meta name="keywords" content="a" />
-<meta name="description" content="a" />
+<html lang="ko">
+<title>bs5 Test suite</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
 <meta charset="utf-8"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="format-detection" content="telephone=no" />
@@ -28,15 +28,15 @@
 ]]></script>
 </head>
 <body>
-<div id="a"></div>
-<div id="stage"></div>
+<div id="stage">test stage</div>
+<div id="test"></div>
 <script src="/bs/bs5/bs5.js"></script>
 <script src="/bs/bs5/bsTest.js"></script>
 <script>
 bs( function(){
 
 function printer(r){
-	document.getElementById('stage').innerHTML += r;
+	document.getElementById('test').innerHTML += r;
 }
 bs.D( 'data1' ).$( 'a', 3, 'b', function( a ){ return a;},
 	'c', function(){return this.a;},
@@ -49,7 +49,7 @@ bs.$xml( document.getElementById('xml').text, function( $d ){
 	);
 
 } );
-bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%' );
+bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
 bs.c( '#stage' ).$( 'width', 100 );
 bs.d( '#stage' ).$( 'background-color', '#eee' );
 
