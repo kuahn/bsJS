@@ -90,9 +90,21 @@ bsTest( printer, 'dom',
 "bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
 "bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' )
 );
+bsTest( printer, 'css',
+"bs.c( '#stage' ).$( 'width' )", 100, bs.css( '#stage' ).$( 'width' ),
+"bs.css( '#stage' ).$( 'padding' )", 10, bs.css( '#stage' ).$( 'padding' )
+);
+bs.$get( function(resStr){
+	console.dir(resStr);
+	var res = JSON.parse(resStr);
+	bsTest( printer, '$get',
+	"res.a", 1, res.a,
+	"res.c", 3, res.c
+	);
+	bsTest( printer );
+},  'ajax.json' );
 
 
-bsTest( printer );
 } );
 </script>
 </body>
