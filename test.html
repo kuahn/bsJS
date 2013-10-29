@@ -94,13 +94,13 @@ bsTest( printer, 'css',
 "bs.c( '#stage' ).$( 'width' )", 100, bs.css( '#stage' ).$( 'width' ),
 "bs.css( '#stage' ).$( 'padding' )", 10, bs.css( '#stage' ).$( 'padding' )
 );
-bs.$get( function(resStr){
-	console.dir(resStr);
-	var res = JSON.parse(resStr);
-	bsTest( printer, '$get',
-	"res.a", 1, res.a,
-	"res.c", 3, res.c
+bs.$get( function( rs ){
+	var r = JSON.parse( rs );
+	bsTest( printer, 'ajax $get',
+		"r.a", 1, r.a,
+		"r.c", 3, r.c
 	);
+
 	bsTest( printer );
 },  'ajax.json' );
 
