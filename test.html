@@ -99,15 +99,15 @@ bsTest( printer, 'css',
 );
 bs.$get( function( rs ){
 	var r = JSON.parse( rs );
-	bsTest( printer, 'ajax $get',
-		"r.a", 1, r.a,
-		"r.c", 3, r.c
+	bsTest( printer, 'ajax',
+		"bs.$get( cb , url ) url.a", 1, r.a,
+		"bs.$get( cb , url ) url.c", 3, r.c
 	);
-
-	bsTest( printer );
 },  'ajax.json' );
 
-
+setTimeout(function(){
+	bsTest( printer );
+}, 1000);
 } );
 </script>
 </body>
