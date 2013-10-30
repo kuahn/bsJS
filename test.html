@@ -52,6 +52,7 @@ bs.$xml( document.getElementById('xml').text, function( $d ){
 bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
 bs.css( '#stage' ).$( 'width', 100 );
 bs.d( '#stage' ).$( 'background-color', '#eee' );
+bs.$ck( 'bsName', "bs5" );
 
 (function(){
 	var i;
@@ -83,7 +84,9 @@ bsTest( printer, 'data',
 "bs.D.data1.$( 'd.2' )", 2, bs.D.data1.$( 'd.2' )
 );
 bsTest( printer, 'function',
+"bs.$ck( 'bsName' )", 'bs5', bs.$ck( 'bsName' ),
 "bs.$ex( 5, '~', 10 )", [5,10], bs.$ex( 5, '~', 10 ),
+"bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' ),
 "bs.$xml(xml).topics.volume[1].title.value", 'title2', bs.$xml( document.getElementById('xml').text ).topics.volume[1].title.value
 );
 bsTest( printer, 'dom',
