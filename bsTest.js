@@ -24,6 +24,9 @@ function bsTest( $printer,$title ){
 		r += '</b> :: <b>'+ origin + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b><br>';
 	}
 	i = bsTest.id++;
+	if( f ){
+		bsTest.isOK = 0;
+	}
 	r += '</div><div style="padding:5px;float:right;border:1px dashed #999;text-align:center"><b style="font-size:30px;color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b><br>ok:<b style="color:#0a0">' + s + '</b> no:<b style="color:#a00">' + f + '</b></div><br clear="both"></div>'+
 		'<div id="bsTestOff'+i+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+$title+'</b> : <b style="color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b></div></div>';
 	$printer( r );
