@@ -22,7 +22,7 @@
 <script>
 bs( function(){
 function printer(r){ document.getElementById('test').innerHTML += r; }
-
+bs.dom( document.getElementById('stage') ).$( 'background-color', '#faa', 'padding', 10);
 bsTest( printer, 'bsDom',
 "bs.dom( document.getElementById('stage') )[0]", document.getElementById('stage'), bs.dom( document.getElementById('stage') )[0]
 );
