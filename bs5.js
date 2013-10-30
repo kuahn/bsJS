@@ -59,7 +59,6 @@ function init(doc){
 		return bs;
 	})(doc);
 	var factory = (function(bs){
-		var fid = 0;
 		function cls( $arg ){
 			var key, factory, t0, k;
 			key = $arg[0], factory = $arg[1];
