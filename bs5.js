@@ -59,6 +59,7 @@ function init(doc){
 		return bs;
 	})(doc);
 	var factory = (function(bs){
+		var fid = 0;
 		function cls( $arg ){
 			var key, factory, t0, k;
 			key = $arg[0], factory = $arg[1];
@@ -86,8 +87,10 @@ function init(doc){
 		}
 		function factory( $key ){
 			function F(){
-				var t0;
-				return ( t0 = arguments[0] ).charAt(0) == '@' ? ( F[t0=t0.substr(1)] = new cls[$key](t0) ) : F[t0] || ( F[t0] = new cls[$key](t0) );
+				var t0 = arguments[0];
+				return typeof t0 == 'string' ? 
+					(t0.charAt(0) == '@' ? ( F[t0=t0.substr(1)] = new cls[$key](t0) ) : F[t0] || ( F[t0] = new cls[$key](t0) ) ) : 
+					( new cls[$key](t0) );
 			}
 			return F;
 		}
@@ -296,17 +299,9 @@ function init(doc){
 				};
 			}else if( $end ){
 				if( W['addEventListener'] ){
-					t0.onload = function(){
-						t0.onload = null;
-						$end();
-					}
+					t0.onload = function(){t0.onload = null, $end();}
 				}else{
-					t0.onreadystatechange = function(){
-						if( t0.readyState == 'loaded' ){
-							t0.onreadystatechange = null;
-							$end();
-						}
-					}
+					t0.onreadystatechange = function(){t0.readyState == 'loaded' && ( t0.onreadystatechange = null, $end() );}
 				}
 			}
 			doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
