@@ -18,22 +18,26 @@
 <div id="stage">test stage</div>
 <div id="result"></div>
 <div id="test"></div>
+
 <script src="./bs5.js"></script>
 <script src="./bsTest.js"></script>
+
+
+
+
 <script>
+function printer(r){
+    document.getElementById('test').innerHTML += r;
+}
+
+bsTest.result = function(r){
+    document.getElementById('result').innerHTML = r;
+}
 
 bs( function(){
-function printer(r){ document.getElementById('test').innerHTML += r; }
-bs.dom( document.getElementById('stage') ).$( 'background-color', '#faa', 'padding', 10);
-bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
-bsTest( printer, 'bsDom',
-"bs.dom( document.getElementById('stage') )[0]", document.getElementById('stage'), bs.dom( document.getElementById('stage') )[0]
-);
-
-bs.css( '.ani' ).$( 'position', 'absolute', 'background', '#aa5' );
-bs.dom( '<div></div>' ).$( 'id', 'ani', 'class', 'ani', 'left', 10, 'top', 10, 'width', 100, 'height', 100, '<', '#stage' );
-bs.ANI.tween( bs.dom('#ani'), 'left', 200 );
-
+    bsTest( printer, 'dom',
+        "typeof bs( '#stage' )", "object", typeof bs( '#stage' )
+    );
 });
 
 </script>
