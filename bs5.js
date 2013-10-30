@@ -278,7 +278,7 @@ function init(doc){
 		};
 	})();
 	bs.$alert = function $alert( $msg ){ alert( $msg ); };
-	bs.$url = function $url( $url ){ location.href = $url; };
+	bs.$url = function $url( $url_ ){ location.href = $url_; };
 	bs.$open = function $open( $url ){ W.open( $url ); };
 	bs.$back = function $back(){ history.back(); };
 	bs.$reload = function $reload(){ location.reload(); };
