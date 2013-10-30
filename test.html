@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<title>bs5 Test suite</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+<script id="xml" type="text/template"><![CDATA[
+<topics>
+	<volume>
+		<category>cat1</category>
+		<title>title1</title>
+		<time>2013.08.09.</time>
+		<img_list><![CDATA[m/1.png]]></img_list>
+	</volume>
+	<volume>
+		<category>cat2</category>
+		<title>title2</title>
+		<time>2013.10.09.</time>
+		<img_list><![CDATA[m/2.png]]></img_list>
+	</volume>
+</topics>
+]]></script>
+</head>
+<body>
+<a href="https://github.com/hikaMaeng/bs5">
+	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<div id="stage">test stage</div>
+<div id="test"></div>
+<script src="./bs5.js"></script>
+<script src="./bsTest.js"></script>
+<script>
+bs( function(){
+
+function printer(r){
+	document.getElementById('test').innerHTML += r;
+}
+bs.D( 'data1' ).$( 'a', 3, 'b', function( a ){ return a;},
+	'c', function(){return this.a;},
+	'd', [0,1,2,3]
+);
+bs.$xml( document.getElementById('xml').text, function( $d ){
+	bsTest( printer, 'async xml parsing',
+
+	"$d.topics.volume[0].title", 'title1', $d.topics.volume[0].title.value
+	);
+
+} );
+bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
+bs.css( '#stage' ).$( 'width', 100 );
+bs.d( '#stage' ).$( 'background-color', '#eee' );
+bs.$ck( 'bsName', "bs5" );
+
+(function(){
+	var i;
+	bs.d( '#stage' ).$(
+	'mousedown', function( $e ){
+		i = 1;
+		bsTest( printer, 'mousedown',
+			"this.id", 'stage', this.id,
+			"$e.x",[0,this.offsetWidth],$e.x
+		);
+	},
+	'mousemove', function( $e ){
+		if( i++ == 1 ) bsTest( printer,'mousemove',
+			"typeof $e.dx", 'number', typeof $e.dx
+		);
+	},
+	'mouseup', function( $e ){
+		bs.d( '#stage' ).$( 'mousedown', null, 'mousemove', null );
+	}
+	);
+} )();
+
+bsTest( printer, 'data',
+"bs.D.data1.a", 3, bs.D.data1.a,
+"bs.D.data1.$( 'a' )", 3, bs.D.data1.$( 'a' ),
+"bs.D.data1.b(5)", 5, bs.D.data1.b(5),
+"bs.D.data1.$( '=b', 5 )", 5, bs.D.data1.$( '=b', 5 ),
+"bs.D.data1.$( '~c' )() == bs.D.data1.a", bs.D.data1.a,bs.D.data1.$( '~c' )(), 
+"bs.D.data1.$( 'd.2' )", 2, bs.D.data1.$( 'd.2' )
+);
+bsTest( printer, 'function',
+"bs.$ck( 'bsName' )", 'bs5', bs.$ck( 'bsName' ),
+"bs.$ex( 5, '~', 10 )", [5,10], bs.$ex( 5, '~', 10 ),
+"bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' ),
+"bs.$xml(xml).topics.volume[1].title.value", 'title2', bs.$xml( document.getElementById('xml').text ).topics.volume[1].title.value
+);
+bsTest( printer, 'dom',
+"bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
+"bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' )
+);
+bsTest( printer, 'css',
+"bs.c( '#stage' ).$( 'width' )", 100, bs.c( '#stage' ).$( 'width' ),
+"bs.css( '#stage' ).$( 'padding' )", 10, bs.css( '#stage' ).$( 'padding' )
+);
+bs.$get( function( rs ){
+	var r = JSON.parse( rs );
+	bsTest( printer, 'ajax',
+		"bs.$get( cb , url ) url.a", 1, r.a,
+		"bs.$get( cb , url ) url.c", 3, r.c
+	);
+},  'ajax.json' );
+
+setTimeout(function(){
+	bsTest( printer );
+}, 1000);
+} );
+</script>
+</body>
+</html>
