@@ -28,7 +28,13 @@ bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
 bsTest( printer, 'bsDom',
 "bs.dom( document.getElementById('stage') )[0]", document.getElementById('stage'), bs.dom( document.getElementById('stage') )[0]
 );
+
+bs.css( '.ani' ).$( 'position', 'absolute', 'background', '#aa5' );
+bs.dom( '<div></div>' ).$( 'id', 'ani', 'class', 'ani', 'left', 10, 'top', 10, 'width', 100, 'height', 100, '<', '#stage' );
+bs.ANI.tween( bs.dom('#ani'), 'left', 200 );
+
 });
+
 </script>
 </body>
 </html>

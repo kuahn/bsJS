@@ -94,10 +94,14 @@ function init(doc){
 		}
 		function factory( $key ){
 			function F(){
-				var t0 = arguments[0];
-				return typeof t0 == 'string' ? 
-					(t0.charAt(0) == '@' ? ( F[t0=t0.substr(1)] = new cls[$key](t0) ) : F[t0] || ( F[t0] = new cls[$key](t0) ) ) : 
-					( new cls[$key](t0) );
+				var t0, t1;
+				t0 = arguments[0];
+				if( typeof t0 == 'string' ){
+					t1 = t0.charAt(0);
+					if( t1 == '@' ) return F[t0=t0.substr(1)] = new cls[$key](t0);
+					else if( t1 == '<' ) return new cls[$key](t0);
+					else return F[t0] || ( F[t0] = new cls[$key](t0) );
+				}else return new cls[$key](t0);
 			}
 			return F;
 		}
@@ -838,7 +842,7 @@ function init(doc){
 				return ( t0 && t0.indexOf( $v ) == -1 ) ? ( $dom.className = $val + ' ' + t0.replace( t, '' ) ) : $dom.className;
 			};
 			d['class-'] = function( $dom, $v ){return $dom.className = $dom.className.replace( $v, '' ).replace( '  ', ' ' );};
-			d.id = function( $dom ){ return $dom.id };
+			d.id = function( $dom, $v ){ return $v === undefined ? $dom.id : ($dom.id = $v); };
 			d.src = function( $dom ){ return $dom.src; };
 			ev = (function(){
 				var k, ev, i;
@@ -1079,7 +1083,7 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, anilen, timer, time, isLive, start, end, loop, tid, isPause, ease, tweenPool;
+		var ani, anilen, timer, time, isLive, start, end, loop, tid, isPause, ease, tweenPool, tTemp;
 		ani = {},anilen = tid = 0;
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
@@ -1156,7 +1160,7 @@ function init(doc){
 		tween.prototype.$ = function( $arg ){
 			var t0, l, i, j, k, v, isDom, v0;
 			
-			this.t = t0 = $arg[0], isDom = t0.isDom, this.start = 1,
+			this.t = t0 = $arg[0], this.isDom = isDom = t0.isDom, this.start = 1,
 			this.time = 1000, this.timeR = .001, this.delay = 0, this.loop = this.loopC = 1,
 			this.k = this.end = this.update = null, this.ease = ease.linear,
 			
@@ -1173,31 +1177,43 @@ function init(doc){
 				else if( k == 'end' || k == 'update' ) this[k] = v;
 				else if( k == 'key' ) tween[v] = this;
 				else{
-					l = this.length; while( l-- ) this[l].push( k, ( v0 = isDom?this[l][0].$(k):this[l][0][k] ), v - v0 );
+					l = this.length;
+					while( l-- ){
+						v0 = isDom ? ( tTemp.length = 1, tTemp[0] = k, this[l][0].$( tTemp ) ) : this[l][0][k];
+						this[l].push( k, v0, v - v0 );
+					}
 				}
 			}
-			
-			this.stime = this.delay + new Date, this.etime = this.stime + this.time;
-			
+			this.stime = +new Date+this.delay, this.etime = this.stime + this.time;
 			ani[arguments[1]||tid++] = this, anilen++, start();
 		};
+		tTemp = {length:0};
 		tween.prototype.ANI = function( $time ){
-			var t0, term, time, rate, i, j, l, k, v;
+			var t0, term, time, rate, i, j, l, k, v, e, isDom;
 			if( !this.start ) return 1;
 			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			isDom = this.isDom, e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
 					while( l-- ){
-						i = 1; while( i < j ) t0 = this[l], k = t0[i++], v = t0[i++]+t0[i++], isDom ? t0[0].$( k, v ) : t0[0][k] = v;
+						t0 = this[l], i = 1, tTemp.length = 0;
+						while( i < j ){
+							k = t0[i++], v = t0[i++] + t0[i++],
+							isDom ? ( tTemp[tTemp.length++] = k, tTemp[tTemp.length++] = v ) : t0[0][k] = v;
+						}
+						if( isDom ) t0[0].$( tTemp );
 					}
 					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end();
 					return 1;
 				}
 			while( l-- ){
-				i = 1; while( i < j ) t0 = this[l], k = t0[i++], v = e(rate,t0[i++],t0[i++],term,time), isDom ? t0[0].$( k, v ) : t0[0][k] = v;
+				t0 = this[l], i = 1, tTemp.length = 0;
+				while( i < j )
+					k = t0[i++], v = e(rate,t0[i++],t0[i++],term,time),
+					isDom ? ( tTemp[tTemp.length++] = k, tTemp[tTemp.length++] = v ) : t0[0][k] = v;
+				if( isDom ) t0[0].$( tTemp );
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
