@@ -18,6 +18,8 @@ if( !Array.prototype.indexOf )
 		}
 		return -1;
 	};
+Date.now || ( Date.now = function(){return +new Date;} );
+
 function init(doc){
 	var bs = (function(doc){
 		var sel,sz,t0,div;
@@ -70,21 +72,9 @@ function init(doc){
 		function cls( $arg ){
 			var key, factory, t0, k;
 			key = $arg[0], factory = $arg[1];
-			if( factory.init ){
-				cls[key] = function( $key ){
-					this.__k = $key;
-					this.__i( $key );
-				};
-			}else{
-				cls[key] = function( $key ){
-					this.__k = $key;
-				};
-			}
-			t0 = cls[key].prototype;
-			t0.$ = factory.$;
-			t0.__i = factory.init;
-			t0.__d = del;
-			t0.__f = factory;
+			if( factory.init ) cls[key] = function( $key ){this.__k = $key, this.__i( $key );};
+			else cls[key] = function( $key ){this.__k = $key;};
+			t0 = cls[key].prototype, t0.$ = factory.$, t0.__i = factory.init, t0.__d = del, t0.__f = factory;
 			for( k in factory.method ) t0[k] = factory.method[k];
 			return factory;
 		}
@@ -734,7 +724,7 @@ function init(doc){
 			};
 			d.$ = function d$(){
 				var dom, target, t0, l, s, i, j, k, v;
-				typeof arguments[0] == 'number'?( s = l = 1, target = this[arguments[0]] ):(l = this.length, s = 0 );
+				typeof arguments[0] == 'number'?( s = l = 1, target = this[arguments[0]] ):( l = this.length, s = 0 );
 				j = arguments.length;
 				while( l-- ){
 					dom = target || this[l], i = s, ds.length = 0;
@@ -743,22 +733,20 @@ function init(doc){
 						if( k === null ) return this._();
 						if( v === undefined ){ //get
 							if( style[k] ){
-								ds.length = 1;
-								ds[0] = k;
-								ds[1] = undefined;
+								ds.length = 1, ds[0] = k, ds[1] = undefined;
 								return dom.bsS ? dom.bsS.$(ds) : undefined;
 							}else if( ev[k] ) return ev( dom, k );
-							else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : k == 'this' ? this : d[k]( dom );
+							else if( k == 'this' ){
+								if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
+								return this;
+							}else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
 						}
 						style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
 						ev[k] ? ev( dom, k, v ) :
 						( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v ) :
 						d[k]( dom, v );
 					}
-					if( ds.length ){
-						if( !dom.bsS ) dom.bsS = new style( dom.style );
-						dom.bsS.$( ds );
-					}
+					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 				}
 				return v;
 			};
@@ -769,6 +757,7 @@ function init(doc){
 					i = this.length;
 					while( i-- ){
 						dom = this[i];
+						if( dom.nodeType == 3 ) continue;
 						if( dom.bsE ) dom.bsE = dom.bsE._();
 						if( dom.bsS ) dom.bsS = null;
 						dom.parentNode.removeChild( dom );
@@ -781,7 +770,7 @@ function init(doc){
 						}
 						this[i] = null;
 					}
-					this.__d();
+					if( this.__d ) this.__d();
 				}
 			};
 			ds = {
@@ -802,9 +791,10 @@ function init(doc){
 					if( $v ){
 						$v = bs( $v ), i = 0, j = $v.length;
 						while( i < j ) $dom.appendChild( $v[i++] );
-					}else{
-						return $k == '>' ? $dom.childNodes : $dom.childNodes[$k.substr(1)];
-					}
+					}else if( $v === null ){
+						if( $k ) d.method._.call( {0:$dom.childNodes[$k],length:1} );
+						else if( $dom.childNodes && $dom.childNodes.length ) d.method._.call( Array.prototype.slice.call( $dom.childNodes, 0 ) );
+					}else return $k == '' ? Array.prototype.slice.call( $dom.childNodes, 0 ) : $dom.childNodes[$k];
 				}
 			};
 			d.x = x, d.y = y;
@@ -961,7 +951,7 @@ function init(doc){
 				var t0, i, j;
 				if( v ){
 					t0 = ev[e] || ( ev[e] = [] );
-					t0[t0.length] = t0[k] = $v;
+					t0[t0.length] = t0[k] = v;
 					if( !W['on'+e] ) W['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
 						var t0, i;
 						t0 = ev[e], i = t0.length;
@@ -1036,9 +1026,9 @@ function init(doc){
 				})( W, doc, bs.DETECT.root ),
 				w:0, h:0,
 				sizer:(function( W, doc ){
-					return function sizer( $end ){
+					return function( $end ){
 						var wh, r, s;
-						if( !ex.is( '#bsSizer' ) ) bs.d( '<div id=""bsSizer""></div>' ).$('display','none','width','100%','height','100%','position','absolute','<','body' );
+						if( !win.is( '#bsSizer' ) ) bs.d( '<div></div>' ).$( 'id', 'bsSizer', 'display','none','width','100%','height','100%','position','absolute','<','body' );
 						s = bs.d('#bsSizer');
 						switch( bs.DETECT.browser ){
 						case'iphone':
@@ -1083,28 +1073,25 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, anilen, timer, time, isLive, start, end, loop, tid, isPause, ease, tweenPool, tTemp;
-		ani = {},anilen = tid = 0;
+		var ani, anidel, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp;
+		ani = [], anidel = [];
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
 			start = function(){
 				if( isLive ) return;
 				isLive = 1, loop();
 			};
-			end = function(){isLive = 0;};
-			timer( function( $time ){if( Math.abs( $time - (new Date) ) < 1 ) time = 1;} );
+			end = function(){ani.length = isLive = 0;};
+			timer( function( $time ){if( Math.abs( $time - Date.now() ) < 1 ) time = 1;} );
 			loop = function loop( $time ){
-				var t, i;
+				var t, i, j;
 				if( isPause ) return;
 				if( isLive ){
-					t = time ? $time : +new Date;
-					for( i in ani ){
-						if( ani[i].ANI(t) ){
-							delete ani[i];
-							anilen--;
-						}
-					}
-					anilen ? timer( loop ) : end();
+					t = time ? $time : Date.now();
+					i = ani.length, anidel.length = 0;
+					while( i-- ) if( ani[i].ANI(t) ) anidel[anidel.length] = ani[i], j = 1;
+					if( j ) for( i = 0, j = anidel.length ; i < j ; i++ ) ani.splice( anidel[i], 1 );
+					ani.length ? timer( loop ) : end();
 				}
 			};
 		}else{
@@ -1114,13 +1101,13 @@ function init(doc){
 			};
 			end = function end(){
 				if( !isLive ) return;
-				clearInterval( isLive ), isLive = 0;
+				clearInterval( isLive ), ani.length = isLive = 0;
 			};
 			loop = function loop(){
 				var t, i;
 				if( isPause ) return;
 				if( isLive ){
-					t = +new Date;
+					t = Date.now();
 					for( i in ani ){
 						if( tw[i].ANI(t) ){
 							delete ani[i];
@@ -1139,9 +1126,9 @@ function init(doc){
 				backIn:function(a,c,b){return b*a*a*(2.70158*a-1.70158)+c},
 				backOut:function(a,c,b){a-=1;return b*(a*a*(2.70158*a+1.70158)+1)+c},
 				backInOut:function(a,c,b){a*=2;if(1>a)return 0.5*b*a*a*(3.5949095*a-2.5949095)+c;a-=2;return 0.5*b*(a*a*(3.70158*a+2.70158)+2)+c},
-				boundIn:function(a,c,b,d,e){return b-ease[3]((e-d)/e,0,b)+c},
-				boundOut:function(a,c,b){if(0.363636>a)return 7.5625*b*a*a+c;if(0.727272>a)return a-=0.545454,b*(7.5625*a*a+0.75)+c;if(0.90909>a)return a-=0.818181,b*(7.5625*a*a+0.9375)+c;a-=0.95454;return b*(7.5625*a*a+0.984375)+c},
-				boundInOut:function(a,c,b,d,e){if(d<0.5*e)return d*=2,0.5*ease[13](d/e,0,b,d,e)+c;d=2*d-e;return 0.5*ease[14](d/e,0,b,d,e)+0.5*b+c},
+				bounceIn:function(a,c,b,d,e){return b-ease[3]((e-d)/e,0,b)+c},
+				bounceOut:function(a,c,b){if(0.363636>a)return 7.5625*b*a*a+c;if(0.727272>a)return a-=0.545454,b*(7.5625*a*a+0.75)+c;if(0.90909>a)return a-=0.818181,b*(7.5625*a*a+0.9375)+c;a-=0.95454;return b*(7.5625*a*a+0.984375)+c},
+				bounceInOut:function(a,c,b,d,e){if(d<0.5*e)return d*=2,0.5*ease[13](d/e,0,b,d,e)+c;d=2*d-e;return 0.5*ease[14](d/e,0,b,d,e)+0.5*b+c},
 				sineIn:function(a,c,b){return -b*Math.cos(a*HPI)+b+c},
 				sineOut:function(a,c,b){return b*Math.sin(a*HPI)+c},
 				sineInOut:function(a,c,b){return 0.5*-b*(Math.cos(PI*a)-1)+c},
@@ -1166,7 +1153,6 @@ function init(doc){
 			
 			this.length = i = t0.length || 1;
 			while(i--) this[i]?(this[i].length=0):(this[i]=[]),this[i][0] = isDom?t0[i].bsS:(t0[i] || t0);
-			
 			i = 1, j = $arg.length;
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
@@ -1185,7 +1171,7 @@ function init(doc){
 				}
 			}
 			this.stime = +new Date+this.delay, this.etime = this.stime + this.time;
-			ani[arguments[1]||tid++] = this, anilen++, start();
+			ani[ani.length] = this, start();
 		};
 		tTemp = {length:0};
 		tween.prototype.ANI = function( $time ){
@@ -1224,7 +1210,7 @@ function init(doc){
 				t0 = tweenPool.length ? tweenPool[--tweenPool.length] : new tween;
 				t0.$( arguments );
 			},
-			ani:function( $ani ){if( $ani.ANI )ani[arguments[1]||tid++] = $ani,anilen++,start();},
+			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
 			del:function( $k ){
 				var i;
 				if( ani[$k] ){
@@ -1241,7 +1227,7 @@ function init(doc){
 				}
 			},
 			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
-			stop:function(){end(), tw = {}, tid = l = 0;},
+			stop:function(){end();},
 			delay:(function(){
 				var delay = [];
 				return function( $f ){
