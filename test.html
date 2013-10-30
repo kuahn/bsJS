@@ -32,15 +32,16 @@
 	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
 <div id="stage">test stage</div>
+<div id="result"></div>
 <div id="test"></div>
 <script src="./bs5.js"></script>
 <script src="./bsTest.js"></script>
 <script>
 bs( function(){
 
-function printer(r){
-	document.getElementById('test').innerHTML += r;
-}
+function printer(r){document.getElementById('test').innerHTML += r;}
+bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
+
 bs.D( 'data1' ).$( 'a', 3, 'b', function( a ){ return a;},
 	'c', function(){return this.a;},
 	'd', [0,1,2,3]
@@ -108,9 +109,6 @@ bs.$get( function( rs ){
 	);
 },  'ajax.json' );
 
-setTimeout(function(){
-	bsTest( printer );
-}, 1000);
 } );
 </script>
 </body>
