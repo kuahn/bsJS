@@ -28,7 +28,7 @@
 ]]></script>
 </head>
 <body>
-<a href="https://github.com/hikaMaeng/bs5">
+<a href="https://github.com/projectBS/bsJS">
 	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
 <div id="stage">test stage</div>
@@ -36,14 +36,21 @@
 <div id="test"></div>
 <script src="./bs5.js"></script>
 <script src="./bsTest.js"></script>
+
+<div id="nav_tests">
+<ul style="list-style: none;">
+	<li><input type="button" value="bs.$url('https://github.com/projectBS/bsJS')" onclick="bs.$url('https://github.com/projectBS/bsJS')"></li>
+	<li><input type="button" value="bs.$back()" onclick="bs.$back()"></li>
+	<li><input type="button" value="bs.$reload()" onclick="bs.$reload()"></li>
+</ul>
+</div>
+
 <script>
 bs( function(){
 
 function printer(r){document.getElementById('test').innerHTML += r;}
 bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
 
-bs.D( 'data1' ).$('a', 3, 'b', function( a ){ return a;}, 'c', function(){return this.a;}, 'd', [0,1,2,3]
-);
 bs.$xml( document.getElementById('xml').text, function( $d ){
 	bsTest( printer, 'async xml parsing',
 
@@ -75,6 +82,7 @@ bs.$ck( 'bsName', "bs5" );
 	);
 } )();
 
+bs.D( 'data1' ).$('a', 3, 'b', function( a ){ return a;}, 'c', function(){return this.a;}, 'd', [0,1,2,3] );
 bsTest( printer, 'data',
 "bs.D.data1.a", 3, bs.D.data1.a,
 "bs.D.data1.$( 'a' )", 3, bs.D.data1.$( 'a' ),
@@ -110,11 +118,18 @@ bsTest( printer, 'css',
 "bs.c( '#stage' ).$( 'width' )", 100, bs.c( '#stage' ).$( 'width' ),
 "bs.css( '#stage' ).$( 'padding' )", 10, bs.css( '#stage' ).$( 'padding' )
 );
+
+bs.$timeout( 0 );
+bs.$get( function( rs ){
+	bsTest( printer, 'get timeout', "bs.$get( cb, url ) result", false, rs !== null);
+},  'ajax.json' );
+
+bs.$timeout( 5 );
 bs.$get( function( rs ){
 	var r = JSON.parse( rs );
-	bsTest( printer, 'ajax',
-		"bs.$get( cb , url ) url.a", 1, r.a,
-		"bs.$get( cb , url ) url.c", 3, r.c
+	bsTest( printer, 'get',
+		"bs.$get( cb, url ) url.a", 1, r.a,
+		"bs.$get( cb, url ) url.c", 3, r.c
 	);
 },  'ajax.json' );
 
