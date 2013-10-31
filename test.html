@@ -31,7 +31,7 @@
 <a href="https://github.com/hikaMaeng/bs5">
 	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
-<div id="stage">test stage</div>
+<div id="stage" data-id="stageId">test stage</div>
 <div class="clsStage" style="display:none;">test stage</div>
 <div class="clsStage" style="display:none;">test stage</div>
 <div id="result"></div>
@@ -95,20 +95,27 @@ bsTest( printer, 'function',
 "bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' ),
 "bs.$xml(xml).topics.volume[1].title.value", 'title2', bs.$xml( document.getElementById('xml').text ).topics.volume[1].title.value
 );
-bsTest( printer, 'dom',
+bsTest( printer, 'dom selector',
 "bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
 "bs.d( document.getElementById('stage') ).$('_margin-top' )", 30, bs.d( document.getElementById('stage') ).$('_margin-top' ),
 "bs.d( '.clsStage' ).length", 2, bs.d( '.clsStage' ).length,
-"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$('html')", 'test', bs.d( '<div>test</div>' ).$('html'),
-"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$('text')", 'test', bs.d( '<div>test</div>' ).$('text'),
-"bs.d( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$('html')", undefined, bs.dom( '<tr><td>test</td></tr>' ).$('html'),
-
+//
 "bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' ),
 "bs.dom( document.getElementById('stage') ).$( 'background-color' )", '#eee', bs.dom( document.getElementById('stage') ).$( 'background-color' ),
-"bs.dom( '.clsStage' ).length", 2, bs.dom( '.clsStage' ).length,
-"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$('html')", 'test', bs.dom( '<div>test</div>' ).$('html'),
-"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$('text')", 'test', bs.dom( '<div>test</div>' ).$('text'),
-"bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$('html')", undefined, bs.dom( '<tr><td>test</td></tr>' ).$('html')
+"bs.dom( '.clsStage' ).length", 2, bs.dom( '.clsStage' ).length
+);
+bsTest( printer, 'dom method',
+"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.d( '<div>test</div>' ).$( 'html' ),
+"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.d( '<div>test</div>' ).$( 'text' ),
+"bs.d( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
+"bs.d( '#stage' ).$( '@data-id' )", "stageId", bs.d( '#stage' ).$( '@data-id' ),
+"bs.d( '#stage' ).$( '@data-id', 'stageId2' )", "stageId2", bs.d( '#stage' ).$( '@data-id', 'stageId2' ),
+//
+"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.dom( '<div>test</div>' ).$( 'html' ),
+"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.dom( '<div>test</div>' ).$( 'text' ),
+"bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
+"bs.dom( '#stage' ).$( '@data-id' )", "stageId2", bs.d( '#stage' ).$( '@data-id' ),
+"bs.dom( '#stage' ).$( '@data-id', 'stageId3' )", "stageId3", bs.d( '#stage' ).$( '@data-id', 'stageId3' )
 );
 bsTest( printer, 'css',
 "bs.c( '#stage' ).$( 'width' )", 100, bs.c( '#stage' ).$( 'width' ),
