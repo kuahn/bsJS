@@ -10,7 +10,7 @@ function bsTest( $printer,$title ){
 		r += k + '. '+ arguments[i++] + ' == <b>';
 		target = arguments[i++];
 		origin = arguments[i++];
-		if( target.splice ){
+		if( target && target.splice ){
 			r += target[0] + ' ~ ' + target[1];
 			if( target[0] <= origin && origin <= target[1] ){
 				check = 1;
