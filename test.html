@@ -100,12 +100,14 @@ bsTest( printer, 'dom',
 "bs.d( document.getElementById('stage') ).$('_margin-top' )", 30, bs.d( document.getElementById('stage') ).$('_margin-top' ),
 "bs.d( '.clsStage' ).length", 2, bs.d( '.clsStage' ).length,
 "bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$('html')", 'test', bs.d( '<div>test</div>' ).$('html'),
+"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$('text')", 'test', bs.d( '<div>test</div>' ).$('text'),
 "bs.d( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$('html')", undefined, bs.dom( '<tr><td>test</td></tr>' ).$('html'),
 
 "bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' ),
 "bs.dom( document.getElementById('stage') ).$( 'background-color' )", '#eee', bs.dom( document.getElementById('stage') ).$( 'background-color' ),
 "bs.dom( '.clsStage' ).length", 2, bs.dom( '.clsStage' ).length,
 "bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$('html')", 'test', bs.dom( '<div>test</div>' ).$('html'),
+"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$('text')", 'test', bs.dom( '<div>test</div>' ).$('text'),
 "bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$('html')", undefined, bs.dom( '<tr><td>test</td></tr>' ).$('html')
 );
 bsTest( printer, 'css',
