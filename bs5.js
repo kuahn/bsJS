@@ -775,7 +775,14 @@ function init(doc){
 			};
 			ds = {
 				'@':function( $dom, $k, $v ){
-					return $v === undefined ? $dom.getAttribute($k) : $dom.setAttribute($k, $v);
+					if( $v ){
+						$dom[$k] = $v;
+						$dom.setAttribute($k, $v);
+						return $v;
+					}else if( $v === null ){
+						$dom.removeAttribute($k);
+						try{delete $dom[$k];}catch(e){};
+					}else return $dom[$k] || $dom.getAttribute($k);
 				},
 				'_':( function( view, style ){
 					return bs.DETECT.cstyle ? function( $dom, $k ){
