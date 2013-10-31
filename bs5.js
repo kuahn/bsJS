@@ -775,7 +775,7 @@ function init(doc){
 			};
 			ds = {
 				'@':function( $dom, $k, $v ){
-					return $v === undefined ? $dom[$k] : ($dom[$k] = $v);
+					return $v === undefined ? $dom.getAttribute($k) : $dom.setAttribute($k, $v);
 				},
 				'_':( function( view, style ){
 					return bs.DETECT.cstyle ? function( $dom, $k ){
