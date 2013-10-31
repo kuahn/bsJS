@@ -3,7 +3,7 @@
  *
  * Copyright 2013.10 hikaMaeng, bsJS-Team.
  * Dual licensed under the MIT or GPL Version 2 licenses.
- * GitHub: https://github.com/hikaMaeng/bs5
+ * GitHub: https://github.com/projectBS/bsJS
  * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
  */
 ( function( W, N ){
