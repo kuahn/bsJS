@@ -821,9 +821,9 @@ function init(doc){
 			d['+html'] = function( $dom, $v ){return $dom.innerHTML = $v + $dom.innerHTML;};
 			(function(){
 				var t = bs.DETECT.text;
-				d.text = function( $dom ){return $v === undefined ? $dom[t] : ($dom[t]=$v);};
-				d['text+'] = function( $dom ){return $dom[t] += $v;};
-				d['+text'] = function( $dom ){return $dom[t] = $v + $dom[t];};
+				d.text = function( $dom, $v ){return $v === undefined ? $dom[t] : ($dom[t]=$v);};
+				d['text+'] = function( $dom, $v ){return $dom[t] += $v;};
+				d['+text'] = function( $dom, $v ){return $dom[t] = $v + $dom[t];};
 			})();
 			d.style = function( $dom ){return $dom.bsS;};
 			d['class'] = function( $dom, $v ){return $v === undefined ? $dom.className : ($dom.className = $v);};
