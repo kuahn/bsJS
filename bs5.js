@@ -601,19 +601,19 @@ function init(doc){
 				var filter;
 				filter = {};
 				if( !bs.DETECT.opacity )
-					filter.opacity = function($s){
+					filter.opacity = function(s){
 						var v;
-						switch( v = arguments[0] ){
-						case undefined: return $s.opacity;
+						switch( v = arguments[1] ){
+						case undefined: return s.opacity;
 						case null:
-							delete $s.opacity;
-							$s.s.filter = '';
+							delete s.opacity;
+							s.s.filter = '';
 							return v;
 						}
-						$s.opacity = v;
-						$s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')';
+						s.opacity = v;
+						s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')';
 						return v;
-					};
+					}, style.opacity = 'opacity';
 	
 				return filter;
 			})();
@@ -643,23 +643,25 @@ function init(doc){
 				var i, j, k, v, f, vt, u;
 				i = 0, j = $arg.length;
 				while( i < j ){
-					k = style[$arg[i++]], v = $arg[i++];
-					if( filter[k] ) v = filter[k]( this, v );
-					else if( v === undefined ) return this[k].v; //get
-					else if( v === null ){//del
-						sv._( this[k] );
-						delete this[k];
-						this.s[k] = '';
-					}else{
-						if( this[k] === undefined ){//add
-							this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
-								( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
-								sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) );
-							v = this[k].v;
-						}else{//set
-							this[k].v = v;
+					if( k = style[$arg[i++]] ){
+						v = $arg[i++];
+						if( filter[k] ) v = filter[k]( this, v );
+						else if( v === undefined ) return this[k].v; //get
+						else if( v === null ){//del
+							sv._( this[k] );
+							delete this[k];
+							this.s[k] = '';
+						}else{
+							if( this[k] === undefined ){//add
+								this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
+									( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
+									sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) );
+								v = this[k].v;
+							}else{//set
+								this[k].v = v;
+							}
+							this.s[k] = this[k]+'';
 						}
-						this.s[k] = this[k]+'';
 					}
 				}
 				return v;
@@ -744,7 +746,7 @@ function init(doc){
 						style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
 						ev[k] ? ev( dom, k, v ) :
 						( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v ) :
-						d[k]( dom, v );
+						d[k] ? d[k]( dom, v ) : 0 ;
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 				}
@@ -1073,8 +1075,8 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, anidel, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp;
-		ani = [], anidel = [];
+		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp;
+		ani = [];
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
 			start = function(){
@@ -1088,9 +1090,8 @@ function init(doc){
 				if( isPause ) return;
 				if( isLive ){
 					t = time ? $time : Date.now();
-					i = ani.length, anidel.length = 0;
-					while( i-- ) if( ani[i].ANI(t) ) anidel[anidel.length] = ani[i], j = 1;
-					if( j ) for( i = 0, j = anidel.length ; i < j ; i++ ) ani.splice( anidel[i], 1 );
+					i = ani.length;
+					while( i-- ) if( ani[i].ANI(t) ) ani.splice( i, 1 );
 					ani.length ? timer( loop ) : end();
 				}
 			};
@@ -1108,13 +1109,9 @@ function init(doc){
 				if( isPause ) return;
 				if( isLive ){
 					t = Date.now();
-					for( i in ani ){
-						if( tw[i].ANI(t) ){
-							delete ani[i];
-							anilen--;
-						}
-					}
-					if( !anilen ) end();
+					i = ani.length;
+					while( i-- ) if( ani[i].ANI(t) ) ani.splice( i, 1 );
+					ani.length ? 0 : end();
 				}
 			};
 		}
@@ -1211,21 +1208,6 @@ function init(doc){
 				t0.$( arguments );
 			},
 			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
-			del:function( $k ){
-				var i;
-				if( ani[$k] ){
-					delete ani[$k];
-					l--;
-				}else{
-					for( i in ani )
-						if( ani[i] === $k ){
-							delete ani[i];
-							anilen--;
-							return;
-						}
-					throw 't-'+$k;
-				}
-			},
 			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
 			stop:function(){end();},
 			delay:(function(){
