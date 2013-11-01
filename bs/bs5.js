@@ -781,7 +781,15 @@ function init(doc){
 			}
 			ds = {
 				'@':function( $dom, $k, $v ){
-					return $v === undefined ? $dom.getAttribute($k) : $dom.setAttribute($k, $v);
+					if( $v === undefined ) return $dom[$k] || $dom.getAttribute($k);
+					if( $v === null ){
+						$dom.removeAttribute($k);
+						try{delete $dom[$k];}catch(e){};
+					}else{
+						$dom[$k] = $v;
+						$dom.setAttribute($k, $v);
+					}
+					return $v;
 				},
 				'_':( function( view, style ){
 					return bs.DETECT.cstyle ? function( $dom, $k ){
