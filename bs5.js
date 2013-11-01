@@ -1116,7 +1116,7 @@ function init(doc){
 				if( isLive ){
 					t = Date.now();
 					for( i in ani ){
-						if( tw[i].ANI(t) ){
+						if( ani[i].ANI(t) ){
 							delete ani[i];
 							anilen--;
 						}
