@@ -3,7 +3,7 @@
  *
  * Copyright 2013.10 hikaMaeng, bsJS-Team.
  * Dual licensed under the MIT or GPL Version 2 licenses.
- * GitHub: https://github.com/projectBS/bsJS
+ * GitHub: https://github.com/hikaMaeng/bs5
  * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
  */
 ( function( W, N ){
@@ -777,14 +777,7 @@ function init(doc){
 			};
 			ds = {
 				'@':function( $dom, $k, $v ){
-					if( $v ){
-						$dom[$k] = $v;
-						$dom.setAttribute($k, $v);
-						return $v;
-					}else if( $v === null ){
-						$dom.removeAttribute($k);
-						try{delete $dom[$k];}catch(e){};
-					}else return $dom[$k] || $dom.getAttribute($k);
+					return $v === undefined ? $dom.getAttribute($k) : $dom.setAttribute($k, $v);
 				},
 				'_':( function( view, style ){
 					return bs.DETECT.cstyle ? function( $dom, $k ){
@@ -834,6 +827,7 @@ function init(doc){
 				d['text+'] = function( $dom, $v ){return $dom[t] += $v;};
 				d['+text'] = function( $dom, $v ){return $dom[t] = $v + $dom[t];};
 			})();
+
 			d.style = function( $dom ){return $dom.bsS;};
 			d['class'] = function( $dom, $v ){return $v === undefined ? $dom.className : ($dom.className = $v);};
 			d['class+'] = function( $dom, $v ){

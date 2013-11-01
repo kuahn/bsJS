@@ -33,6 +33,11 @@ bs( function(){
 </script>
 ```
 
+## License
+Dual licensed under the MIT or GPL Version 2 licenses.
+
 [facebook group](https://www.facebook.com/groups/bs5js/?hc_location=stream)  
 =======
 [demo(test) page](http://projectbs.github.io/bsJS/test.html)
+
+Copyright 2013.10 hikaMaeng, bsJS-Team.
