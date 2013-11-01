@@ -707,7 +707,7 @@ function init(doc){
 			return css;
 		})( style ) );
 		bs.module( 'd,dom', (function( bs, style, doc ){
-			var d, ds, ev, t;
+			var d, ds, ev, t, nodes;
 			t = /^\s*|\s*$/g;
 			function x( $dom ){
 				var i = 0; do i += $dom.offsetLeft; while( $dom = $dom.offsetParent )
@@ -726,27 +726,24 @@ function init(doc){
 			};
 			d.$ = function d$(){
 				var dom, target, t0, l, s, i, j, k, v;
-				typeof arguments[0] == 'number'?( s = l = 1, target = this[arguments[0]] ):( l = this.length, s = 0 );
-				j = arguments.length;
+				j = arguments.length, typeof arguments[0] == 'number'?( s = l = 1, target = this[arguments[0]] ):( l = this.length, s = 0 );
 				while( l-- ){
 					dom = target || this[l], i = s, ds.length = 0;
 					while( i < j ){
 						k = arguments[i++], v = arguments[i++];
 						if( k === null ) return this._();
 						if( v === undefined ){ //get
-							if( style[k] ){
-								ds.length = 1, ds[0] = k, ds[1] = undefined;
-								return dom.bsS ? dom.bsS.$(ds) : undefined;
-							}else if( ev[k] ) return ev( dom, k );
+							if( style[k] ) return dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
+							else if( ev[k] ) return ev( dom, k );
 							else if( k == 'this' ){
 								if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 								return this;
 							}else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
 						}
-						style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
-						ev[k] ? ev( dom, k, v ) :
-						( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v ) :
-						d[k] ? d[k]( dom, v ) : 0 ;
+						v = style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
+							ev[k] ? ev( dom, k, v ) :
+							( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v, arguments, i ) :
+							d[k] ? d[k]( dom, v ) : undefined ;
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 				}
@@ -775,6 +772,13 @@ function init(doc){
 					if( this.__d ) this.__d();
 				}
 			};
+			nodes = {length:0};
+			function childNodes( $nodes ){
+				var i, j;
+				for( nodes.length = i = 0, j = $nodes.length ; i < j ; i++ )
+					if( $nodes[i].nodeType == 1 ) nodes[nodes.length++] = $nodes[i];
+				return nodes;
+			}
 			ds = {
 				'@':function( $dom, $k, $v ){
 					return $v === undefined ? $dom.getAttribute($k) : $dom.setAttribute($k, $v);
@@ -788,15 +792,24 @@ function init(doc){
 						return t0.substr( t0.length - 2 ) == 'px' ? parseFloat( t0.substring( 0, t0.length - 2 ) ) : t0;
 					};
 				} )( doc.defaultView, style ),
-				'>':function( $dom, $k, $v ){
-					var i, j;
+				'>':function( $dom, $k, $v, $arg, $i ){
+					var t0, i, j, v;
 					if( $v ){
-						$v = bs( $v ), i = 0, j = $v.length;
-						while( i < j ) $dom.appendChild( $v[i++] );
+						if( $k ){
+							if( $k.indexOf( '>' ) > -1 ){
+								$k = $k.split('>');
+								i = 0, j = $k.length;
+								do $dom = childNodes( $dom.childNodes )[$k[i++]]; while( i < j )
+							}else $dom = childNodes( $dom.childNodes )[$k];
+							v = $arg.length == $i ? $arg[$i] : undefined;
+							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = undefined, $dom.bsS.$( ds, v ) ) : undefined;
+							else if( ev[$v] ) return ev( $dom, $v, v );
+							else return ( t0 = ds[$v.charAt(0)] ) ? t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 ) : d[$v]( $dom, v );
+						}else for( $v = bs( $v ), i = 0, j = $v.length ; i < j ; i++ ) $dom.appendChild( $v[i] );
 					}else if( $v === null ){
-						if( $k ) d.method._.call( {0:$dom.childNodes[$k],length:1} );
-						else if( $dom.childNodes && $dom.childNodes.length ) d.method._.call( Array.prototype.slice.call( $dom.childNodes, 0 ) );
-					}else return $k == '' ? Array.prototype.slice.call( $dom.childNodes, 0 ) : $dom.childNodes[$k];
+						if( $k ) d.method._.call( {0:childNodes( $dom.childNodes )[$k],length:1} );
+						else if( $dom.childNodes && childNodes( $dom.childNodes ).length ) d.method._.call( nodes );
+					}else return childNodes( $dom.childNodes ), $k ? nodes[$k] : nodes;
 				}
 			};
 			d.x = x, d.y = y;

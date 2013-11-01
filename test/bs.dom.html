@@ -19,6 +19,7 @@
 <div id="stage" data-id="stageId" data-id2="stageId2">test stage</div>
 <div class="clsStage" style="display:none;">test stage</div>
 <div class="clsStage" style="display:none;">test stage</div>
+<div id="stageHika"></div>
 <div id="result"></div>
 <div id="test"></div>
 <script src="../bs/bs5.js"></script>
@@ -67,6 +68,28 @@ bs( function(){
 		"bs.dom( '#stage' ).$( '@data-id2', 'stageId3' )", "stageId3", bs.d( '#stage' ).$( '@data-id2', 'stageId3' ),
 		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId3", bs.d( '#stage' ).$( '@data-id2' ),
 		"bs.dom( '#stage' ).$( '@data-id2', null )", null, bs.dom( '#stage' ).$( '@data-id2', null )
+	);
+	
+	bs.dom( "#stageHika" ).$( 
+		'>', '<div><b><span>a</span></b></div>',
+		'>', '<div>b</div>' 
+	);
+	
+	bsTest( printer, 'DOM addChild',
+		"bs.dom( '#stageHika' ).$( '>' ).length", 2, bs.dom( '#stageHika' ).$( '>' ).length
+	);
+	bsTest( printer, 'DOM getChild and key',
+		"bs.dom( '#stageHika' ).$( '>1' ).innerHTML", 'b', bs.dom( '#stageHika' ).$( '>1' ).innerHTML,
+		"bs.dom( '#stageHika' ).$( '>1', 'html' )", 'b', bs.dom( '#stageHika' ).$( '>1', 'html' )
+	);
+	
+	bsTest( printer, 'DOM grand grand child and key',
+		"bs.dom( '#stageHika' ).$( '>0>0>0', 'html' )", 'a', bs.dom( '#stageHika' ).$( '>0>0>0', 'html' )
+	);
+	
+	bs.dom( "#stageHika" ).$( '>', null );
+	bsTest( printer, 'DOM removeChild',
+		"bs.dom( '#stageHika' ).$( '>' ).length", 0, bs.dom( '#stageHika' ).$( '>' ).length
 	);
 } );
 </script>
