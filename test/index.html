@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>bs5 Test suite</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<ul>
+	<li><a href="bs.$xml.html">bs.$xml.html</a></li>
+	<li><a href="bs.ajax.html">bs.ajax.html</a></li>
+	<li><a href="bs.css.html">bs.css.html</a></li>
+	<li><a href="bs.data.html">bs.data.html</a></li>
+	<li><a href="bs.dom.html">bs.dom.html</a></li>
+	<li><a href="bs.event.html">bs.event.html</a></li>
+	<li><a href="bs.function.html">bs.function.html</a></li>
+	
+</ul>
+
+<script src="../bs/bs5.js"></script>
+<script src="../bs/bsTest.js"></script>
+<script src="./printer.js"></script>
+<script>
+bs( function(){
+	bs.c("li").$(
+		"font-weight", "bold",
+		"border", "1px dashed #999",
+		"padding", 10,
+		"margin",10
+	);
+} );
+</script>
+</body>
+</html>

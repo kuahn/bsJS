@@ -1,0 +1,1 @@
+function printer(r){document.getElementById('test').innerHTML += r;}
