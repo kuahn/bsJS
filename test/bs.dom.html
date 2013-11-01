@@ -40,10 +40,12 @@ bs( function(){
 	bsTest( 'dom selector',
 		"bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
 		"bs.d( document.getElementById('stage') ).$('_margin-top' )", 30, bs.d( document.getElementById('stage') ).$('_margin-top' ),
+		"bs.d( bs.d('#stage') ).$('_margin-top' )", 30, bs.d( bs.d('#stage') ).$('_margin-top' ),
 		"bs.d( '.clsStage' ).length", 2, bs.d( '.clsStage' ).length,
 		//
 		"bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' ),
 		"bs.dom( document.getElementById('stage') ).$( 'background-color' )", '#eee', bs.dom( document.getElementById('stage') ).$( 'background-color' ),
+		"bs.dom( bs.dom('#stage') ).$( 'background-color' )", '#eee', bs.dom( bs.dom('#stage') ).$( 'background-color' ),
 		"bs.dom( '.clsStage' ).length", 2, bs.dom( '.clsStage' ).length
 	);
 
@@ -54,14 +56,18 @@ bs( function(){
 		"bs.d( '#stage' ).$( '@data-id' )", "stageId", bs.d( '#stage' ).$( '@data-id' ),
 		"bs.d( '#stage' ).$( '@data-id', 'stageId2' )", "stageId2", bs.d( '#stage' ).$( '@data-id', 'stageId2' ),
 		"bs.d( '#stage' ).$( '@data-id' )", "stageId2", bs.d( '#stage' ).$( '@data-id' ),
+		"bs.d( '#stage' ).$( '@data-id', '' )", "", bs.d( '#stage' ).$( '@data-id', '' ),
+		"bs.d( '#stage' ).$( '@data-id', 0 )", 0, bs.d( '#stage' ).$( '@data-id', 0 ),
 		"bs.d( '#stage' ).$( '@data-id', null )", null, bs.d( '#stage' ).$( '@data-id', null ),
 		//
 		"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.dom( '<div>test</div>' ).$( 'html' ),
 		"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.dom( '<div>test</div>' ).$( 'text' ),
 		"bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
-		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId2", bs.d( '#stage' ).$( '@data-id2' ),
-		"bs.dom( '#stage' ).$( '@data-id2', 'stageId3' )", "stageId3", bs.d( '#stage' ).$( '@data-id2', 'stageId3' ),
-		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId3", bs.d( '#stage' ).$( '@data-id2' ),
+		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId2", bs.dom( '#stage' ).$( '@data-id2' ),
+		"bs.dom( '#stage' ).$( '@data-id2', 'stageId3' )", "stageId3", bs.dom( '#stage' ).$( '@data-id2', 'stageId3' ),
+		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId3", bs.dom( '#stage' ).$( '@data-id2' ),
+		"bs.dom( '#stage' ).$( '@data-id2', '' )", "", bs.dom( '#stage' ).$( '@data-id2', '' ),
+		"bs.dom( '#stage' ).$( '@data-id2', 0 )", 0, bs.dom( '#stage' ).$( '@data-id2', 0 ),
 		"bs.dom( '#stage' ).$( '@data-id2', null )", null, bs.dom( '#stage' ).$( '@data-id2', null )
 	);
 	
@@ -75,7 +81,8 @@ bs( function(){
 	);
 	bsTest( 'DOM getChild and key',
 		"bs.dom( '#stageHika' ).$( '>1' ).innerHTML", 'b', bs.dom( '#stageHika' ).$( '>1' ).innerHTML,
-		"bs.dom( '#stageHika' ).$( '>1', 'html' )", 'b', bs.dom( '#stageHika' ).$( '>1', 'html' )
+		"bs.dom( '#stageHika' ).$( '>1', 'html' )", 'b', bs.dom( '#stageHika' ).$( '>1', 'html' ),
+		"bs.dom( bs.d('#stageHika' ).$( '>1' ) ).$( 'html', 'c' )", 'c', bs.dom( bs.d('#stageHika' ).$( '>1' ) ).$( 'html', 'c' )
 	);
 	
 	bsTest( 'DOM grand grand child and key',
