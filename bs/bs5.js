@@ -730,15 +730,13 @@ function init(doc){
 				while( l-- ){
 					dom = target || this[l], i = s, ds.length = 0;
 					while( i < j ){
-						k = arguments[i++], v = arguments[i++];
+						k = arguments[i++];
 						if( k === null ) return this._();
-						if( v === undefined ){ //get
+						if( ( v = arguments[i++] ) === undefined ){ //get
 							if( style[k] ) return dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
 							else if( ev[k] ) return ev( dom, k );
-							else if( k == 'this' ){
-								if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
-								return this;
-							}else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
+							else if( k == 'this' ) return ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined ), this;
+							else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
 						}
 						v = style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
 							ev[k] ? ev( dom, k, v ) :
@@ -781,7 +779,12 @@ function init(doc){
 			}
 			ds = {
 				'@':function( $dom, $k, $v ){
-					return $v === undefined ? $dom.getAttribute($k) : $dom.setAttribute($k, $v);
+					if( $v === undefined ) return $dom[$k] || $dom.getAttribute($k);
+					if( $v === null ){
+						$dom.removeAttribute($k);
+						try{delete $dom[$k];}catch(e){};
+					}else $dom[$k] = $v, $dom.setAttribute($k, $v);
+					return $v;
 				},
 				'_':( function( view, style ){
 					return bs.DETECT.cstyle ? function( $dom, $k ){

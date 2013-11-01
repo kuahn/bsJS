@@ -28,11 +28,6 @@
 <script>
 bs( function(){
 	/*
-		config
-	*/
-	bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
-
-	/*
 		pre process
 	*/
 	bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
@@ -42,7 +37,7 @@ bs( function(){
 	/*
 		test case
 	*/
-	bsTest( printer, 'dom selector',
+	bsTest( 'dom selector',
 		"bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
 		"bs.d( document.getElementById('stage') ).$('_margin-top' )", 30, bs.d( document.getElementById('stage') ).$('_margin-top' ),
 		"bs.d( '.clsStage' ).length", 2, bs.d( '.clsStage' ).length,
@@ -52,7 +47,7 @@ bs( function(){
 		"bs.dom( '.clsStage' ).length", 2, bs.dom( '.clsStage' ).length
 	);
 
-	bsTest( printer, 'dom method',
+	bsTest( 'dom method',
 		"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.d( '<div>test</div>' ).$( 'html' ),
 		"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.d( '<div>test</div>' ).$( 'text' ),
 		"bs.d( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
@@ -75,20 +70,20 @@ bs( function(){
 		'>', '<div>b</div>' 
 	);
 	
-	bsTest( printer, 'DOM addChild',
+	bsTest( 'DOM addChild',
 		"bs.dom( '#stageHika' ).$( '>' ).length", 2, bs.dom( '#stageHika' ).$( '>' ).length
 	);
-	bsTest( printer, 'DOM getChild and key',
+	bsTest( 'DOM getChild and key',
 		"bs.dom( '#stageHika' ).$( '>1' ).innerHTML", 'b', bs.dom( '#stageHika' ).$( '>1' ).innerHTML,
 		"bs.dom( '#stageHika' ).$( '>1', 'html' )", 'b', bs.dom( '#stageHika' ).$( '>1', 'html' )
 	);
 	
-	bsTest( printer, 'DOM grand grand child and key',
+	bsTest( 'DOM grand grand child and key',
 		"bs.dom( '#stageHika' ).$( '>0>0>0', 'html' )", 'a', bs.dom( '#stageHika' ).$( '>0>0>0', 'html' )
 	);
 	
 	bs.dom( "#stageHika" ).$( '>', null );
-	bsTest( printer, 'DOM removeChild',
+	bsTest( 'DOM removeChild',
 		"bs.dom( '#stageHika' ).$( '>' ).length", 0, bs.dom( '#stageHika' ).$( '>' ).length
 	);
 } );
