@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<title>bs5 Test suite</title>
+<title>bs5 Test suite (Sato)</title>
 <meta name="keywords" content="bs5" />
 <meta name="description" content="bs5 Test suite" />
 <meta charset="utf-8"/>
@@ -31,23 +31,26 @@
 <a href="https://github.com/projectBS/bsJS">
 	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
-<div id="stage" data-id="stageId" data-id2="stageId2">test stage</div>
-<div class="clsStage" style="display:none;">test stage</div>
-<div class="clsStage" style="display:none;">test stage</div>
+<div id="stage">test stage</div>
 <div id="result"></div>
 <div id="test"></div>
 <script src="./bs5.js"></script>
 <script src="./bsTest.js"></script>
+
+<div id="nav_tests">
+<ul style="list-style: none;">
+	<li><input type="button" value="bs.$url('https://github.com/projectBS/bsJS')" onclick="bs.$url('https://github.com/projectBS/bsJS')"></li>
+	<li><input type="button" value="bs.$back()" onclick="bs.$back()"></li>
+	<li><input type="button" value="bs.$reload()" onclick="bs.$reload()"></li>
+</ul>
+</div>
+
 <script>
 bs( function(){
 
 function printer(r){document.getElementById('test').innerHTML += r;}
 bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
 
-bs.D( 'data1' ).$( 'a', 3, 'b', function( a ){ return a;},
-	'c', function(){return this.a;},
-	'd', [0,1,2,3]
-);
 bs.$xml( document.getElementById('xml').text, function( $d ){
 	bsTest( printer, 'async xml parsing',
 
@@ -65,22 +68,21 @@ bs.$ck( 'bsName', "bs5" );
 	bs.d( '#stage' ).$(
 	'mousedown', function( $e ){
 		i = 1;
-		bsTest( printer, 'mousedown',
-			"this.id", 'stage', this.id,
-			"$e.x",[0,this.offsetWidth],$e.x
-		);
+		bsTest( printer, 'mousedown', "this.id", 'stage', this.id, "$e.x",[0,this.offsetWidth], $e.x);
 	},
 	'mousemove', function( $e ){
-		if( i++ == 1 ) bsTest( printer,'mousemove',
-			"typeof $e.dx", 'number', typeof $e.dx
-		);
+		if( i++ == 1 ){
+			bsTest( printer, 'mousemove', "this.id", 'stage', this.id, "typeof $e.dx", 'number', typeof $e.dx );
+		}
 	},
 	'mouseup', function( $e ){
-		bs.d( '#stage' ).$( 'mousedown', null, 'mousemove', null );
+		bsTest( printer, 'mouseup', "this.id", 'stage', this.id, "$e.x",[0,this.offsetWidth], $e.x );
+		bs.d( '#stage' ).$( 'mousedown', null, 'mousemove', null, 'mouseup', null );
 	}
 	);
 } )();
 
+bs.D( 'data1' ).$('a', 3, 'b', function( a ){ return a;}, 'c', function(){return this.a;}, 'd', [0,1,2,3] );
 bsTest( printer, 'data',
 "bs.D.data1.a", 3, bs.D.data1.a,
 "bs.D.data1.$( 'a' )", 3, bs.D.data1.$( 'a' ),
@@ -92,44 +94,42 @@ bsTest( printer, 'data',
 bsTest( printer, 'function',
 "bs.$ck( 'bsName' )", 'bs5', bs.$ck( 'bsName' ),
 "bs.$ex( 5, '~', 10 )", [5,10], bs.$ex( 5, '~', 10 ),
+"bs.$ex( 10, '~', 5 )", [5,10], bs.$ex( 10, '~', 5 ),
+"bs.$ex( 5, '~', 5 )", [5,5], bs.$ex( 5, '~', 5 ),
+"bs.$ex( -5, '~', -10 )", [-10,-5], bs.$ex( -5, '~', -10 ),
+"bs.$ex( -10, '~', -5 )", [-10,-5], bs.$ex( -10, '~', -5 ),
+"bs.$ex( 5, '~f', 10 )", [5,10], bs.$ex( 5, '~f', 10 ),
+"bs.$ex( 10, '~f', 5 )", [5,10], bs.$ex( 10, '~f', 5 ),
+"bs.$ex( 5, '~f', 5 )", [5,5], bs.$ex( 5, '~f', 5 ),
+"bs.$ex( -5, '~f', -10 )", [-10,-5], bs.$ex( -5, '~f', -10 ),
+"bs.$ex( -10, '~f', -5 )", [-10,-5], bs.$ex( -10, '~f', -5 ),
+"bs.$ex( 5, '~', 13, '~f', 17)", [5, 17], bs.$ex( 5, '~', 13, '~f', 17),
 "bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' ),
+"bs.$trim( '	foo	bar	' )", 'foo	bar', bs.$trim( '	foo	bar	' ),
 "bs.$xml(xml).topics.volume[1].title.value", 'title2', bs.$xml( document.getElementById('xml').text ).topics.volume[1].title.value
+
 );
-bsTest( printer, 'dom selector',
+
+bsTest( printer, 'dom',
 "bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
-"bs.d( document.getElementById('stage') ).$('_margin-top' )", 30, bs.d( document.getElementById('stage') ).$('_margin-top' ),
-"bs.d( '.clsStage' ).length", 2, bs.d( '.clsStage' ).length,
-//
-"bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' ),
-"bs.dom( document.getElementById('stage') ).$( 'background-color' )", '#eee', bs.dom( document.getElementById('stage') ).$( 'background-color' ),
-"bs.dom( '.clsStage' ).length", 2, bs.dom( '.clsStage' ).length
-);
-bsTest( printer, 'dom method',
-"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.d( '<div>test</div>' ).$( 'html' ),
-"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.d( '<div>test</div>' ).$( 'text' ),
-"bs.d( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
-"bs.d( '#stage' ).$( '@data-id' )", "stageId", bs.d( '#stage' ).$( '@data-id' ),
-"bs.d( '#stage' ).$( '@data-id', 'stageId2' )", "stageId2", bs.d( '#stage' ).$( '@data-id', 'stageId2' ),
-"bs.d( '#stage' ).$( '@data-id' )", "stageId2", bs.d( '#stage' ).$( '@data-id' ),
-"bs.d( '#stage' ).$( '@data-id', null )", null, bs.d( '#stage' ).$( '@data-id', null ),
-//
-"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.dom( '<div>test</div>' ).$( 'html' ),
-"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.dom( '<div>test</div>' ).$( 'text' ),
-"bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
-"bs.dom( '#stage' ).$( '@data-id2' )", "stageId2", bs.d( '#stage' ).$( '@data-id2' ),
-"bs.dom( '#stage' ).$( '@data-id2', 'stageId3' )", "stageId3", bs.d( '#stage' ).$( '@data-id2', 'stageId3' ),
-"bs.dom( '#stage' ).$( '@data-id2' )", "stageId3", bs.d( '#stage' ).$( '@data-id2' ),
-"bs.dom( '#stage' ).$( '@data-id2', null )", null, bs.dom( '#stage' ).$( '@data-id2', null )
+"bs.dom( '#stage' ).$( 'background-color' )", '#eee', bs.dom( '#stage' ).$( 'background-color' )
 );
 bsTest( printer, 'css',
 "bs.c( '#stage' ).$( 'width' )", 100, bs.c( '#stage' ).$( 'width' ),
 "bs.css( '#stage' ).$( 'padding' )", 10, bs.css( '#stage' ).$( 'padding' )
 );
+
+bs.$timeout( 0 );
+bs.$get( function( rs ){
+	bsTest( printer, 'get timeout', "bs.$get( cb, url ) result", false, rs !== null);
+},  'ajax.json' );
+
+bs.$timeout( 5 );
 bs.$get( function( rs ){
 	var r = JSON.parse( rs );
-	bsTest( printer, 'ajax',
-		"bs.$get( cb , url ) url.a", 1, r.a,
-		"bs.$get( cb , url ) url.c", 3, r.c
+	bsTest( printer, 'get',
+		"bs.$get( cb, url ) url.a", 1, r.a,
+		"bs.$get( cb, url ) url.c", 3, r.c
 	);
 },  'ajax.json' );
 
