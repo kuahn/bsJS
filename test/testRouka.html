@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<title>test ## Rouka</title>
+<title>test ## javarouka</title>
 <meta name="keywords" content="bs5" />
 <meta name="description" content="bs5 Test suite" />
 <meta charset="utf-8"/>
@@ -38,7 +38,7 @@
         var $stage = bs.dom("#stage"),
             $display = bs.dom("#display");
 
-        $stage.$("html", $stage.$("html").toUpperCase());
+        $stage.$("html", $stage.$("text").toUpperCase());
 
         bs.dom("#stage").$(
             "color", "white",
@@ -48,7 +48,7 @@
             "cursor", "pointer",
             "font-size", "200%",
             "click", function() {
-                alert("WoW!");
+                alert("document text only >>\n" + bs.dom("body").$("text"));
             }
         );
 
@@ -67,7 +67,7 @@
         }, url);
 
         bsTest(printer, "DOM Control & CSS",
-                "bs.dom('#stage').$(html) text", $stage.$("html"), "TEST STAGE");
+                "bs.dom('#stage').$(html) text", $stage.$("text"), "TEST STAGE");
     } );
 
 }();
