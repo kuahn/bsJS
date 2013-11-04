@@ -10,57 +10,52 @@
 'use strict';
 if( !W['console'] )	W['console'] = {log:function(){alert( arguments.join() );}};
 if( !Array.prototype.indexOf )
-	Array.prototype.indexOf = function( $v, i ){
-		var j, k, l;
-		if( j = this.length ){
-			for( i = !i ? 0 : i, k = parseInt( j * .5 ) + 1, j-- ; i < k ; i++ )
+	Array.prototype.indexOf = function( $v, $i ){
+		var i, j, k, l;
+		if( j = this.length )
+			for( i = $i || 0, k = parseInt( j * .5 ) + 1, j-- ; i < k ; i++ )
 				if( this[l = i] === $v || this[l = j - i] === $v ) return l;
-		}
 		return -1;
 	};
 Date.now || ( Date.now = function(){return +new Date;} );
 
 function init(doc){
 	var bs = (function(doc){
-		var sel,sz,t0,div;
+		var sel,sz,t0,div,nodes;
 		if( doc.querySelectorAll ) sel = function( $sel ){return doc.querySelectorAll( $sel );};
 		else if( sz = W['Sizzle'] ) sel = function( $sel ){return sz( $sel );};
 		else if( sz = doc.getElementById('sizzle') ){
-			t0 = doc.createElement( 'script' );
-			doc.getElementsByTagName('head')[0].appendChild( t0 );
-			t0.text = sz.text;
-			sz = Sizzle;
+			t0 = doc.createElement( 'script' ),
+			doc.getElementsByTagName('head')[0].appendChild( t0 ),
+			t0.text = sz.text, sz = Sizzle,
 			sel = function( $sel ){return sz( $sel );};
 		}else{
+			sz = {};
 			sel = function( $sel ){
-				var t0, t1, i, j;
-				switch( $sel.charAt(0) ){
-				case'#':return {0:doc.getElementById($sel.substr(1)),length:1};
-				case'.': $sel = $sel.substr(1), t0 = doc.getElementsByTagName('*'), t1 = {length:0};
-					for( i = 0, j = t0.length ; i < j ; i++ ) if( t0[i].className.indexOf( $sel ) > -1 ) t1[t1.length++] = t0[i];
-					return t1;
+				var t0, i;
+				if( ( t0 = $sel.charAt(0) ) == '#' ) return sz[0] = doc.getElementById($sel.substr(1)), sz.length = 1, sz;
+				if( t0 == '.' ){
+					$sel = $sel.substr(1), t0 = doc.getElementsByTagName('*'), sz.length = 0, i = t0.length;
+					while( i-- ) if( t0[i].className.indexOf( $sel ) > -1 ) sz[sz.length++] = t0[i];
+					return sz;
 				}
 				return doc.getElementsByTagName($sel);
 			};
 		}
-		div = doc.createElement( 'div' );
-		function bs( $sel ){
+		div = doc.createElement( 'div' ), nodes = {};
+		function bs( $sel, $node ){
 			var r, t0, i, j, k;
 			t0 = typeof $sel; 
 			if( t0 == 'function' ) return $sel();
-			if( t0 == 'string' ){
-				if( $sel.charAt(0) == '<' ){
-					div.innerHTML = $sel;
-					return div.childNodes;
-				}else return sel( $sel );
-			}else if( $sel.isDom ) return $sel;
-			else if( $sel.nodeType ) return {0:$sel,length:1};
-			else if( j = $sel.length ){
-				r = {length:0};
+			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, div.childNodes ) : sel( $sel );
+			if( $sel.isDom ) return $sel;
+			r = $node ? {} : nodes;
+			if( $sel.nodeType == 1 ) return r[0] = $sel, r.length = 1, r;
+			if( j = $sel.length ){
+				r.length = 0;
 				for( i = 0 ; i < j ; i++ ){
-					t0 = bs( $sel[i] );
-					k = t0.length;
-					while( k-- ) r[r.length++] = t0[k];
+					t0 = bs( $sel[i], 1 ), r.length = k = t0.length;
+					while( k-- ) r[k] = t0[k];
 				}
 				return r;
 			}
@@ -71,40 +66,31 @@ function init(doc){
 	var factory = (function(bs){
 		function cls( $arg ){
 			var key, factory, t0, k;
-			key = $arg[0], factory = $arg[1];
-			if( factory.init ) cls[key] = function( $key ){this.__k = $key, this.__i( $key );};
-			else cls[key] = function( $key ){this.__k = $key;};
+			key = $arg[0], factory = $arg[1],
+			cls[key] = factory.init ? function($key){this.__k = $key,this.__i( $key );} : function($key){this.__k = $key;};
 			t0 = cls[key].prototype, t0.$ = factory.$, t0.__i = factory.init, t0.__d = del, t0.__f = factory;
 			for( k in factory.method ) t0[k] = factory.method[k];
 			return factory;
 		}
 		function del(){
-			delete this.__f[this.__k];
-			return this.__k;
+			return delete this.__f[this.__k], this.__k;
 		}
 		function factory( $key ){
 			function F(){
 				var t0, t1;
-				t0 = arguments[0];
-				if( typeof t0 == 'string' ){
-					t1 = t0.charAt(0);
-					if( t1 == '@' ) return F[t0=t0.substr(1)] = new cls[$key](t0);
-					else if( t1 == '<' ) return new cls[$key](t0);
-					else return F[t0] || ( F[t0] = new cls[$key](t0) );
-				}else return new cls[$key](t0);
+				return typeof ( t0 = arguments[0] ) == 'string' ? 
+						( t1 = t0.charAt(0) ) == '@' ? ( F[t0=t0.substr(1)] = new cls[$key](t0) ) :
+						t1 == '<' ? new cls[$key](t0) : F[t0] || ( F[t0] = new cls[$key](t0) ) :
+					new cls[$key](t0);
 			}
 			return F;
 		}
 		bs.module = function(){
-			var t0,t1,i;
-			t0 = arguments[0].split(',');
-			arguments[0] = t0[0];
-			t1 = new cls(arguments);
-			i = t0.length;
+			var t0, t1, i;
+			t0 = arguments[0].split(','), arguments[0] = t0[0], t1 = new cls(arguments), i = t0.length;
 			while( i-- ) bs[t0[i]] = t1;
 		};
-		bs.factory = factory;
-		return factory;
+		return bs.factory = factory;
 	})(bs);
 	bs.module( 'D,data', (function(){
 		function b(c,f){return function(){return f.apply(c,arguments);};}
@@ -144,8 +130,7 @@ function init(doc){
 		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); }
 		return function ex(){
 			var t0, i, j;
-			t0 = arguments[0];
-			i = 1, j = arguments.length;
+			t0 = arguments[0], i = 1, j = arguments.length;
 			while( i < j ){
 				switch( arguments[i++] ){
 				case'~': t0 = rand( t0, arguments[i++] ); break;
@@ -172,15 +157,13 @@ function init(doc){
 		t = /^\s*|\s*$/g;
 		function _xml( $node ){
 			var node, r, n, t0, t1, i, j;
-			node = $node.childNodes;
-			r = {};
+			node = $node.childNodes, r = {};
 			for( i = 0, j = node.length ; i < j ; i++ ){
 				t0 = type ? node[i] : node.nextNode();
 				if( t0.nodeType == 3 ){
 					r.value = (type ? t0.textContent : t0.text).replace( t, '' );
 				}else{
-					n = t0.nodeName;
-					t0 = _xml( t0 );
+					n = t0.nodeName, t0 = _xml( t0 );
 					if( t1 = r[n] ){
 						if( t1.length === undefined ) r[n] = {length:2,0:t1,1:t0};
 						else r[n][t1.length++] = t0;
@@ -192,22 +175,15 @@ function init(doc){
 		}
 		function xml0( $data, $end ){
 			var r, t0, t1, nn, i, j;
-			t0 = $data.childNodes;
-			r = {}, i = 0, j = t0.length;
+			t0 = $data.childNodes, r = {}, i = 0, j = t0.length;
 			if( $end ){
 				( nn = function(){
 					var k, t1;
-					for( var k = 0 ; i < j && k < 5000 ; i++, k++ ){
-						t1 = type ? t0[i] : t0.nextNode();
-						r[t1.nodeName] = _xml( t1 );
-					}
+					for( var k = 0 ; i < j && k < 5000 ; i++, k++ ) t1 = type ? t0[i] : t0.nextNode(), r[t1.nodeName] = _xml( t1 );
 					i < j ? setTimeout( nn, 16 ) : $end( r );
 				} )();
 			}else{
-				for( ; i < j ; i++ ){
-					t1 = type ? t0[i] : t0.nextNode();
-					r[t1.nodeName] = _xml( t1 );
-				}
+				for( ; i < j ; i++ ) t1 = type ? t0[i] : t0.nextNode(), r[t1.nodeName] = _xml( t1 );
 				return r;
 			}
 		}
@@ -217,16 +193,14 @@ function init(doc){
 			return $data.replace( t, '' );
 		}
 		if( W['DOMParser'] ){
-			type = 1;
-			parser = new DOMParser;
+			type = 1, parser = new DOMParser;
 			return function( $data, $end ){
 				return xml0( parser.parseFromString( filter( $data ), "text/xml" ), $end );
 			};
 		}else{
-			type = 0;
-			parser = (function(){
+			type = 0, parser = (function(){
 				var t0, i, j;
-				t0 = 'MSXML2.DOMDocument', t0 = ['Microsoft.XMLDOM', 'MSXML.DOMDocument', t0, t0+'.3.0', t0+'.4.0', t0+'.5.0', t0+'.6.0'];
+				t0 = 'MSXML2.DOMDocument', t0 = ['Microsoft.XMLDOM', 'MSXML.DOMDocument', t0, t0+'.3.0', t0+'.4.0', t0+'.5.0', t0+'.6.0'],
 				i = t0.length;
 				while( i-- ){
 					try{ new ActiveXObject( j = t0[i] ); }catch( $e ){ continue; }
@@ -254,19 +228,11 @@ function init(doc){
 					t0.complete ? $data.loaded() : setTimeout( t1, 10 );
 				} )();
 			}
-			t0.src = $src;
-			return t0;
+			return t0.src = $src, t0;
 		}
 		return function load( $end ){
 			var t0, path, i, j;
-			if( arguments.length == 2 && arguments[1][0] ){
-				path = arguments[1];
-				i = 0;
-			}else{
-				path = arguments;
-				i = 1;
-			}
-			j = path.length;
+			arguments.length == 2 && arguments[1][0] ? ( path = arguments[1], i = 0 ) : ( path = arguments, i = 1 ), j = path.length,
 			t0 = {
 				count:0, length:0,
 				loaded:function loaded(){
@@ -293,27 +259,23 @@ function init(doc){
 			var t0, i;
 			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8';
 			if( $url.charAt( $url.length -1 ) == '=' ){
-				$url += 'bs.__callback.' + ( i = 'c' + (_callback++) );
+				$url += 'bs.__callback.' + ( i = 'c' + (_callback++) ),
 				bs.__callback[i] = function(){
 					$end.apply( null, arguments );
 					delete bs.__callback[i];
 				};
 			}else if( $end ){
-				if( W['addEventListener'] ){
-					t0.onload = function(){t0.onload = null, $end();}
-				}else{
-					t0.onreadystatechange = function(){t0.readyState == 'loaded' && ( t0.onreadystatechange = null, $end() );}
-				}
+				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $end();}
+				else t0.onreadystatechange = function(){t0.readyState == 'loaded' && ( t0.onreadystatechange = null, $end() );}
 			}
-			doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
-			t0.src = $url;
+			doc.getElementsByTagName( 'head' )[0].appendChild( t0 ), t0.src = $url;
 		};
 	})(doc);
 	(function(){
 		var	_timeout = 5000, _cgiA = []; 
 		var rq = W['XMLHttpRequest'] ? function rq(){ return new XMLHttpRequest; } : ( function(){
 			var t0, i, j;
-			t0 = 'MSXML2.XMLHTTP', t0 = ['Microsoft.XMLHTTP',t0,t0+'.3.0',t0+'.4.0',t0+'.5.0'];
+			t0 = 'MSXML2.XMLHTTP', t0 = ['Microsoft.XMLHTTP',t0,t0+'.3.0',t0+'.4.0',t0+'.5.0'],
 			i = t0.length;
 			while( i-- ){
 				try{ new ActiveXObject( j = t0[i] ); }catch( $e ){ continue; }
@@ -322,8 +284,8 @@ function init(doc){
 			return function rq(){ return new ActiveXObject( j ); };
 		} )();
 		function xhrSend( $type, $xhr, $data ){
-			$xhr.setRequestHeader( 'Content-Type', $type == 'GET' ? 'text/plain; charset=UTF-8' : 'application/x-www-form-urlencoded; charset=UTF-8' );
-			$xhr.setRequestHeader( 'Cache-Control', 'no-cache' );
+			$xhr.setRequestHeader( 'Content-Type', $type == 'GET' ? 'text/plain; charset=UTF-8' : 'application/x-www-form-urlencoded; charset=UTF-8' ),
+			$xhr.setRequestHeader( 'Cache-Control', 'no-cache' ),
 			$xhr.send( $data );
 		}
 		function xhr( $end ){
@@ -334,7 +296,7 @@ function init(doc){
 					if( t0.readyState != 4 || t1 < 0 ) return;
 					clearTimeout( t1 ), t1 = -1;
 					$end( t0.status == 200 || t0.status == 0 ? t0.responseText : null );
-				};
+				},
 				t1 = setTimeout( function(){
 					if( t1 < 0 ) return;
 					t1 = -1;
@@ -345,30 +307,26 @@ function init(doc){
 		}
 		function cgi( $arguments, $idx ){
 			var t0, i, j;
-			t0 = _cgiA;
-			t0.length = 0;
+			t0 = _cgiA, t0.length = 0,
 			i = $idx ? $idx : 0, j = $arguments.length;
 			if( j - i > 1 ) while( i < j ) t0[t0.length] = encodeURIComponent( $arguments[i++] ) + '=' + encodeURIComponent( $arguments[i++] );
 			t0[t0.length] = 'bsNoCache=' + bs.$ex( 1000, '~' ,9999 );
 			return t0.join( '&' );
 		}
-		bs.$timeout = function timeout( $time ){
-			_timeout = parseInt( $time * 1000 );
-		};
+		bs.$timeout = function timeout( $time ){_timeout = parseInt( $time * 1000 );};
 		bs.$get = function get( $end, $url ){
 			var t0;
-			t0 = cgi( arguments, 2 );
-			$url = $url.split( '#' );
-			$url = $url[0] + ( $url[0].indexOf( '?' ) > -1 ? '&' : '?' ) + t0 + ( $url[1] ? '#' + $url[1] : '' );
-			t0 = xhr( $end );
-			t0.open( 'GET', $url, $end ? true : false );
+			t0 = cgi( arguments, 2 ), $url = $url.split( '#' ),
+			$url = $url[0] + ( $url[0].indexOf( '?' ) > -1 ? '&' : '?' ) + t0 + ( $url[1] ? '#' + $url[1] : '' ),
+			t0 = xhr( $end ),
+			t0.open( 'GET', $url, $end ? true : false ),
 			xhrSend( 'GET', t0, '' );
 			if( !$end )	return t0.responseText;
 		};
 		bs.$post = function post( $end, $url ){
 			var t0;
-			t0 = xhr( $end );
-			t0.open( 'POST', $url, $end ? true : false );
+			t0 = xhr( $end ),
+			t0.open( 'POST', $url, $end ? true : false ),
 			xhrSend( 'POST', t0, cgi( arguments, 2 ) || '' );
 			if( !$end )	return t0.responseText;
 		};
@@ -378,25 +336,20 @@ function init(doc){
 		t0 =  doc.cookie.split(';');
 		i = t0.length;
 		if( arguments.length == 1 ){
-			while( i-- ){
-				if( ( t1 = t0[i] ) && t1.substring( 0, j = t1.indexOf('=') ).replace( /\s/, '' ) == $key ){
-					t2 = t1.substr( j + 1);
-				}
-			}
+			while( i-- ) if( ( t1 = t0[i] ) && t1.substring( 0, j = t1.indexOf('=') ).replace( /\s/, '' ) == $key ) t2 = t1.substr( j + 1);
 		}else{
-			val = arguments[1];
+			val = arguments[1],
 			t1 = $key + '=' + ( val || '' ) + ';domain='+document.domain+';path=/';
 			if( arguments[2] ){
-				t0 = new Date;
-				t0.setTime( t0.getTime() + arguments[2] * 86400000 );
+				t0 = new Date,
+				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}else if( val === null ){
-				t0 = new Date;
-				t0.setTime( t0.getTime() - 86400000 );
+				t0 = new Date,
+				t0.setTime( t0.getTime() - 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}
-			doc.cookie = t1;
-			t2 = val + '';
+			doc.cookie = t1, t2 = val + '';
 		}
 		return t2 ? decodeURIComponent( t2 ) : null;
 	};
@@ -406,10 +359,10 @@ function init(doc){
 			b, bStyle, div,
 			v, a, c;
 			
-		agent = navigator.userAgent.toLowerCase();
-		platform = navigator.platform.toLowerCase();
-		app = navigator.appVersion.toLowerCase();
-		flash = 0;
+		agent = navigator.userAgent.toLowerCase(),
+		platform = navigator.platform.toLowerCase(),
+		app = navigator.appVersion.toLowerCase(),
+		flash = 0,
 		device = 'pc';
 		( function(){
 			function ie(){
@@ -717,26 +670,26 @@ function init(doc){
 				var i = 0; do i += $dom.offsetTop; while( $dom = $dom.offsetParent )
 				return i;
 			}
-			d = factory( 'd' );
+			d = factory( 'd' ),
 			d.init = function( $key ){
 				var t0, i;
-				t0 = bs( $key );
-				this.length = i = t0.length;
+				t0 = bs( $key ), this.length = i = t0.length;
 				while( i-- ) this[i] = t0[i];
-			};
+			},
 			d.$ = function d$(){
 				var dom, target, t0, l, s, i, j, k, v;
-				j = arguments.length, typeof arguments[0] == 'number'?( s = l = 1, target = this[arguments[0]] ):( l = this.length, s = 0 );
+				j = arguments.length, typeof arguments[0] == 'number' ? ( s = l = 1, target = this[arguments[0]] ) : ( l = this.length, s = 0 );
 				while( l-- ){
 					dom = target || this[l], i = s, ds.length = 0;
 					while( i < j ){
 						k = arguments[i++];
 						if( k === null ) return this._();
 						if( ( v = arguments[i++] ) === undefined ){ //get
-							if( style[k] ) return dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : dom.style[style[k]];
-							else if( ev[k] ) return ev( dom, k );
-							else if( k == 'this' ) return ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined ), this;
-							else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
+							return style[k] ? ( dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : dom.style[style[k]] ) :
+								ev[k] ? ev( dom, k ) :
+								( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) :
+								k == 'this' ? ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined, this ) :
+								d[k] ? d[k]( dom ) : undefined;
 						}
 						v = style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
 							ev[k] ? ev( dom, k, v ) :
@@ -747,7 +700,7 @@ function init(doc){
 					if( target ) break;
 				}
 				return v;
-			};
+			},
 			d.method = {
 				isDom:1,
 				'_': function(){
@@ -770,7 +723,7 @@ function init(doc){
 					}
 					if( this.__d ) this.__d();
 				}
-			};
+			},
 			nodes = {length:0};
 			function childNodes( $nodes ){
 				var i, j;
@@ -807,7 +760,8 @@ function init(doc){
 								do $dom = childNodes( $dom.childNodes )[$k[i++]]; while( i < j )
 							}else $dom = childNodes( $dom.childNodes )[$k];
 							v = $arg.length > $i ? (ds['>'].i = $i + 1, $arg[$i] ) : undefined;
-							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = v, $dom.bsS.$( ds ) ) : v === undefined ? $dom.style[style[$v]] : ( $dom.style[style[$v]] = v );
+							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = v, $dom.bsS.$( ds ) ) : 
+								v === undefined ? $dom.style[style[$v]] : ( $dom.style[style[$v]] = v );
 							else if( ev[$v] ) return ev( $dom, $v, v );
 							else return ( t0 = ds[$v.charAt(0)] ) ? t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 ) : d[$v]( $dom, v );
 						}else for( $v = bs( $v ), i = 0, j = $v.length ; i < j ; i++ ) $dom.appendChild( $v[i] );
@@ -915,45 +869,34 @@ function init(doc){
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
 						self = this, dom = self.dom;
-						if( $v === null ){
-							dom['on'+$k] = null;
-							delete self[$k];
-						}else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
+						if( $v === null ) dom['on'+$k] = null, delete self[$k];
+						else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
 						else if( $k == 'rollout' ) self.$( 'mouseout', ev$.rollout );
 						else{
 							self[$k] = $v;
 							dom['on'+$k] = function( $e ){
 								var type, start, dx, dy, t0, t1, t2, i, j, X, Y;
-								self.event = $e || ( $e = event );
-								self.type = $e.type, self.code = $e.keyCode;
+								self.event = $e || ( $e = event ), self.type = $e.type, self.code = $e.keyCode;
 								if( type = evType[$k] ){
-									dx = x( dom );
-									dy = y( dom );
+									dx = x( dom ), dy = y( dom );
 									if( type < 3 ){
-										t0 = $e.changedTouches;
+										t0 = $e.changedTouches,
 										self.length = i = t0.length;
-										while( i-- ){
-											t1 = t0[i];
-											self['lx'+i] = ( self['x'+i] = X = t1[pageX] ) - dx;
-											self['ly'+i] = ( self['y'+i] = Y = t1[pageY] ) - dy;
-											if( type == 2 ){
-												self['_x'+i] = X;
-												self['_y'+i] = Y;
-											}else{
-												self['dx'+i] = X - self['_x'+i];
-												self['dy'+i] = Y - self['_y'+i];
-											}
-										}
+										while( i-- )
+											t1 = t0[i],
+											self['lx'+i] = ( self['x'+i] = X = t1[pageX] ) - dx,
+											self['ly'+i] = ( self['y'+i] = Y = t1[pageY] ) - dy,
+											type == 2 ?
+												( self['_x'+i] = X, self['_y'+i] = Y ) :
+												( self['dx'+i] = X - self['_x'+i], self['dy'+i] = Y - self['_y'+i] );
 										self.x = self.x0, self.y = self.y0, self.lx = self.lx0, self.ly = self.ly0, self.dx = self.dx0, self.dy = self.dy0;
 									}else{
-										self.length = 0;
-										self.lx = ( self.x = $e[pageX] ) - dx;
-										self.ly = ( self.y = $e[pageY] ) - dy;
-										if( type == 4 ){
-											self._x = self.x, self._y = self.y;
-										}else{				
-											self.dx = self.x - self._x, self.dy = self.y - self._y;
-										}
+										self.length = 0,
+										self.lx = ( self.x = $e[pageX] ) - dx,
+										self.ly = ( self.y = $e[pageY] ) - dy,
+										type == 4 ?
+											( self._x = self.x, self._y = self.y ) :
+											( self.dx = self.x - self._x, self.dy = self.y - self._y );
 									}
 								}
 								$v.call( dom, self );
