@@ -740,7 +740,7 @@ function init(doc){
 						}
 						v = style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
 							ev[k] ? ev( dom, k, v ) :
-							( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1), v, arguments, i ) :
+							( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
 							d[k] ? d[k]( dom, v ) : undefined ;
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
@@ -798,6 +798,7 @@ function init(doc){
 				} )( doc.defaultView, style ),
 				'>':function( $dom, $k, $v, $arg, $i ){
 					var t0, i, j, v;
+					ds['>'].i = 0;
 					if( $v ){
 						if( $k ){
 							if( $k.indexOf( '>' ) > -1 ){
@@ -805,7 +806,7 @@ function init(doc){
 								i = 0, j = $k.length;
 								do $dom = childNodes( $dom.childNodes )[$k[i++]]; while( i < j )
 							}else $dom = childNodes( $dom.childNodes )[$k];
-							v = $arg.length - 1 == $i ? $arg[$i] : undefined;
+							v = $arg.length > $i ? (ds['>'].i = $i + 1, $arg[$i] ) : undefined;
 							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = v, $dom.bsS.$( ds ) ) : v === undefined ? $dom.style[style[$v]] : ( $dom.style[style[$v]] = v );
 							else if( ev[$v] ) return ev( $dom, $v, v );
 							else return ( t0 = ds[$v.charAt(0)] ) ? t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 ) : d[$v]( $dom, v );
