@@ -733,7 +733,7 @@ function init(doc){
 						k = arguments[i++];
 						if( k === null ) return this._();
 						if( ( v = arguments[i++] ) === undefined ){ //get
-							if( style[k] ) return dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
+							if( style[k] ) return dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : dom.style[style[k]];
 							else if( ev[k] ) return ev( dom, k );
 							else if( k == 'this' ) return ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined ), this;
 							else return ( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) : d[k]( dom );
@@ -744,6 +744,7 @@ function init(doc){
 							d[k] ? d[k]( dom, v ) : undefined ;
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
+					if( target ) break;
 				}
 				return v;
 			};
@@ -804,13 +805,13 @@ function init(doc){
 								i = 0, j = $k.length;
 								do $dom = childNodes( $dom.childNodes )[$k[i++]]; while( i < j )
 							}else $dom = childNodes( $dom.childNodes )[$k];
-							v = $arg.length == $i ? $arg[$i] : undefined;
-							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = undefined, $dom.bsS.$( ds, v ) ) : undefined;
+							v = $arg.length - 1 == $i ? $arg[$i] : undefined;
+							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = v, $dom.bsS.$( ds ) ) : v === undefined ? $dom.style[style[$v]] : ( $dom.style[style[$v]] = v );
 							else if( ev[$v] ) return ev( $dom, $v, v );
 							else return ( t0 = ds[$v.charAt(0)] ) ? t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 ) : d[$v]( $dom, v );
 						}else for( $v = bs( $v ), i = 0, j = $v.length ; i < j ; i++ ) $dom.appendChild( $v[i] );
 					}else if( $v === null ){
-						if( $k ) d.method._.call( {0:childNodes( $dom.childNodes )[$k],length:1} );
+						if( $k ) d.method._.call( childNodes( $dom.childNodes ), nodes[0] = nodes[$k], nodes.length = 1, nodes );
 						else if( $dom.childNodes && childNodes( $dom.childNodes ).length ) d.method._.call( nodes );
 					}else return childNodes( $dom.childNodes ), $k ? nodes[$k] : nodes;
 				}

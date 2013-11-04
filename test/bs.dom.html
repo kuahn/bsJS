@@ -65,25 +65,31 @@ bs( function(){
 		"bs.dom( '#stage' ).$( '@data-id2', null )", null, bs.dom( '#stage' ).$( '@data-id2', null )
 	);
 	
+	//구조생성
+	//<stage>
+	//	<div><b><span>a</span></b></div>
+	//	<div>b</div>
+	//</stage>
 	bs.dom( "#stageHika" ).$( 
 		'>', '<div><b><span>a</span></b></div>',
 		'>', '<div>b</div>' 
 	);
-	
-	bsTest( 'DOM addChild',
+		
+	bsTest( 'DOM 직계 자손은 2개인가?',
 		"bs.dom( '#stageHika' ).$( '>' ).length", 2, bs.dom( '#stageHika' ).$( '>' ).length
 	);
-	bsTest( 'DOM getChild and key',
+	bsTest( 'DOM 자식찾기, 자식의 속성얻기',
 		"bs.dom( '#stageHika' ).$( '>1' ).innerHTML", 'b', bs.dom( '#stageHika' ).$( '>1' ).innerHTML,
 		"bs.dom( '#stageHika' ).$( '>1', 'html' )", 'b', bs.dom( '#stageHika' ).$( '>1', 'html' )
 	);
 	
-	bsTest( 'DOM grand grand child and key',
+	bsTest( 'DOM 다중자손의 속성얻기',
 		"bs.dom( '#stageHika' ).$( '>0>0>0', 'html' )", 'a', bs.dom( '#stageHika' ).$( '>0>0>0', 'html' )
 	);
 	
+	//자식전체삭제
 	bs.dom( "#stageHika" ).$( '>', null );
-	bsTest( 'DOM removeChild',
+	bsTest( 'DOM 자식을 전부 삭제',
 		"bs.dom( '#stageHika' ).$( '>' ).length", 0, bs.dom( '#stageHika' ).$( '>' ).length
 	);
 } );
