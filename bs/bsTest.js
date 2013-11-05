@@ -47,7 +47,7 @@ bsTest.tear = (function(){
 		$func();
 		id = bsTest.id++;
 		bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px">'+
-			'<div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><b>'+$title+'</b><hr><pre>'+$func.toString().replace( r0, '&lt;' ).replace( t1, '\t' )+'</pre></div>'+
+			'<div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><b>'+$title+'</b><hr><pre>'+$func.toString().replace( r0, '&lt;' ).replace( r1, '\t' )+'</pre></div>'+
 			'<div id="bsTestOff'+id+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+$title+'</b></div>'+
 		'</div>' );
 	};
