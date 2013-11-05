@@ -38,7 +38,8 @@ Dual licensed under the MIT or GPL Version 2 licenses.
 
 [facebook group](https://www.facebook.com/groups/bs5js/?hc_location=stream)  
 
-[showcase page](http://projectbs.github.io/bsJS/showcase/)
+[showcase page](http://projectbs.github.io/bsJS/showcase/)  
+
 [demo(test) page](http://projectbs.github.io/bsJS/test/)
 
 Copyright 2013.10 hikaMaeng, bsJS-Team.
