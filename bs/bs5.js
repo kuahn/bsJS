@@ -257,7 +257,7 @@ function init(doc){
 		bs.__callback = {};
 		return function js( $end, $url ){
 			var t0, i;
-			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8';
+			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8', t0.src = $url;
 			if( $url.charAt( $url.length -1 ) == '=' ){
 				$url += 'bs.__callback.' + ( i = 'c' + (_callback++) ),
 				bs.__callback[i] = function(){
@@ -268,7 +268,7 @@ function init(doc){
 				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $end();}
 				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $end() );}
 			}
-			doc.getElementsByTagName( 'head' )[0].appendChild( t0 ), t0.src = $url;
+			doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
 		};
 	})(doc);
 	(function(){

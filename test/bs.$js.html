@@ -12,31 +12,41 @@
 <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
 </head>
-<body style="font-family:Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;">
+<body>
 <a href="https://github.com/projectBS/bsJS">
 	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
-<ul>
-	<li><a href="bs.$js.html">bs.$js.html</a></li>
-	<li><a href="bs.$xml.html">bs.$xml.html</a></li>
-	<li><a href="bs.ajax.html">bs.ajax.html</a></li>
-	<li><a href="bs.css.html">bs.css.html</a></li>
-	<li><a href="bs.data.html">bs.data.html</a></li>
-	<li><a href="bs.dom.html">bs.dom.html</a></li>
-	<li><a href="bs.event.html">bs.event.html</a></li>
-	<li><a href="bs.function.html">bs.function.html</a></li>
-</ul>
-
+<div id="result"></div>
+<div id="test"></div>
 <script src="../bs/bs5.js"></script>
 <script src="../bs/bsTest.js"></script>
+<script src="../bs/tipJS.dev.js"></script>
+<script src="./printer.js"></script>
 <script>
 bs( function(){
-	bs.c("li").$(
-		"font-weight", "bold",
-		"border", "1px dashed #999",
-		"padding", 10,
-		"margin",10
-	);
+
+	bsTest.tear( 'init.', function(){
+/*
+	the result will..
+	1. bs.$js( cbfn, './bs.$js.test.1.js' ) == true :: true OK
+	2. bs.$js( cbfn, './bs.$js.test.2.js' ) == true :: true OK
+	3. bs.$js( cbfn, './bs.$js.test.3.js' ) == true :: true OK
+	4. bs.$js( cbfn, './bs.$js.test.4.js' ) == true :: true OK
+	5. bs.$js( cbfn, './bs.$js.test.5.js' ) == true :: true OK
+*/
+		var _jsFlg;
+		_jsFlg = window._jsFlg = [];
+		_jsFlg.length = 5;
+		bs.$js(function(){
+			_jsTestFn();
+		}, "./bs.$js.test.1.js");
+		/*tipJS.loadJS("./bs.$js.test.1.js", function(){
+			_jsTestFn();
+		});*/
+
+	} );
+
+
 } );
 </script>
 </body>
