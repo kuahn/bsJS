@@ -16,19 +16,17 @@
 <a href="https://github.com/projectBS/bsJS">
 	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
-<ul>
-	<li><a href="space.html">space | 우주여행</a></li>
-	<li><a href="move.html">move | 키보드와 파티클</a></li>
-</ul>
-
+<div class="list"><a href="space.html" target="_blank"><img src="thumb_space.png" />space:우주여행</a></div>
+<div class="list"><a href="move.html" target="_blank"><img src="thumb_move.png"/>move:키보드와 파티클</a></div>
+<div id="stage"></div>
 <script src="../bs/bs5.js"></script>
 <script>
 bs( function(){
-	bs.c("li").$(
-		"font-weight", "bold",
-		"border", "1px dashed #999",
-		"padding", 10,
-		"margin",10
+	bs.c("img").$( 'border', 0, 'display', 'block', 'margin-bottom', 10 );
+	bs.c("a").$( 'text-decoration', 'none' );
+	bs.c(".list").$(
+		'width',300, 'text-align', 'center', "font-weight", "bold", "border", "1px dashed #aaa", "padding", 10, "margin",10,
+		'float', 'left'
 	);
 } );
 </script>

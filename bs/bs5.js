@@ -576,6 +576,10 @@ function init(doc){
 				pf = bs.DETECT.stylePrefix, pfL = pf.length;
 				for( k in doc.body.style ){
 					if( k == 'length' ) continue;
+					if( k == 'styleFloat' || k == 'cssFloat' ){
+						style.float = k;
+						continue;
+					}
 					if( k.substr( 0, pfL ) == pf ){
 						k = k.substr( pfL );
 						p = 1;
