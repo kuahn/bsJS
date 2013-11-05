@@ -32,9 +32,9 @@ bs( function(){
 				'left', 0, 'top', 0, 'width', 10, 'height', 10, 'border-radius',5,
 				'<', '#stage'
 			);
-			bs.dom( '#stage' )[0].focus();
-			bs.WIN.on( 'keydown', 'kd', function( $e ){game.keybuffer[$e.keyCode] = 1;} );
-			bs.WIN.on( 'keyup', 'ku', function( $e ){game.keybuffer[$e.keyCode] = 0;} );
+			//bs.dom( '#stage' )[0].focus();
+			bs.WIN.on( 'keydown', 'kd', function( $e ){game.keybuffer[$e.code] = 1;} );
+			bs.WIN.on( 'keyup', 'ku', function( $e ){game.keybuffer[$e.code] = 0;} );
 		},
 		end:function( $target ){
 			game.div[game.div.length++] = $target.$('visibility', 'hidden', 'this');
@@ -78,11 +78,8 @@ bs( function(){
 			else if( this.vx < 0 ) this.vx += this.rv;
 		}
 	};
-	console.log('a');
     game.init();
-	console.log('b');
     bs.ANI.ani( game );
-	console.log('c');
 } );
 
 </script>

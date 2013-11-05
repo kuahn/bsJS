@@ -914,19 +914,22 @@ function init(doc){
 		})( bs, style, doc ) );
 		bs.WIN = (function(){
 			var win;
-			function ev( e, k, v ){
-				var t0, i, j;
+			function ev( e, k, v, t ){
+				var t0, i, j, target;
+				target = t || W;
 				if( v ){
 					t0 = ev[e] || ( ev[e] = [] );
 					t0[t0.length] = t0[k] = v;
-					if( !W['on'+e] ) W['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
-						var t0, i;
+					if( !target['on'+e] ) target['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
+						var t0, i, E;
+						ev.event = $e || event;
+						ev.type = ev.event.type, ev.code = ev.event.keyCode;
 						t0 = ev[e], i = t0.length;
-						while( i-- ) t0[i]( $e );
+						while( i-- ) t0[i]( ev );
 					} );
 				}else if( ( t0 = ev[e] ) && t0[k] ){
 					t0.splice( t0.indexOf( t0[k] ), 1 );
-					if( !t0.length ) W['on'+e] = null;
+					if( !t0.length ) target['on'+e] = null;
 				}
 			}
 			function hash( e, k, v ){
@@ -939,8 +942,9 @@ function init(doc){
 						ev['@'+e] = setInterval( function(){
 							var t0, i, j;
 							if( old != location.hash ){
+								ev.type = 'hashchange'; ev.event = event,
 								old = location.hash, t0 = ev[e], i = t0.length;
-								while( i-- ) t0[i]();
+								while( i-- ) t0[i]( ev );
 							}
 						}, 50 );
 					}
@@ -960,7 +964,8 @@ function init(doc){
 			win = {
 				on:function( e, k, v ){
 					if( e == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
-					else if( e == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					if( e == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					if( e.substr(0,3) == 'key' ) return ev( e, k, v, doc );
 					ev( e, k, v );
 				},
 				is:(function( sel ){
