@@ -584,7 +584,7 @@ function init(doc){
 					}
 					for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
 						if( k.charCodeAt(i) < 90 ){
-							kk += k.substring( l, i ).toLowerCase() + '-';
+							kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
 							l = i;
 						}
 					}
@@ -596,8 +596,8 @@ function init(doc){
 				var i, j, k, v, f, vt, u;
 				i = 0, j = $arg.length;
 				while( i < j ){
-					if( k = style[$arg[i++]] ){
-						v = $arg[i++];
+					k = style[$arg[i++]], v = $arg[i++];
+					if( k ){
 						if( filter[k] ) v = filter[k]( this, v );
 						else if( v === undefined ) return this[k].v; //get
 						else if( v === null ){//del
@@ -623,9 +623,9 @@ function init(doc){
 		})();
 		bs.module( 'c,css', ( function( style ){
 			var css, sheet, rule, del;
-			sheet = doc.createElement( 'style' );
-			doc.getElementsByTagName( 'head' )[0].appendChild( sheet );
-			sheet = sheet.styleSheet || sheet.sheet;
+			sheet = doc.createElement( 'style' ),
+			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
+			sheet = sheet.styleSheet || sheet.sheet,
 			rule = sheet.cssRules || sheet.rules;
 			function idx( $sel ){
 				var i, j, k;
@@ -642,20 +642,16 @@ function init(doc){
 			};
 			if( sheet.insertRule ){
 				css.init = function( $key ){
-					sheet.insertRule( $key + '{}', rule.length );
+					sheet.insertRule( $key + '{}', rule.length ),
 					this.s = new style( rule[rule.length - 1].style );
 				};
-				del = function del( $key ){
-					sheet.deleteRule( idx( $key ) );
-				};
+				del = function( $key ){sheet.deleteRule( idx( $key ) );};
 			}else{
 				css.init = function( $key ){
-					sheet.addRule( $key, ' ' );
+					sheet.addRule( $key, ' ' ),
 					this.s = new style( rule[rule.length - 1].style );
 				};
-				del = function del( $key){
-					sheet.removeRule( idx( $key ) );
-				};
+				del = function( $key ){sheet.removeRule( idx( $key ) );};
 			}
 			return css;
 		})( style ) );
@@ -711,14 +707,12 @@ function init(doc){
 						if( dom.nodeType == 3 ) continue;
 						if( dom.bsE ) dom.bsE = dom.bsE._();
 						if( dom.bsS ) dom.bsS = null;
-						dom.parentNode.removeChild( dom );
+						dom.parentNode.removeChild( dom ),
 						j = dom.attributes.length;
-						while( j-- ){
-							k = dom.attributes[j].nodeName;
-							switch( typeof dom.getAttribute( k ) ){
+						while( j-- )
+							switch( typeof dom.getAttribute( k = dom.attributes[j].nodeName ) ){
 							case'object':case'function': dom.removeAttribute( k );
 							}
-						}
 						this[i] = null;
 					}
 					if( this.__d ) this.__d();
@@ -1109,9 +1103,10 @@ function init(doc){
 			this.t = t0 = $arg[0], this.isDom = isDom = t0.isDom, this.start = 1,
 			this.time = 1000, this.timeR = .001, this.delay = 0, this.loop = this.loopC = 1,
 			this.k = this.end = this.update = null, this.ease = ease.linear,
-			
 			this.length = i = t0.length || 1;
-			while(i--) this[i]?(this[i].length=0):(this[i]=[]),this[i][0] = isDom?t0[i].bsS:(t0[i] || t0);
+			while(i--)
+				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
+				( this[i][0] = isDom ? t0[i].bsS : (t0[i] || t0) );
 			i = 1, j = $arg.length;
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
@@ -1124,7 +1119,7 @@ function init(doc){
 				else{
 					l = this.length;
 					while( l-- ){
-						v0 = isDom ? ( tTemp.length = 1, tTemp[0] = k, this[l][0].$( tTemp ) ) : this[l][0][k];
+						v0 = isDom ? ( tTemp.length = 1, tTemp[0] = k, tTemp[1] = undefined, this[l][0].$( tTemp ) ) : this[l][0][k],
 						this[l].push( k, v0, v - v0 );
 					}
 				}
@@ -1150,7 +1145,7 @@ function init(doc){
 						if( isDom ) t0[0].$( tTemp );
 					}
 					tweenPool[tweenPool.length++] = this;
-					if( this.end ) this.end();
+					if( this.end ) this.end( this.t );
 					return 1;
 				}
 			while( l-- ){
@@ -1165,9 +1160,7 @@ function init(doc){
 		
 		return {
 			tween:function(){
-				var t0;
-				t0 = tweenPool.length ? tweenPool[--tweenPool.length] : new tween;
-				t0.$( arguments );
+				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
 			},
 			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
 			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
