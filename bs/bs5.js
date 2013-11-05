@@ -567,7 +567,6 @@ function init(doc){
 						s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')';
 						return v;
 					}, style.opacity = 'opacity';
-	
 				return filter;
 			})();
 			function style(){this.s = arguments[0];}
@@ -1032,13 +1031,11 @@ function init(doc){
 							break;
 						default:
 							if( W.innerHeight === undefined ){
-								console.log(12);
 								sizer( function(){
 									$end( win.w = doc.documentElement.clientWidth || doc.body.clientWidth,
 										win.h = doc.documentElement.clientHeight || doc.body.clientHeight );
 								} );
 							}else{
-								console.log(13);
 								sizer( function(){
 									$end( win.w = W.innerWidth, win.h = W.innerHeight );
 								} );
