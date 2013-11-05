@@ -266,7 +266,7 @@ function init(doc){
 				};
 			}else if( $end ){
 				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $end();}
-				else t0.onreadystatechange = function(){t0.readyState == 'loaded' && ( t0.onreadystatechange = null, $end() );}
+				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $end() );}
 			}
 			doc.getElementsByTagName( 'head' )[0].appendChild( t0 ), t0.src = $url;
 		};
