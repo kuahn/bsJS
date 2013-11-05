@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<title>animation</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head><body>
+<div style="text-align:center">Keyboard : up, down, left, top</div>
+<div id="stage"></div>
+<a href="https://github.com/projectBS/bsJS"> <img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> </a> 
+<script src="../bs/bs5.js"></script> 
+<script>
+bs( function(){
+	var game = {
+		keybuffer:{}, x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, term:10, tcheck:0,
+		init:function(){
+			this.w = bs.dom('body').$('_width') - 15;
+			this.h = 300;
+			bs.css( 'body' ).$( 'margin', 0, 'padding', 0 );
+			bs.dom( '#stage' ).$( 'top', 30, 'position', 'absolute', 'width', '100%', 'height', this.h, 'background', '#eee', 'overflow', 'hidden' );
+			bs.dom( '<div></div>' ).$( 'id', 'a', 'position', 'absolute', 'background', '#950',
+				'left', 0, 'top', 0, 'width', 10, 'height', 10, 'border-radius',5,
+				'<', '#stage'
+			);
+			bs.dom( '#stage' )[0].focus();
+			bs.WIN.on( 'keydown', 'kd', function( $e ){game.keybuffer[$e.keyCode] = 1;} );
+			bs.WIN.on( 'keyup', 'ku', function( $e ){game.keybuffer[$e.keyCode] = 0;} );
+		},
+		ANI:function( $time ){ 
+			//accelation
+			if( this.keybuffer[38] ) this.vy -= this.v; //up
+			else if( game.keybuffer[40] ) this.vy += this.v; //down
+		
+			if( this.keybuffer[37] ) this.vx -= this.v; //left
+			else if( game.keybuffer[39] ) this.vx += this.v; //right
+		
+			//boundery
+			this.x += this.vx, this.y += this.vy;
+			if( this.y < 5 ) this.y = 5, this.vy = 0;
+			else if( this.y > this.h ) this.y = this.h, this.vy = 0;
+			if( this.x < 5 ) this.x = 5, this.vx = 0;
+			else if( this.x > this.w ) this.x = this.w, this.vx = 0;
+		
+			bs.dom('#a').$( 'left', this.x, 'top', this.y );
+
+			//particle
+			if( $time > this.tcheck ){
+				this.tcheck = $time + this.term;
+				var s = bs.$ex( 20, '~', 50 );
+				bs.ANI.tween( bs.dom('<div></div>' ).$( 'width',10, 'height',10, 'opacity', 1, 'border-radius', 10,
+					'background', 'rgb('+bs.$ex(100,'~',200)+','+bs.$ex(100,'~',200)+','+bs.$ex(100, '~',200)+')', 'position','absolute', 'left',this.x,'top',this.y, '<', '#stage', 'this' ),
+					
+					'left', bs.$ex( -100, '~', 100 ) + this.x, 'top', bs.$ex( -100, '~', 100 ) + this.y,
+					'border-radius', s, 'width', s, 'height',s, 'opacity', 0, 
+					'time', bs.$ex( 1, '~f', 3 ), 'end', function( $target ){$target.$(null);}
+				);
+			}
+	
+			//friction
+			if( this.vy > 0 ) this.vy -= this.rv;
+			else if( this.vy < 0 ) this.vy += this.rv;
+			if( this.vx > 0 ) this.vx -= this.rv;
+			else if( this.vx < 0 ) this.vx += this.rv;
+		}
+	};
+    game.init();
+    bs.ANI.ani( game );
+} );
+
+</script>
+</body>
+</html>

@@ -922,7 +922,7 @@ function init(doc){
 					if( !W['on'+e] ) W['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
 						var t0, i;
 						t0 = ev[e], i = t0.length;
-						while( i-- ) t0[i]( e );
+						while( i-- ) t0[i]( $e );
 					} );
 				}else if( ( t0 = ev[e] ) && t0[k] ){
 					t0.splice( t0.indexOf( t0[k] ), 1 );
@@ -959,8 +959,8 @@ function init(doc){
 			}
 			win = {
 				on:function( e, k, v ){
-					if( k == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
-					else if( k == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					if( e == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
+					else if( e == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
 					ev( e, k, v );
 				},
 				is:(function( sel ){
