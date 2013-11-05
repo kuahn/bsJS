@@ -31,6 +31,7 @@ bs( function(){
 		bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
 		bs.css( '#stage' ).$( 'width', 100 );
 		bs.d( '#stage' ).$( 'background-color', '#eee' );
+		bs.d( '#stage' ).$( 'class', 'cls1' );
 	} );
 	bsTest( 'dom selector',
 		"bs.d( '#stage' ).$('_margin-top' )", 30, bs.d( '#stage' ).$('_margin-top' ),
@@ -47,6 +48,19 @@ bs( function(){
 		"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.d( '<div>test</div>' ).$( 'html' ),
 		"bs.d( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.d( '<div>test</div>' ).$( 'text' ),
 		"bs.d( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
+		"bs.d( '#stage' ).$( 'class' )", 'cls1', bs.d( '#stage' ).$( 'class' ),
+		"bs.d( '#stage' ).$( 'class+', 'cls2' )", 'cls2 cls1', bs.d( '#stage' ).$( 'class+', 'cls2' ),
+		"bs.d( '#stage' ).$( 'class+', 'cls2' )", 'cls2 cls1', bs.d( '#stage' ).$( 'class+', 'cls2' ),
+		"bs.d( '#stage' ).$( 'class+', 'cls' )", 'cls cls2 cls1', bs.d( '#stage' ).$( 'class+', 'cls' ),
+		"bs.d( '#stage' ).$( 'class-', 'cls2' )", 'cls cls1', bs.d( '#stage' ).$( 'class-', 'cls2' ),
+		"bs.d( '#stage' ).$( 'class-', 'cls' )", 'cls1', bs.d( '#stage' ).$( 'class-', 'cls' ),
+		"bs.d( '#stage' ).$( 'class', null )", null, bs.d( '#stage' ).$( 'class', null ),
+		//
+		"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.dom( '<div>test</div>' ).$( 'html' ),
+		"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.dom( '<div>test</div>' ).$( 'text' ),
+		"bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' )
+	);
+	bsTest( 'dom attribute',
 		"bs.d( '#stage' ).$( '@data-id' )", "stageId", bs.d( '#stage' ).$( '@data-id' ),
 		"bs.d( '#stage' ).$( '@data-id', 'stageId2' )", "stageId2", bs.d( '#stage' ).$( '@data-id', 'stageId2' ),
 		"bs.d( '#stage' ).$( '@data-id' )", "stageId2", bs.d( '#stage' ).$( '@data-id' ),
@@ -54,9 +68,6 @@ bs( function(){
 		"bs.d( '#stage' ).$( '@data-id', 0 )", 0, bs.d( '#stage' ).$( '@data-id', 0 ),
 		"bs.d( '#stage' ).$( '@data-id', null )", null, bs.d( '#stage' ).$( '@data-id', null ),
 		//
-		"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'html' )", 'test', bs.dom( '<div>test</div>' ).$( 'html' ),
-		"bs.dom( '&lt;div&gt;test&lt;/div&gt;' ).$( 'text' )", 'test', bs.dom( '<div>test</div>' ).$( 'text' ),
-		"bs.dom( '&lt;tr&gt;&lt;td&gt;test&lt;/td&gt;&lt;/tr&gt;' ).$( 'html' )", undefined, bs.dom( '<tr><td>test</td></tr>' ).$( 'html' ),
 		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId2", bs.dom( '#stage' ).$( '@data-id2' ),
 		"bs.dom( '#stage' ).$( '@data-id2', 'stageId3' )", "stageId3", bs.dom( '#stage' ).$( '@data-id2', 'stageId3' ),
 		"bs.dom( '#stage' ).$( '@data-id2' )", "stageId3", bs.dom( '#stage' ).$( '@data-id2' ),

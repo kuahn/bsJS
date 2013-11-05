@@ -567,7 +567,6 @@ function init(doc){
 						s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')';
 						return v;
 					}, style.opacity = 'opacity';
-	
 				return filter;
 			})();
 			function style(){this.s = arguments[0];}
@@ -576,6 +575,10 @@ function init(doc){
 				pf = bs.DETECT.stylePrefix, pfL = pf.length;
 				for( k in doc.body.style ){
 					if( k == 'length' ) continue;
+					if( k == 'styleFloat' || k == 'cssFloat' ){
+						style.float = k;
+						continue;
+					}
 					if( k.substr( 0, pfL ) == pf ){
 						k = k.substr( pfL );
 						p = 1;
@@ -584,7 +587,7 @@ function init(doc){
 					}
 					for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
 						if( k.charCodeAt(i) < 90 ){
-							kk += k.substring( l, i ).toLowerCase() + '-';
+							kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
 							l = i;
 						}
 					}
@@ -596,8 +599,8 @@ function init(doc){
 				var i, j, k, v, f, vt, u;
 				i = 0, j = $arg.length;
 				while( i < j ){
-					if( k = style[$arg[i++]] ){
-						v = $arg[i++];
+					k = style[$arg[i++]], v = $arg[i++];
+					if( k ){
 						if( filter[k] ) v = filter[k]( this, v );
 						else if( v === undefined ) return this[k].v; //get
 						else if( v === null ){//del
@@ -623,9 +626,9 @@ function init(doc){
 		})();
 		bs.module( 'c,css', ( function( style ){
 			var css, sheet, rule, del;
-			sheet = doc.createElement( 'style' );
-			doc.getElementsByTagName( 'head' )[0].appendChild( sheet );
-			sheet = sheet.styleSheet || sheet.sheet;
+			sheet = doc.createElement( 'style' ),
+			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
+			sheet = sheet.styleSheet || sheet.sheet,
 			rule = sheet.cssRules || sheet.rules;
 			function idx( $sel ){
 				var i, j, k;
@@ -642,20 +645,16 @@ function init(doc){
 			};
 			if( sheet.insertRule ){
 				css.init = function( $key ){
-					sheet.insertRule( $key + '{}', rule.length );
+					sheet.insertRule( $key + '{}', rule.length ),
 					this.s = new style( rule[rule.length - 1].style );
 				};
-				del = function del( $key ){
-					sheet.deleteRule( idx( $key ) );
-				};
+				del = function( $key ){sheet.deleteRule( idx( $key ) );};
 			}else{
 				css.init = function( $key ){
-					sheet.addRule( $key, ' ' );
+					sheet.addRule( $key, ' ' ),
 					this.s = new style( rule[rule.length - 1].style );
 				};
-				del = function del( $key){
-					sheet.removeRule( idx( $key ) );
-				};
+				del = function( $key ){sheet.removeRule( idx( $key ) );};
 			}
 			return css;
 		})( style ) );
@@ -711,14 +710,12 @@ function init(doc){
 						if( dom.nodeType == 3 ) continue;
 						if( dom.bsE ) dom.bsE = dom.bsE._();
 						if( dom.bsS ) dom.bsS = null;
-						dom.parentNode.removeChild( dom );
+						dom.parentNode.removeChild( dom ),
 						j = dom.attributes.length;
-						while( j-- ){
-							k = dom.attributes[j].nodeName;
-							switch( typeof dom.getAttribute( k ) ){
+						while( j-- )
+							switch( typeof dom.getAttribute( k = dom.attributes[j].nodeName ) ){
 							case'object':case'function': dom.removeAttribute( k );
 							}
-						}
 						this[i] = null;
 					}
 					if( this.__d ) this.__d();
@@ -799,14 +796,23 @@ function init(doc){
 				d['text+'] = function( $dom, $v ){return $dom[t] += $v;};
 				d['+text'] = function( $dom, $v ){return $dom[t] = $v + $dom[t];};
 			})();
-
 			d.style = function( $dom ){return $dom.bsS;};
 			d['class'] = function( $dom, $v ){return $v === undefined ? $dom.className : ($dom.className = $v);};
-			d['class+'] = function( $dom, $v ){
-				var t0 = $dom.className;
-				return ( t0 && t0.indexOf( $v ) == -1 ) ? ( $dom.className = $val + ' ' + t0.replace( t, '' ) ) : $dom.className;
-			};
-			d['class-'] = function( $dom, $v ){return $dom.className = $dom.className.replace( $v, '' ).replace( '  ', ' ' );};
+			(function(){
+				var t = /^\s*|\s*$/g;
+				d['class+'] = function( $dom, $v ){
+					var t0;
+					return !( t0 = $dom.className.replace(t,'') ) ? ( $dom.className = $v ) :
+						t0.split( ' ' ).indexOf( $v ) == -1 ? ($dom.className = $v+' '+t0 ) : t0;
+				};
+				d['class-'] = function( $dom, $v ){
+					var t0, i;
+					if( !( t0 = $dom.className.replace(t,'') ) ) return t0;
+					t0 = bs.$ex( t0.split( ' ' ) );
+					if( ( i = t0.indexOf( $v ) ) > -1 ) t0.splice( i, 1 );
+					return $dom.className = t0.join(' ');
+				};
+			})();
 			d.id = function( $dom, $v ){ return $v === undefined ? $dom.id : ($dom.id = $v); };
 			d.src = function( $dom ){ return $dom.src; };
 			ev = (function(){
@@ -911,19 +917,22 @@ function init(doc){
 		})( bs, style, doc ) );
 		bs.WIN = (function(){
 			var win;
-			function ev( e, k, v ){
-				var t0, i, j;
+			function ev( e, k, v, t ){
+				var t0, i, j, target;
+				target = t || W;
 				if( v ){
 					t0 = ev[e] || ( ev[e] = [] );
 					t0[t0.length] = t0[k] = v;
-					if( !W['on'+e] ) W['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
-						var t0, i;
+					if( !target['on'+e] ) target['on'+e] = ev['@'+e] || ( ev['@'+e] = function( $e ){
+						var t0, i, E;
+						ev.event = $e || event;
+						ev.type = ev.event.type, ev.code = ev.event.keyCode;
 						t0 = ev[e], i = t0.length;
-						while( i-- ) t0[i]( e );
+						while( i-- ) t0[i]( ev );
 					} );
 				}else if( ( t0 = ev[e] ) && t0[k] ){
 					t0.splice( t0.indexOf( t0[k] ), 1 );
-					if( !t0.length ) W['on'+e] = null;
+					if( !t0.length ) target['on'+e] = null;
 				}
 			}
 			function hash( e, k, v ){
@@ -936,8 +945,9 @@ function init(doc){
 						ev['@'+e] = setInterval( function(){
 							var t0, i, j;
 							if( old != location.hash ){
+								ev.type = 'hashchange'; ev.event = event,
 								old = location.hash, t0 = ev[e], i = t0.length;
-								while( i-- ) t0[i]();
+								while( i-- ) t0[i]( ev );
 							}
 						}, 50 );
 					}
@@ -956,8 +966,9 @@ function init(doc){
 			}
 			win = {
 				on:function( e, k, v ){
-					if( k == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
-					else if( k == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					if( e == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
+					if( e == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					if( e.substr(0,3) == 'key' ) return ev( e, k, v, doc );
 					ev( e, k, v );
 				},
 				is:(function( sel ){
@@ -1109,9 +1120,10 @@ function init(doc){
 			this.t = t0 = $arg[0], this.isDom = isDom = t0.isDom, this.start = 1,
 			this.time = 1000, this.timeR = .001, this.delay = 0, this.loop = this.loopC = 1,
 			this.k = this.end = this.update = null, this.ease = ease.linear,
-			
 			this.length = i = t0.length || 1;
-			while(i--) this[i]?(this[i].length=0):(this[i]=[]),this[i][0] = isDom?t0[i].bsS:(t0[i] || t0);
+			while(i--)
+				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
+				( this[i][0] = isDom ? t0[i].bsS : (t0[i] || t0) );
 			i = 1, j = $arg.length;
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
@@ -1124,7 +1136,7 @@ function init(doc){
 				else{
 					l = this.length;
 					while( l-- ){
-						v0 = isDom ? ( tTemp.length = 1, tTemp[0] = k, this[l][0].$( tTemp ) ) : this[l][0][k];
+						v0 = isDom ? ( tTemp.length = 1, tTemp[0] = k, tTemp[1] = undefined, this[l][0].$( tTemp ) ) : this[l][0][k],
 						this[l].push( k, v0, v - v0 );
 					}
 				}
@@ -1150,7 +1162,7 @@ function init(doc){
 						if( isDom ) t0[0].$( tTemp );
 					}
 					tweenPool[tweenPool.length++] = this;
-					if( this.end ) this.end();
+					if( this.end ) this.end( this.t );
 					return 1;
 				}
 			while( l-- ){
@@ -1165,9 +1177,7 @@ function init(doc){
 		
 		return {
 			tween:function(){
-				var t0;
-				t0 = tweenPool.length ? tweenPool[--tweenPool.length] : new tween;
-				t0.$( arguments );
+				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
 			},
 			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
 			pause:function(){isPause = 1;},resume:function(){isPause = 0;},

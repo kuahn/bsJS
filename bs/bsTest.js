@@ -38,14 +38,39 @@ function bsTest( $printer,$title ){
 bsTest.isOK = 1, bsTest.id = 0;
 bsTest.off = function(dom){dom.style.display = 'none', document.getElementById('bsTestOn'+dom.id.substr(9)).style.display = 'block';};
 bsTest.on = function(dom){dom.style.display = 'none', document.getElementById('bsTestOff'+dom.id.substr(8)).style.display = 'block';};
-bsTest.tearR0 = /</g;
-bsTest.tearR1 = /\t\t/g;
-bsTest.tear = function( $title, $func ){
-	var id;
-	$func();
-	id = bsTest.id++;
-	bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px">'+
-		'<div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><b>'+$title+'</b><hr><pre>'+$func.toString().replace( bsTest.tearR0, '&lt;' ).replace( bsTest.tearR1, '\t' )+'</pre></div>'+
-		'<div id="bsTestOff'+id+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+$title+'</b></div>'+
-	'</div>' );
-};
+bsTest.tear = (function(){
+	var r0, r1;
+	r0 = /</g;
+	r1 = /\t\t/g;
+	return function( $title, $func ){
+		var id;
+		$func();
+		id = bsTest.id++;
+		bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px">'+
+			'<div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><b>'+$title+'</b><hr><pre>'+$func.toString().replace( r0, '&lt;' ).replace( r1, '\t' )+'</pre></div>'+
+			'<div id="bsTestOff'+id+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+$title+'</b></div>'+
+		'</div>' );
+	};
+})();
+bsTest.auto = (function(){
+	var test, arg, testType;
+	testType = {
+		'number':[0, 111, -111, Number.MAX_VALUE, Number.MIN_VALUE, Number.NaN, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, null, undefined]
+	};
+	test = {};
+	return function( $title, $context, $func, $result ){
+		var arg, i, j;
+		arg = [];
+		for( test.length = 0, i = 3, j = arguments.length ; i < j ; i++ ){
+			test[test.length++] = testType[arguments[i]];
+		}
+		
+		for( i = 0 ; i < test.length ; i++ )
+			arg[i] = test[i][0];
+			
+				
+		
+		
+		$func.apply( $context, arg )
+	};
+})();
