@@ -801,12 +801,21 @@ function init(doc){
 			})();
 
 			d.style = function( $dom ){return $dom.bsS;};
-			d['class'] = function( $dom, $v ){return $v === undefined ? $dom.className : ($dom.className = $v);};
-			d['class+'] = function( $dom, $v ){
-				var t0 = $dom.className;
-				return ( t0 && t0.indexOf( $v ) == -1 ) ? ( $dom.className = $val + ' ' + t0.replace( t, '' ) ) : $dom.className;
-			};
-			d['class-'] = function( $dom, $v ){return $dom.className = $dom.className.replace( $v, '' ).replace( '  ', ' ' );};
+			//d['class'] = function( $dom, $v ){return $v === undefined ? $dom.className : ($dom.className = $v);};
+			d['class'] = function( $dom, $v ){return ds['@']( $dom, 'class', $v );};
+			d['class+'] = (function(){
+				var t = /^\s*|\s*$/g, t0, t1 = 'class';
+				return function( $dom, $v ){return t0 = ds['@']( $dom, t1 ), !t0 ? ds['@']( $dom, t1, $v ):( t0.split( ' ' ).indexOf( $v ) == -1 ) ? ds['@']( $dom, t1, $v + ' ' + t0.replace( t, '' ) ) : t0;};
+			})();
+			d['class-'] = (function(){
+				var t = 'class', t0 = [], t1, t2, i, j;
+				return function( $dom, $v ){
+					if( !( t1 = ds['@']( $dom, t ) ) ) return t1;
+					t0.length = 0, t2 = t1.split( ' ' );
+					for( i = 0, j = t2.length; i < j; i++) if( t2[i] != $v ) t0.push( t2[i] );
+					return ds['@']( $dom, t, t0.join( ' ' ).replace( '  ', ' ' ) );
+				};
+			})();
 			d.id = function( $dom, $v ){ return $v === undefined ? $dom.id : ($dom.id = $v); };
 			d.src = function( $dom ){ return $dom.src; };
 			ev = (function(){
@@ -1020,11 +1029,13 @@ function init(doc){
 							break;
 						default:
 							if( W.innerHeight === undefined ){
+								console.log(12);
 								sizer( function(){
 									$end( win.w = doc.documentElement.clientWidth || doc.body.clientWidth,
 										win.h = doc.documentElement.clientHeight || doc.body.clientHeight );
 								} );
 							}else{
+								console.log(13);
 								sizer( function(){
 									$end( win.w = W.innerWidth, win.h = W.innerHeight );
 								} );
