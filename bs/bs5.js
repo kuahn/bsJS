@@ -72,9 +72,7 @@ function init(doc){
 			for( k in factory.method ) t0[k] = factory.method[k];
 			return factory;
 		}
-		function del(){
-			return delete this.__f[this.__k], this.__k;
-		}
+		function del(){return delete this.__f[this.__k], this.__k;}
 		function factory( $key ){
 			function F(){
 				var t0, t1;
@@ -221,13 +219,8 @@ function init(doc){
 		function _load( $src, $data ){
 			var t0, t1;
 			t0 = new Image;
-			if( window['HTMLCanvasElement'] ){
-				t0.onload = $data.loaded;
-			}else{
-				( t1 = function(){
-					t0.complete ? $data.loaded() : setTimeout( t1, 10 );
-				} )();
-			}
+			if( window['HTMLCanvasElement'] ) t0.onload = $data.loaded;
+			else ( t1 = function(){t0.complete ? $data.loaded() : setTimeout( t1, 10 );} )();
 			return t0.src = $src, t0;
 		}
 		return function load( $end ){
@@ -339,14 +332,14 @@ function init(doc){
 			while( i-- ) if( ( t1 = t0[i] ) && t1.substring( 0, j = t1.indexOf('=') ).replace( /\s/, '' ) == $key ) t2 = t1.substr( j + 1);
 		}else{
 			val = arguments[1],
-			t1 = $key + '=' + ( val || '' ) + ';domain='+document.domain+';path=/';
-			if( arguments[2] ){
-				t0 = new Date,
-				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
-				t1 += ';expires=' + t0.toUTCString();
-			}else if( val === null ){
+			t1 = $key + '=' + ( val || '' ) + ';domain='+document.domain+';path='+ (arguments[3] || '/');
+			if( val === null ){
 				t0 = new Date,
 				t0.setTime( t0.getTime() - 86400000 ),
+				t1 += ';expires=' + t0.toUTCString();
+			}else if( arguments[2] ){
+				t0 = new Date,
+				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}
 			doc.cookie = t1, t2 = val + '';
@@ -964,7 +957,7 @@ function init(doc){
 			}
 			function sizer( $wh ){
 				win.on( 'resize', 'wh', $wh );
-				if( bs.DETECT.eventRotate ) win.on( 'resize', 'wh', $wh );
+				if( bs.DETECT.eventRotate ) win.on( 'orientationchange', 'wh', $wh );
 				$wh();
 			}
 			win = {

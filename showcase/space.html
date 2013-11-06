@@ -25,7 +25,7 @@ bs.css( '.ani' ).$( 'position', 'absolute' );
 bs.WIN.sizer( function( w, h ){
 	var i, k, s;
 	if( started ) return;
-	started = 1, i = 300;
+	started = 1, i = bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 50 : 300;
 	while( i-- ){
 		k = bs.$ex(0,'~',1), s = bs.$ex(3,'~',15);
 		bs.ANI.tween( 
