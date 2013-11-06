@@ -844,7 +844,7 @@ function init(doc){
 						if( !isChild( this, $e.event.toElement || $e.event.explicitOriginalTarget ) ) $.type = 'rollout', $v.call( this, $e );
 					};
 				}
-				ev = ( function( x, y ){
+				ev = ( function( ev$, x, y ){
 					var pageX, pageY, evType, prevent;
 					evType = {
 						'touchstart':2,'touchend':1,'touchmove':1,
@@ -877,6 +877,7 @@ function init(doc){
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
 						self = this, dom = self.dom;
+						if( typeof ev$[$k] == 'string' ) $k = ev$[$k];
 						if( $v === null ) dom['on'+$k] = null, delete self[$k];
 						else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
 						else if( $k == 'rollout' ) self.$( 'mouseout', ev$.rollout );
@@ -912,7 +913,7 @@ function init(doc){
 						}
 					};
 					return ev;
-				} )( x, y );
+				} )( ev$, x, y );
 				return ev$;
 			})();
 			return d;

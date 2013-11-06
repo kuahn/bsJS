@@ -12,13 +12,14 @@
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
 </head><body>
 <div style="text-align:center">Keyboard : up, down, left, top</div>
+<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> </a> 
 <div id="stage"></div>
-<a href="https://github.com/projectBS/bsJS"> <img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> </a> 
 <script src="../bs/bs5.js"></script> 
 <script>
 bs( function(){
 	var game = {
-		keybuffer:{}, x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, term:10, tcheck:0, div:{length:0},
+		keybuffer:{}, x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, tcheck:0, div:{length:0},
+		term:bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 100 : 10,
 		init:function(){
 			var i;
 			this.div.length = i = 80;
@@ -27,12 +28,13 @@ bs( function(){
 			this.w = bs.dom('body').$('_width') - 15;
 			this.h = 300;
 			bs.css( 'body' ).$( 'margin', 0, 'padding', 0 );
-			bs.dom( '#stage' ).$( 'top', 30, 'position', 'absolute', 'width', '100%', 'height', this.h, 'background', '#eee', 'overflow', 'hidden' );
+			bs.dom( '#stage' ).$( 'top', 30, 'position', 'absolute', 'width', '100%', 'height', this.h, 'background', '#eee', 'overflow', 'hidden', 'down', function( $e ){
+				game.vx = ( $e.lx - game.x )*.1, game.vy = ($e.ly - game.y)*.1;
+			} );
 			bs.dom( '<div></div>' ).$( 'id', 'a', 'position', 'absolute', 'background', '#950',
 				'left', 0, 'top', 0, 'width', 10, 'height', 10, 'border-radius',5,
 				'<', '#stage'
 			);
-			//bs.dom( '#stage' )[0].focus();
 			bs.WIN.on( 'keydown', 'kd', function( $e ){game.keybuffer[$e.code] = 1;} );
 			bs.WIN.on( 'keyup', 'ku', function( $e ){game.keybuffer[$e.code] = 0;} );
 		},
