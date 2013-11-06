@@ -25,7 +25,7 @@ bs( function(){
 			this.div.length = i = 80;
 			while( i-- ) this.div[i] = bs.dom('<div></div>' ).$( 'position','absolute', 'visibility', 'hidden', '<', '#stage', 'this' );
 			
-			this.w = bs.dom('body').$('_width') - 15;
+			this.w = bs.dom('body').$('_width') - 10;
 			this.h = 300;
 			bs.css( 'body' ).$( 'margin', 0, 'padding', 0 );
 			bs.dom( '#stage' ).$( 'top', 30, 'position', 'absolute', 'width', '100%', 'height', this.h, 'background', '#eee', 'overflow', 'hidden', 'down', function( $e ){
@@ -52,7 +52,7 @@ bs( function(){
 			//boundery
 			this.x += this.vx, this.y += this.vy;
 			if( this.y < 5 ) this.y = 5, this.vy = 0;
-			else if( this.y > this.h ) this.y = this.h, this.vy = 0;
+			else if( this.y > this.h - 15 ) this.y = this.h - 15, this.vy = 0;
 			if( this.x < 5 ) this.x = 5, this.vx = 0;
 			else if( this.x > this.w ) this.x = this.w, this.vx = 0;
 		
