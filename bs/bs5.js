@@ -571,27 +571,29 @@ function init(doc){
 			})();
 			function style(){this.s = arguments[0];}
 			(function(){
-				var p, pf, pfL, i, j, k, kk, l;
+				var p, pf, pfL, i, j, k, kk, l, patch, b, r0, r1;
+				b = doc.body.style;
+				patch = {styleFloat:'float',cssFloat:'float'};
 				pf = bs.DETECT.stylePrefix, pfL = pf.length;
-				for( k in doc.body.style ){
+				r0 = /[-][A-Z]/g;
+				r1 = function($0){return $0.substr(1).toLowerCase();};
+				for( k in b ){
 					if( k == 'length' ) continue;
-					if( k == 'styleFloat' || k == 'cssFloat' ){
-						style.float = k;
-						continue;
-					}
-					if( k.substr( 0, pfL ) == pf ){
-						k = k.substr( pfL );
-						p = 1;
-					}else{
-						p = 0;
-					}
-					for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
-						if( k.charCodeAt(i) < 90 ){
-							kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
-							l = i;
+					if( patch[k] ) style[patch[k]] = k;
+					else{
+						if( k.substr( 0, pfL ) == pf ){
+							k = k.charAt(pfL).toLowerCase() + k.substr( pfL + 1 ).replace( r0, r1 );
+							if( k in b ) continue;
+							p = 1;
+						}else p = 0;
+						for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
+							if( k.charCodeAt(i) < 90 ){
+								kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
+								l = i;
+							}
 						}
+						style[kk + k.substring( l ).toLowerCase()] = ( p ? pf : '' ) + k;
 					}
-					style[kk + k.substring( l ).toLowerCase()] = ( p ? pf : '' ) + k;
 				}
 			})();
 			nopx = {'opacity':1,'zIndex':1};
