@@ -19,6 +19,34 @@ if( !Array.prototype.indexOf )
 	};
 Date.now || ( Date.now = function(){return +new Date;} );
 
+if( !W['JSON'] ) W['JSON'] = {
+	stringify:(function(){
+		function stringify( $obj ){
+			var t0, i, j;
+			switch( t0 = typeof $obj ){
+			case'number':case'boolean':case'function': return $obj.toString();
+			case'undefined':case'null': return t0;
+			case'string': return '"' + $obj + '"';
+			case'object':
+				t0 = '';
+				if( $obj.splice ){
+					for( i = 0, j = $obj.length ; i < j ; i++ ) t0 += ',' + stringify( $obj[i] );
+					return '[' + t0.substr(1) + ']';
+				}else{
+					for( i in $obj ) t0 += ',"'+i+'":' + stringify( $obj[i] );
+					return '{' + t0.substr(1) + '}';
+				}
+			}
+		}
+		return stringify;
+	})(),
+	parse:function( $str ){
+		var t0;
+		eval( 't0='+$str );
+		return t0;
+	}
+};
+
 function init(doc){
 	var bs = (function(doc){
 		var sel,sz,t0,div,nodes;
