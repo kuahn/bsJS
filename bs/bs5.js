@@ -589,6 +589,7 @@ function init(doc){
 					}, style.opacity = 'opacity';
 				return filter;
 			})();
+			bs.filter = filter;
 			function style(){this.s = arguments[0];}
 			(function(){
 				var p, pf, pfL, i, j, k, kk, l, patch, b, r0, r1;
@@ -641,7 +642,7 @@ function init(doc){
 				}
 				return v;
 			};
-			style.prototype.$g = function( k ){return this[style[k]].v};
+			style.prototype.$g = function( k ){return k = style[k], k ? filter[k] ? filter[k]( this ) : this[k].v:0};
 			bs.style = style;
 			return style;
 		})();
@@ -1070,9 +1071,10 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style;
+		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
 		style = bs.style;
-		bs.style = null;
+		filter = bs.filter;
+		bs.style = bs.filter = null;
 		ani = [];
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
@@ -1160,8 +1162,15 @@ function init(doc){
 				else{
 					l = this.length;
 					while( l-- ){
-						v0 = isDom ? this[l][0].$g( k ) : this[l][0][k],
-						this[l].push( isDom ? style[k] : k, v0, v - v0 );
+						if( isDom ){
+							if( style[k] ){
+								v0 = this[l][0].$g( k ),
+								this[l].push( style[k], v0, v - v0 );
+							}
+						}else{
+							v0 = this[l][0][k],
+							this[l].push( k, v0, v - v0 );
+						}
 					}
 				}
 			}
@@ -1171,16 +1180,18 @@ function init(doc){
 		};
 		tTemp = {length:0};
 		tween.prototype.ANIstyle = function( $time ){
-			var t0, t1, term, time, rate, i, j, l, k, v, e;
+			var t0, t1, term, time, rate, i, j, l, k, v, e, v0;
 			if( !this.start ) return 1;
 			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			e = this.ease, time = this.time, rate = term * this.timeR, 
+			l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
 					while( l-- ){
 						t0 = this[l], t1 = this[l][0], i = 1;
-						while( i < j ) k = t0[i++], v = t1[k], t1.s[k] = ( v.v = t0[i++] + t0[i++] ) + v.u;
+						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++];
+							v0 = t1[k], t1.s[k] = ( v0.v = filter[k] ? filter[k]( t1, v ) : v ) + v0.u;
 					}
 					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
@@ -1188,7 +1199,8 @@ function init(doc){
 				}
 			while( l-- ){
 				t0 = this[l], t1 = this[l][0], i = 1;
-				while( i < j ) k = t0[i++], v = t1[k], t1.s[k] = ( v.v = e( rate, t0[i++], t0[i++], term, time ) ) + v.u;
+				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
+					v0 = t1[k], t1.s[k] = ( v0.v = filter[k] ? filter[k]( t1, v ) : v ) + v0.u;
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
