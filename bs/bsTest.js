@@ -59,8 +59,9 @@ bsTest.suite = function(){
 	function sum(){
 		var self = this;
 		setTimeout( function(){
-			bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px">'+
-				arg[self.id.charAt(self.id.length - 1 )] + ' loaded :: ' +
+			var idx = self.id.charAt(self.id.length - 1 );
+			bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px"><a href="'+arg[idx]+'" target="_blank">'+
+				arg[idx] + '</a> loaded :: ' +
 				'<b style="font-size:20px;color:#' + ( !bsTest.isOKsub ? 'a00">FAIL' : '0a0">OK' ) + '</b>' +
 				'</div>' );
 			
@@ -71,7 +72,7 @@ bsTest.suite = function(){
 		},10 );
 	}
 	function load(){
-		if( i-- ) bs.dom( '<iframe></iframe>' ).$( 'float', 'left', 'id', 'bsTestIF' + i, '<', 'body', '@src', arg[i], 'load', sum );//, 'visibility', 'hidden' );
+		if( i-- ) bs.dom( '<iframe></iframe>' ).$( 'float', 'left', 'id', 'bsTestIF' + i, '<', 'body', '@src', arg[i], 'load', sum, 'visibility', 'hidden' );
 	}
 	load();
 };
