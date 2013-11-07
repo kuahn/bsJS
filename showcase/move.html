@@ -22,7 +22,9 @@ bs( function(){
 		term:bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 100 : 10,
 		init:function(){
 			var i;
-			this.div.length = i = 80;
+			this.f = bs.dom('<div></div>' ).$( 'id', 'fps', 'position','absolute', 'font-size', 11, 'color', '#900', '<', 'body', 'this' );
+			this.fps = 0, this.fsum = this.fcnt = 0;
+			this.div.length = i = bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 30 : 80;
 			while( i-- ) this.div[i] = bs.dom('<div></div>' ).$( 'position','absolute', 'visibility', 'hidden', '<', '#stage', 'this' );
 			
 			this.w = bs.dom('body').$('_width') - 10;
@@ -42,6 +44,15 @@ bs( function(){
 			game.div[game.div.length++] = $target.$('visibility', 'hidden', 'this');
 		},
 		ANI:function( $time ){ 
+			//fps
+			var i;
+			i = parseInt(1000/($time - this.fps)),
+			this.fsum += i,
+			this.fcnt++,
+			this.f.$( 'html', "fps:"+i+", average:"+parseInt( this.fsum / this.fcnt ) ),
+			this.fps = $time;
+			
+			
 			//accelation
 			if( this.keybuffer[38] ) this.vy -= this.v; //up
 			else if( game.keybuffer[40] ) this.vy += this.v; //down

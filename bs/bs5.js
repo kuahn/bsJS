@@ -538,7 +538,6 @@ function init(doc){
 			sv = (function(){
 				var i = 0;
 				function sv(){this.v = arguments[0], this.u = arguments[1];}
-				sv.prototype.toString = function(){return this.v + this.u;}
 				function sv$(){return i ? sv$[--i] : new sv( arguments[0], arguments[1] );}
 				sv._ = function sv_(){sv$[i++] = arguments[0];}
 				return sv$;
@@ -591,7 +590,7 @@ function init(doc){
 			})();
 			nopx = {'opacity':1,'zIndex':1};
 			style.prototype.$ = function( $arg ){
-				var i, j, k, v, f, vt, u;
+				var t0, i, j, k, v, u;
 				i = 0, j = $arg.length;
 				while( i < j ){
 					k = style[$arg[i++]], v = $arg[i++];
@@ -603,20 +602,19 @@ function init(doc){
 							delete this[k];
 							this.s[k] = '';
 						}else{
-							if( this[k] === undefined ){//add
-								this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
+							t0 = this[k]; 
+							if( t0 === undefined ) v = ( this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
 									( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
-									sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) );
-								v = this[k].v;
-							}else{//set
-								this[k].v = v;
-							}
-							this.s[k] = this[k]+'';
+									sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) ) ).v, t0 = this[k];
+							else t0.v = v;
+							this.s[k] = t0.v + t0.u;
 						}
 					}
 				}
 				return v;
 			};
+			style.prototype.$g = function( k ){return this[style[k]].v};
+			bs.style = style;
 			return style;
 		})();
 		bs.module( 'c,css', ( function( style ){
@@ -1044,7 +1042,9 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp;
+		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style;
+		style = bs.style;
+		bs.style = null;
 		ani = [];
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
@@ -1132,45 +1132,60 @@ function init(doc){
 				else{
 					l = this.length;
 					while( l-- ){
-						v0 = isDom ? ( tTemp.length = 1, tTemp[0] = k, tTemp[1] = undefined, this[l][0].$( tTemp ) ) : this[l][0][k],
-						this[l].push( k, v0, v - v0 );
+						v0 = isDom ? this[l][0].$g( k ) : this[l][0][k],
+						this[l].push( isDom ? style[k] : k, v0, v - v0 );
 					}
 				}
 			}
-			this.stime = +new Date+this.delay, this.etime = this.stime + this.time;
+			this.ANI = isDom ? this.ANIstyle : this.ANIobj;
+			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time;
 			ani[ani.length] = this, start();
 		};
 		tTemp = {length:0};
-		tween.prototype.ANI = function( $time ){
-			var t0, term, time, rate, i, j, l, k, v, e, isDom;
+		tween.prototype.ANIstyle = function( $time ){
+			var t0, t1, term, time, rate, i, j, l, k, v, e;
 			if( !this.start ) return 1;
 			if( ( term = $time - this.stime ) < 0 ) return;
-			isDom = this.isDom, e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
 					while( l-- ){
-						t0 = this[l], i = 1, tTemp.length = 0;
-						while( i < j ){
-							k = t0[i++], v = t0[i++] + t0[i++],
-							isDom ? ( tTemp[tTemp.length++] = k, tTemp[tTemp.length++] = v ) : t0[0][k] = v;
-						}
-						if( isDom ) t0[0].$( tTemp );
+						t0 = this[l], t1 = this[l][0], i = 1;
+						while( i < j ) k = t0[i++], v = t1[k], t1.s[k] = ( v.v = t0[i++] + t0[i++] ) + v.u;
 					}
 					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
 					return 1;
 				}
 			while( l-- ){
-				t0 = this[l], i = 1, tTemp.length = 0;
-				while( i < j )
-					k = t0[i++], v = e(rate,t0[i++],t0[i++],term,time),
-					isDom ? ( tTemp[tTemp.length++] = k, tTemp[tTemp.length++] = v ) : t0[0][k] = v;
-				if( isDom ) t0[0].$( tTemp );
+				t0 = this[l], t1 = this[l][0], i = 1;
+				while( i < j ) k = t0[i++], v = t1[k], t1.s[k] = ( v.v = e( rate, t0[i++], t0[i++], term, time ) ) + v.u;
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
-		
+		tween.prototype.ANIobj = function( $time ){
+			var t0, t1, term, time, rate, i, j, l, k, v, e;
+			if( !this.start ) return 1;
+			if( ( term = $time - this.stime ) < 0 ) return;
+			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			if( term > this.time )
+				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
+				else{
+					while( l-- ){
+						t0 = this[l], t1 = this[l][0], i = 1;
+						while( i < j ) t1[t0[i++]] = t0[i++] + t0[i++];
+					}
+					tweenPool[tweenPool.length++] = this;
+					if( this.end ) this.end( this.t );
+					return 1;
+				}
+			while( l-- ){
+				t0 = this[l], t1 = this[l][0], i = 1;
+				while( i < j ) t1[t0[i++]] = e(rate,t0[i++],t0[i++],term,time);
+			}
+			if( this.update ) this.update( rate, $time, this );
+		};
 		return {
 			tween:function(){
 				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
