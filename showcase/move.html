@@ -43,11 +43,7 @@ bs( function(){
 		end:function( $target ){
 			game.div[game.div.length++] = $target.$('visibility', 'hidden', 'this');
 		},
-		ANI:function( $time ){ 
-			//fps
-			
-			
-			
+		ANI:function( $time ){
 			//accelation
 			if( this.keybuffer[38] ) this.vy -= this.v; //up
 			else if( game.keybuffer[40] ) this.vy += this.v; //down
