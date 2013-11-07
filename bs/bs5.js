@@ -72,9 +72,7 @@ function init(doc){
 			for( k in factory.method ) t0[k] = factory.method[k];
 			return factory;
 		}
-		function del(){
-			return delete this.__f[this.__k], this.__k;
-		}
+		function del(){return delete this.__f[this.__k], this.__k;}
 		function factory( $key ){
 			function F(){
 				var t0, t1;
@@ -221,13 +219,8 @@ function init(doc){
 		function _load( $src, $data ){
 			var t0, t1;
 			t0 = new Image;
-			if( window['HTMLCanvasElement'] ){
-				t0.onload = $data.loaded;
-			}else{
-				( t1 = function(){
-					t0.complete ? $data.loaded() : setTimeout( t1, 10 );
-				} )();
-			}
+			if( window['HTMLCanvasElement'] ) t0.onload = $data.loaded;
+			else ( t1 = function(){t0.complete ? $data.loaded() : setTimeout( t1, 10 );} )();
 			return t0.src = $src, t0;
 		}
 		return function load( $end ){
@@ -339,14 +332,14 @@ function init(doc){
 			while( i-- ) if( ( t1 = t0[i] ) && t1.substring( 0, j = t1.indexOf('=') ).replace( /\s/, '' ) == $key ) t2 = t1.substr( j + 1);
 		}else{
 			val = arguments[1],
-			t1 = $key + '=' + ( val || '' ) + ';domain='+document.domain+';path=/';
-			if( arguments[2] ){
-				t0 = new Date,
-				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
-				t1 += ';expires=' + t0.toUTCString();
-			}else if( val === null ){
+			t1 = $key + '=' + ( val || '' ) + ';domain='+document.domain+';path='+ (arguments[3] || '/');
+			if( val === null ){
 				t0 = new Date,
 				t0.setTime( t0.getTime() - 86400000 ),
+				t1 += ';expires=' + t0.toUTCString();
+			}else if( arguments[2] ){
+				t0 = new Date,
+				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}
 			doc.cookie = t1, t2 = val + '';
@@ -571,27 +564,29 @@ function init(doc){
 			})();
 			function style(){this.s = arguments[0];}
 			(function(){
-				var p, pf, pfL, i, j, k, kk, l;
+				var p, pf, pfL, i, j, k, kk, l, patch, b, r0, r1;
+				b = doc.body.style;
+				patch = {styleFloat:'float',cssFloat:'float'};
 				pf = bs.DETECT.stylePrefix, pfL = pf.length;
-				for( k in doc.body.style ){
+				r0 = /[-][A-Z]/g;
+				r1 = function($0){return $0.substr(1).toLowerCase();};
+				for( k in b ){
 					if( k == 'length' ) continue;
-					if( k == 'styleFloat' || k == 'cssFloat' ){
-						style.float = k;
-						continue;
-					}
-					if( k.substr( 0, pfL ) == pf ){
-						k = k.substr( pfL );
-						p = 1;
-					}else{
-						p = 0;
-					}
-					for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
-						if( k.charCodeAt(i) < 90 ){
-							kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
-							l = i;
+					if( patch[k] ) style[patch[k]] = k;
+					else{
+						if( k.substr( 0, pfL ) == pf ){
+							k = k.charAt(pfL).toLowerCase() + k.substr( pfL + 1 ).replace( r0, r1 );
+							if( k in b ) continue;
+							p = 1;
+						}else p = 0;
+						for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
+							if( k.charCodeAt(i) < 90 ){
+								kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
+								l = i;
+							}
 						}
+						style[kk + k.substring( l ).toLowerCase()] = ( p ? pf : '' ) + k;
 					}
-					style[kk + k.substring( l ).toLowerCase()] = ( p ? pf : '' ) + k;
 				}
 			})();
 			nopx = {'opacity':1,'zIndex':1};
@@ -842,7 +837,7 @@ function init(doc){
 						if( !isChild( this, $e.event.toElement || $e.event.explicitOriginalTarget ) ) $.type = 'rollout', $v.call( this, $e );
 					};
 				}
-				ev = ( function( x, y ){
+				ev = ( function( ev$, x, y ){
 					var pageX, pageY, evType, prevent;
 					evType = {
 						'touchstart':2,'touchend':1,'touchmove':1,
@@ -875,6 +870,7 @@ function init(doc){
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
 						self = this, dom = self.dom;
+						if( typeof ev$[$k] == 'string' ) $k = ev$[$k];
 						if( $v === null ) dom['on'+$k] = null, delete self[$k];
 						else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
 						else if( $k == 'rollout' ) self.$( 'mouseout', ev$.rollout );
@@ -910,7 +906,7 @@ function init(doc){
 						}
 					};
 					return ev;
-				} )( x, y );
+				} )( ev$, x, y );
 				return ev$;
 			})();
 			return d;
@@ -961,7 +957,7 @@ function init(doc){
 			}
 			function sizer( $wh ){
 				win.on( 'resize', 'wh', $wh );
-				if( bs.DETECT.eventRotate ) win.on( 'resize', 'wh', $wh );
+				if( bs.DETECT.eventRotate ) win.on( 'orientationchange', 'wh', $wh );
 				$wh();
 			}
 			win = {
