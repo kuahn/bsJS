@@ -17,13 +17,13 @@
 <script src="../bs/bs5.js"></script> 
 <script>
 bs( function(){
+
 	var game = {
 		keybuffer:{}, x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, tcheck:0, div:{length:0},
 		term:bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 100 : 10,
 		init:function(){
 			var i;
-			this.f = bs.dom('<div></div>' ).$( 'id', 'fps', 'position','absolute', 'font-size', 11, 'color', '#900', '<', 'body', 'this' );
-			this.fps = 0, this.fsum = this.fcnt = 0;
+			
 			this.div.length = i = bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 30 : 80;
 			while( i-- ) this.div[i] = bs.dom('<div></div>' ).$( 'position','absolute', 'visibility', 'hidden', '<', '#stage', 'this' );
 			
@@ -45,12 +45,7 @@ bs( function(){
 		},
 		ANI:function( $time ){ 
 			//fps
-			var i;
-			i = parseInt(1000/($time - this.fps)),
-			this.fsum += i,
-			this.fcnt++,
-			this.f.$( 'html', "fps:"+i+", average:"+parseInt( this.fsum / this.fcnt ) ),
-			this.fps = $time;
+			
 			
 			
 			//accelation
@@ -92,6 +87,7 @@ bs( function(){
 		}
 	};
     game.init();
+	bs.ANI.fps( bs.dom('<div></div>' ).$( 'id', 'fps', 'position','absolute', 'font-size', 11, 'color', '#900', '<', 'body', 'this' )[0] );
     bs.ANI.ani( game );
 } );
 

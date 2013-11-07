@@ -1191,6 +1191,31 @@ function init(doc){
 				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
 			},
 			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
+			fps:(function(){
+				var printer, prev, sum, cnt, isStop;
+				prev = sum = cnt = 0;
+				function fps(){
+					if( arguments.length ){
+						if( printer ) throw 'fps is running';
+						isStop = 0,
+						printer = arguments[0],
+						bs.ANI.ani( fps );
+					}else{
+						isStop = 1,
+						printer = null;
+					}
+				}
+				fps.ANI = function( $time ){
+					var i;
+					i = parseInt(1000/($time - prev)),
+					sum += i,
+					cnt++,
+					printer.innerHTML = "fps:"+i+", average:"+parseInt( sum / cnt ),
+					prev = $time;
+					return isStop;
+				};
+				return fps;
+			})(),
 			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
 			stop:function(){end();},
 			delay:(function(){
