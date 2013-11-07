@@ -54,27 +54,24 @@ bsTest.tear = (function(){
 	};
 })();
 bsTest.suite = function(){
-	var arg, i, k;
-	arg = arguments, i = arg.length, k = 0;
-	function sum(){
-		var self = this;
-		setTimeout( function(){
-			var idx = self.id.charAt(self.id.length - 1 );
-			bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px"><a href="'+arg[idx]+'" target="_blank">'+
-				arg[idx] + '</a> loaded :: ' +
-				'<b style="font-size:20px;color:#' + ( !bsTest.isOKsub ? 'a00">FAIL' : '0a0">OK' ) + '</b>' +
-				'</div>' );
-			
-			if( !bsTest.isOKsub ) bsTest.isOK = 0;
-			if( ++k == arg.length ){
-				if( bsTest.result ) bsTest.result( '<hr><div style="font-weight:bold;font-size:30px;padding:10px;color:#' + ( !bsTest.isOK ? 'a00">FAIL' : '0a0">OK' ) + '</div>' );
-			}else load();
-		},10 );
-	}
-	function load(){
-		if( i-- ) bs.dom( '<iframe></iframe>' ).$( 'float', 'left', 'id', 'bsTestIF' + i, '<', 'body', '@src', arg[i], 'load', sum, 'visibility', 'hidden' );
-	}
-	load();
+	var i = arguments.length;
+	bsTest.suite.urls = arguments;
+	while( i-- ) bsTest.printer(
+		'<div style="width:250px;float:left;border:1px dashed #999;background:#eee;padding:10px;margin:10px">'+
+			'<div id="bsTestSuite'+i+'">'+arguments[i]+' loading</div>'+
+			'<iframe id="bsTestIF'+i+'" src="'+arguments[i]+'" scrolling="no" style="margin-top:10px;border:0;width:100%;height:200px" onload="javascript:bsTest.suite.onload(this)"></iframe>'+
+		'</div>'
+	);
+};
+bsTest.suite.onload = function( $iframe ){
+	var i, url;
+	i = $iframe.id.charAt( $iframe.id.length - 1 );
+	url = bsTest.suite.urls[i];
+	bs.dom( '#bsTestSuite'+i ).$( 'html', '<a href="'+url+'" target="_blank">'+url+'</a> ' +
+		'<b style="font-size:20px;color:#' + ( !bsTest.isOKsub ? 'a00">FAIL' : '0a0">OK' ) + '</b>' );
+	bs.dom( bs.dom( '#bsTestSuite'+i ).$('<') ).$( 'border-radius', 10 );
+	if( !bsTest.isOKsub ) bsTest.isOK = 0;
+	bsTest.result( '<div style="font-weight:bold;font-size:30px;padding:10px;color:#' + ( !bsTest.isOK ? 'a00">FAIL' : '0a0">OK' ) + '</div><hr>' );
 };
 bsTest.auto = (function(){
 	var test, arg, testType;
