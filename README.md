@@ -40,6 +40,6 @@ Dual licensed under the MIT or GPL Version 2 licenses.
 
 [showcase page](http://projectbs.github.io/bsJS/showcase/)  
 
-[demo(test) page](http://projectbs.github.io/bsJS/test/)
+[demo(test) page](http://projectbs.github.io/bsJS/test/)  
 
 Copyright 2013.10 hikaMaeng, bsJS-Team.

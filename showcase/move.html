@@ -17,12 +17,14 @@
 <script src="../bs/bs5.js"></script> 
 <script>
 bs( function(){
+
 	var game = {
 		keybuffer:{}, x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, tcheck:0, div:{length:0},
 		term:bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 100 : 10,
 		init:function(){
 			var i;
-			this.div.length = i = 80;
+			
+			this.div.length = i = bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 30 : 80;
 			while( i-- ) this.div[i] = bs.dom('<div></div>' ).$( 'position','absolute', 'visibility', 'hidden', '<', '#stage', 'this' );
 			
 			this.w = bs.dom('body').$('_width') - 10;
@@ -41,7 +43,7 @@ bs( function(){
 		end:function( $target ){
 			game.div[game.div.length++] = $target.$('visibility', 'hidden', 'this');
 		},
-		ANI:function( $time ){ 
+		ANI:function( $time ){
 			//accelation
 			if( this.keybuffer[38] ) this.vy -= this.v; //up
 			else if( game.keybuffer[40] ) this.vy += this.v; //down
@@ -81,6 +83,7 @@ bs( function(){
 		}
 	};
     game.init();
+	bs.ANI.fps( bs.dom('<div></div>' ).$( 'id', 'fps', 'position','absolute', 'font-size', 11, 'color', '#900', '<', 'body', 'this' )[0] );
     bs.ANI.ani( game );
 } );
 
