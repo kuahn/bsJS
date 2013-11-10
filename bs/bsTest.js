@@ -36,7 +36,7 @@ function bsTest( $printer,$title ){
 	if( window.top.bsTest ) window.top.bsTest.isOKsub = bsTest.isOK;
 	if( bsTest.result )bsTest.result( '<hr><div style="font-weight:bold;font-size:30px;padding:10px;color:#' + ( !bsTest.isOK ? 'a00">FAIL' : '0a0">OK' ) + '</div>' );
 }
-bsTest.isOKsub = bsTest.isOK = 1, bsTest.id = 0;
+bsTest.isOKsub = bsTest.isOK = 1, bsTest.id = 0, bsTest.IFid = 'bsTestIF';
 bsTest.off = function(dom){dom.style.display = 'none', document.getElementById('bsTestOn'+dom.id.substr(9)).style.display = 'block';};
 bsTest.on = function(dom){dom.style.display = 'none', document.getElementById('bsTestOff'+dom.id.substr(8)).style.display = 'block';};
 bsTest.tear = (function(){
@@ -59,13 +59,14 @@ bsTest.suite = function(){
 	while( i-- ) bsTest.printer(
 		'<div style="width:250px;float:left;border:1px dashed #999;background:#eee;padding:10px;margin:10px">'+
 			'<div id="bsTestSuite'+i+'">'+arguments[i]+' loading</div>'+
-			'<iframe id="bsTestIF'+i+'" src="'+arguments[i]+'" scrolling="no" style="margin-top:10px;border:0;width:100%;height:200px" onload="javascript:bsTest.suite.onload(this)"></iframe>'+
+			'<iframe id="'+bsTest.IFid+i+'" src="'+arguments[i]+'" scrolling="no" style="margin-top:10px;border:0;width:100%;height:200px" onload="javascript:bsTest.suite.onload(this)"></iframe>'+
 		'</div>'
 	);
 };
 bsTest.suite.onload = function( $iframe ){
 	var i, url;
-	i = $iframe.id.charAt( $iframe.id.length - 1 );
+	i = $iframe.id.substr( bsTest.IFid.length );
+	console.log(i);
 	url = bsTest.suite.urls[i];
 	bs.dom( '#bsTestSuite'+i ).$( 'html', '<a href="'+url+'" target="_blank">'+url+'</a> ' +
 		'<b style="font-size:20px;color:#' + ( !bsTest.isOKsub ? 'a00">FAIL' : '0a0">OK' ) + '</b>' );
