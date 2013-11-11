@@ -24,18 +24,19 @@ function bsTest( $printer,$title ){
 		}
 		r += ' <b>'
 		origin = arguments[i++];
-		if( target && target.splice ){
-			//range
-			if( target.length == 2 && typeof target[0] == 'number' &&  typeof target[1] == 'number' ){
-				r += '( ' + target[0] + ' ~ ' + target[1] + ' ) ';
-				check = target[0] <= origin && origin <= target[1];
-			//not
-			}else if( target.length == 2 && target[0] == '!' ){
-				r += '!= ' + target[1];
-				check = origin !== target[1] ? 1 : 0;
-			}else{
+		if( target && target.bsTestType ){
+			switch( target.bsTestType ){
+			case'in':
 				r += 'of [' + target.join(',') +']';
 				check = target.indexOf( origin ) > -1 ? 1 : 0;
+				break;
+			case'range':
+				r += '( ' + target[0] + ' ~ ' + target[1] + ' ) ';
+				check = target[0] <= origin && origin <= target[1];
+				break;
+			case'not':
+				r += '!= ' + target[0];
+				check = origin !== target[0] ? 1 : 0;
 			}
 		}else{
 			r += '== ' + target;
@@ -59,13 +60,25 @@ bsTest.f2s = (function(){
 		t0 = $f.toString().split('\n');
 		t1 = t0[t0.length - 1];
 		t1 = t1.substr( 0, t1.length - 1 );
-		console.log( t1 );
-		for( i = 0, j = t0.length ; i < j ; i++ ){
-			if( t0[i].substr( 0, t1.length ) == t1 ) t0[i] = t0[i].substr( t1.length );
-		}
+		for( i = 0, j = t0.length ; i < j ; i++ ) if( t0[i].substr( 0, t1.length ) == t1 ) t0[i] = t0[i].substr( t1.length );
 		return t0.join( '\n' ).replace( r0, '&lt;' ).replace( r1, '  ' );
 	};
 })();
+bsTest.RANGE = function( a, b ){
+	var t0 = [a,b];
+	t0.bsTestType = 'range';
+	return t0;
+};
+bsTest.IN = function(){
+	var t0 = Array.prototype.slice.call( arguments, 0 );
+	t0.bsTestType = 'in';
+	return t0;
+};
+bsTest.NOT = function( a ){
+	var t0 = [a];
+	t0.bsTestType = 'not';
+	return t0;
+};
 bsTest.isOKsub = bsTest.isOK = 1, bsTest.id = 0, bsTest.IFid = 'bsTestIF';
 bsTest.off = function(dom){dom.style.display = 'none', document.getElementById('bsTestOn'+dom.id.substr(9)).style.display = 'block';};
 bsTest.on = function(dom){dom.style.display = 'none', document.getElementById('bsTestOff'+dom.id.substr(8)).style.display = 'block';};

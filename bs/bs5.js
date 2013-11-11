@@ -845,7 +845,7 @@ function init(doc){
 					if( $v === undefined ) return ( t0 = $dom.bsE ) ? t0[$k] : $dom[$k];
 					if( $v === null ) return ( t0 = $dom.bsE ) ? t0.$( $k, null ) : ( $dom[$k] = null );
 				}
-				for( k in doc.createElement('div') ) k.substr(0,2) == 'on' ? ( i = 1,ev$[k.substr(2).toLowerCase()] = 1 ) : 0;
+				for( k in doc ) k.substr(0,2) == 'on' ? ( i = 1,ev$[k.substr(2).toLowerCase()] = 1 ) : 0;
 				if( !i ){
 					k = Object.getOwnPropertyNames(doc)
 						.concat(Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(doc))))
