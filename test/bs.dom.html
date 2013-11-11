@@ -27,6 +27,13 @@
 <script src="./printer.js"></script>
 <script>
 bs( function(){
+	bsTest( 'test',
+		'3', ['!',2], 3,
+		'3', [1,2,3,4,5], 3,
+		function(){
+			return 'a';
+		},'a'
+	);
 	bsTest.tear( '스타일설정', function(){
 		bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
 		bs.css( '#stage' ).$( 'width', 100 );

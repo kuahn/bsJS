@@ -1,5 +1,5 @@
 function bsTest( $printer,$title ){
-	var id, i, j, k, r, t, s, f, check, title;
+	var id, i, j, k, r, t, s, f, check, title, target, origin, t0;
 	if( typeof $printer != 'function' ){
 		title = $printer;
 		$printer = bsTest.printer;
@@ -13,18 +13,32 @@ function bsTest( $printer,$title ){
 	t = s = f = 0;
 	for( k = 1, j = arguments.length ; i < j ; k++ ){
 		t++;
-		r += k + '. '+ arguments[i++] + ' == <b>';
-		target = arguments[i++];
+		t0 = arguments[i++];
+		r += k + '. ';
+		if( typeof t0 == 'function' ){
+			r += '<pre>'+bsTest.f2s(t0)+'</pre>';
+			target = t0();
+		}else{
+			r += t0;
+			target = arguments[i++];
+		}
+		r += ' <b>'
 		origin = arguments[i++];
 		if( target && target.splice ){
-			r += target[0] + ' ~ ' + target[1];
-			if( target[0] <= origin && origin <= target[1] ){
-				check = 1;
+			//range
+			if( target.length == 2 && typeof target[0] == 'number' &&  typeof target[1] == 'number' ){
+				r += '( ' + target[0] + ' ~ ' + target[1] + ' ) ';
+				check = target[0] <= origin && origin <= target[1];
+			//not
+			}else if( target.length == 2 && target[0] == '!' ){
+				r += '!= ' + target[1];
+				check = origin !== target[1] ? 1 : 0;
 			}else{
-				check = 0;
+				r += 'of [' + target.join(',') +']';
+				check = target.indexOf( origin ) > -1 ? 1 : 0;
 			}
 		}else{
-			r += target;
+			r += '== ' + target;
 			check = origin === target;
 		}
 		r += '</b> :: <b>'+ origin + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b><br>';
@@ -36,23 +50,34 @@ function bsTest( $printer,$title ){
 	if( window.top.bsTest ) window.top.bsTest.isOKsub = bsTest.isOK;
 	if( bsTest.result )bsTest.result( '<hr><div style="font-weight:bold;font-size:30px;padding:10px;color:#' + ( !bsTest.isOK ? 'a00">FAIL' : '0a0">OK' ) + '</div>' );
 }
+bsTest.f2s = (function(){
+	var r0, r1;
+	r0 = /</g;
+	r1 = /\t/g;
+	return function( $f ){
+		var t0, t1, i, j;
+		t0 = $f.toString().split('\n');
+		t1 = t0[t0.length - 1];
+		t1 = t1.substr( 0, t1.length - 1 );
+		console.log( t1 );
+		for( i = 0, j = t0.length ; i < j ; i++ ){
+			if( t0[i].substr( 0, t1.length ) == t1 ) t0[i] = t0[i].substr( t1.length );
+		}
+		return t0.join( '\n' ).replace( r0, '&lt;' ).replace( r1, '  ' );
+	};
+})();
 bsTest.isOKsub = bsTest.isOK = 1, bsTest.id = 0, bsTest.IFid = 'bsTestIF';
 bsTest.off = function(dom){dom.style.display = 'none', document.getElementById('bsTestOn'+dom.id.substr(9)).style.display = 'block';};
 bsTest.on = function(dom){dom.style.display = 'none', document.getElementById('bsTestOff'+dom.id.substr(8)).style.display = 'block';};
-bsTest.tear = (function(){
-	var r0, r1;
-	r0 = /</g;
-	r1 = /\t\t/g;
-	return function( $title, $func ){
-		var id;
-		$func();
-		id = bsTest.id++;
-		bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px">'+
-			'<div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><b>'+$title+'</b><hr><pre>'+$func.toString().replace( r0, '&lt;' ).replace( r1, '\t' )+'</pre></div>'+
-			'<div id="bsTestOff'+id+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+$title+'</b></div>'+
-		'</div>' );
-	};
-})();
+bsTest.tear = function( $title, $func ){
+	var id;
+	$func();
+	id = bsTest.id++;
+	bsTest.printer( '<div style="border:1px solid #999;background:#eee;padding:10px;margin:10px">'+
+		'<div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><b>'+$title+'</b><hr><pre>'+bsTest.f2s($func)+'</pre></div>'+
+		'<div id="bsTestOff'+id+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+$title+'</b></div>'+
+	'</div>' );
+};
 bsTest.suite = function(){
 	var i = arguments.length;
 	bsTest.suite.urls = arguments;
