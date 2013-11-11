@@ -28,8 +28,9 @@
 <script>
 bs( function(){
 	bsTest( 'test',
-		'3', ['!',2], 3,
-		'3', [1,2,3,4,5], 3,
+		'3', bsTest.NOT(2), 3,
+		'3', bsTest.IN(1,2,3,4,5), 3,
+		'3', bsTest.RANGE(1,5), 3,
 		function(){
 			return 'a';
 		},'a'
@@ -112,6 +113,11 @@ bs( function(){
 	bsTest( 'DOM 자식을 전부 삭제',
 		"bs.dom( '#stageHika' ).$( '>' ).length", 0, bs.dom( '#stageHika' ).$( '>' ).length
 	);
+	bsTest.tear( '리사이즈', function(){
+		bs.dom( "#stageHika" ).$( 'resize', function( $e ){
+			console.log('resize');
+		} );
+	} );
 } );
 </script>
 </body>
