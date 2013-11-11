@@ -38,7 +38,7 @@ bs( function(){
 	*/
 	bsTest( printer, 'function',
 		"bs.$ck( 'bsName' )", 'bs5', bs.$ck( 'bsName' ),
-		"bs.$ex( 5, '~', 10 )", [5,10], bs.$ex( 5, '~', 10 ),
+		"bs.$ex( 5, '~', 10 )", bsTest.RANGE(5,10), bs.$ex( 5, '~', 10 ),
 		"bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' )
 	);
 
