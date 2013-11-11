@@ -9,14 +9,14 @@ function bsTest( $printer,$title ){
 		i = 2;
 	}
 	id = bsTest.id++;
-	r = '<div style="border:1px dashed #999;padding:10px;margin:10px"><div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><div style="float:left"><b>'+title+'</b><hr>';
+	r = '<div style="border:1px dashed #999;padding:10px;margin:10px"><div id="bsTestOn'+id+'" style="display:none;cursor:pointer" onclick="bsTest.on(this)"><div style="float:left"><b>'+title+'</b><hr><ol>';
 	t = s = f = 0;
 	for( k = 1, j = arguments.length ; i < j ; k++ ){
 		t++;
 		t0 = arguments[i++];
-		r += k + '. ';
+		r += '<li>';
 		if( typeof t0 == 'function' ){
-			r += '<pre>'+bsTest.f2s(t0)+'</pre>';
+			r += '<pre style="display:inline;">'+bsTest.f2s(t0)+'</pre>';
 			target = t0();
 		}else{
 			r += t0;
@@ -41,10 +41,10 @@ function bsTest( $printer,$title ){
 			r += '== ' + target;
 			check = origin === target;
 		}
-		r += '</b> :: <b>'+ origin + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b><br>';
+		r += '</b> :: <b>'+ origin + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b></li>';
 	}
 	if( f ) bsTest.isOK = 0;
-	r += '</div><div style="padding:5px;float:right;border:1px dashed #999;text-align:center"><b style="font-size:30px;color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b><br>ok:<b style="color:#0a0">' + s + '</b> no:<b style="color:#a00">' + f + '</b></div><br clear="both"></div>'+
+	r += '</ol></div><div style="padding:5px;float:right;border:1px dashed #999;text-align:center"><b style="font-size:30px;color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b><br>ok:<b style="color:#0a0">' + s + '</b> no:<b style="color:#a00">' + f + '</b></div><br clear="both"></div>'+
 		'<div id="bsTestOff'+id+'" style="display:block;cursor:pointer" onclick="bsTest.off(this)"><b>'+title+'</b> : <b style="color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b></div></div>';
 	$printer( r );
 	if( window.top.bsTest ) window.top.bsTest.isOKsub = bsTest.isOK;
