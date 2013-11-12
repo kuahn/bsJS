@@ -327,7 +327,7 @@ function init(doc){
 			return t0;
 		}
 		function cgi( $arguments, $idx ){
-			var t0, i, j;
+			var t0, t1, i, j;
 			t0 = _cgiA, t0.length = 0, t1 = _cgiH, t1.length = 0,
 			i = $idx ? $idx : 0, j = $arguments.length;
 			if( j - i > 1 ) while( i < j )
@@ -370,7 +370,7 @@ function init(doc){
 		bs.$delete = function post( $end, $url ){
 			return httpMethod( 'DELETE', $end, $url );
 		};
-	})();
+	} )();
 	bs.$ck = function ck( $key ){
 		var r, t0, t1, t2, key, val, i, j;
 		t0 =  doc.cookie.split(';');
