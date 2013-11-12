@@ -23,22 +23,13 @@
 <script src="./printer.js"></script>
 <script>
 bs( function(){
-	/*
-		config
-	*/
-	bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
-
-	/*
-		pre process
-	*/
-	bs.$ck( 'bsName', "bs5" );
-
-	/*
-		test case
-	*/
-	bsTest( printer, 'function',
+	bsTest.tear( "Cookie Set",
+	function(){
+		bs.$ck( 'bsName', "bs5" );
+	} );
+	bsTest( 'function',
 		"bs.$ck( 'bsName' )", 'bs5', bs.$ck( 'bsName' ),
-		"bs.$ex( 5, '~', 10 )", [5,10], bs.$ex( 5, '~', 10 ),
+		"bs.$ex( 5, '~', 10 )", bsTest.RANGE(5,10), bs.$ex( 5, '~', 10 ),
 		"bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' )
 	);
 
