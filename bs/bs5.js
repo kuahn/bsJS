@@ -293,7 +293,7 @@ function init(doc){
 		};
 	})(doc);
 	(function(){
-		var	_timeout = 5000, _cgiA = []; 
+		var	_timeout = 5000, _cgiA = [], _cgiH = [];
 		var rq = W['XMLHttpRequest'] ? function rq(){ return new XMLHttpRequest; } : ( function(){
 			var t0, i, j;
 			t0 = 'MSXML2.XMLHTTP', t0 = ['Microsoft.XMLHTTP',t0,t0+'.3.0',t0+'.4.0',t0+'.5.0'],
@@ -328,28 +328,47 @@ function init(doc){
 		}
 		function cgi( $arguments, $idx ){
 			var t0, i, j;
-			t0 = _cgiA, t0.length = 0,
+			t0 = _cgiA, t0.length = 0, t1 = _cgiH, t1.length = 0,
 			i = $idx ? $idx : 0, j = $arguments.length;
-			if( j - i > 1 ) while( i < j ) t0[t0.length] = encodeURIComponent( $arguments[i++] ) + '=' + encodeURIComponent( $arguments[i++] );
+			if( j - i > 1 ) while( i < j )
+				if ( $arguments[i].charAt(0) == '@' ) t1[t1.length] = $arguments[i++].substr(1), t1[t1.length] = $arguments[i++];
+				else t0[t0.length] = encodeURIComponent( $arguments[i++] ) + '=' + encodeURIComponent( $arguments[i++] );
 			t0[t0.length] = 'bsNoCache=' + bs.$ex( 1000, '~' ,9999 );
-			return t0.join( '&' );
+			return [t0.join( '&' ), t1];
+		}
+		function cgiH( $headers, $xhr ){
+			var i, j;
+			i = 0, j = $headers.length;
+			while(i < j) $xhr.setRequestHeader( $headers[i++], $headers[i++] );
+		}
+		function httpMethod( $type, $end, $url ){
+			var t0, t1;
+			t0 = xhr( $end ), t1 = cgi( arguments, 2 ),
+			t0.open( $type, $url, $end ? true : false ),
+			cgiH( t1[1], t0 ),
+			xhrSend( $type, t0, t1[0] || '' );
+			if( !$end )	return t0.responseText;
 		}
 		bs.$timeout = function timeout( $time ){_timeout = parseInt( $time * 1000 );};
 		bs.$get = function get( $end, $url ){
-			var t0;
-			t0 = cgi( arguments, 2 ), $url = $url.split( '#' ),
-			$url = $url[0] + ( $url[0].indexOf( '?' ) > -1 ? '&' : '?' ) + t0 + ( $url[1] ? '#' + $url[1] : '' ),
+			var t0, t1;
 			t0 = xhr( $end ),
+			t1 = cgi( arguments, 2 ),
+			$url = $url.split( '#' ),
+			$url = $url[0] + ( $url[0].indexOf( '?' ) > -1 ? '&' : '?' ) + t1[0] + ( $url[1] ? '#' + $url[1] : '' ),
 			t0.open( 'GET', $url, $end ? true : false ),
+			cgiH( t1[1], t0 ),
 			xhrSend( 'GET', t0, '' );
 			if( !$end )	return t0.responseText;
 		};
 		bs.$post = function post( $end, $url ){
-			var t0;
-			t0 = xhr( $end ),
-			t0.open( 'POST', $url, $end ? true : false ),
-			xhrSend( 'POST', t0, cgi( arguments, 2 ) || '' );
-			if( !$end )	return t0.responseText;
+			return httpMethod( 'POST', $end, $url );
+		};
+		bs.$put = function put( $end, $url ){
+			return httpMethod( 'PUT', $end, $url );
+		};
+		bs.$delete = function post( $end, $url ){
+			return httpMethod( 'DELETE', $end, $url );
 		};
 	})();
 	bs.$ck = function ck( $key ){
