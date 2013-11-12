@@ -39,13 +39,15 @@ bs( function(){
 	/*
 		test case
 	*/
-	var i;
+	var i=0;
 	bs.d( '#stage' ).$(
 		'mousedown', function( $e ){
 			i = 1;
+                        console.log("this.offsetWidth : ", this.offsetWidth);
+                        console.log("$e.x : ", $e.x);
 			bsTest( printer, 'mousedown',
 				"this.id", 'stage', this.id,
-				"$e.x", [0,this.offsetWidth], $e.x
+				"$e.x", bsTest.RANGE(0,this.offsetWidth), $e.x
 			);
 		}, // mousedown
 		'mousemove', function( $e ){
@@ -58,9 +60,9 @@ bs( function(){
 			}
 		}, // mousemove
 		'mouseup', function( $e ){
-			bsTest( printer, 'mouseup', "this.id", 
-				'stage', this.id, "$e.x",
-				[0,this.offsetWidth], $e.x
+			bsTest( printer, 'mouseup', 
+                                "this.id", 'stage', this.id, 
+                                "$e.x", bsTest.RANGE(0,this.offsetWidth), $e.x
 			);
 			bs.d( '#stage' ).$( 'mousedown', null, 'mousemove', null, 'mouseup', null );
 		} // mouseup
