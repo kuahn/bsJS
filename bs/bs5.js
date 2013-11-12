@@ -682,16 +682,16 @@ function init(doc){
 			};
 			if( sheet.insertRule ){
 				add = function( $key ){sheet.insertRule( $key + '{}', ruleSet.length ); return ruleSet[ruleSet.length - 1];}
-				del = function( $key ){sheet.deleteRule( idx( this.r ) ); return ruleSet[ruleSet.length - 1];};
+				del = function( $key ){sheet.deleteRule( idx( this.r ) );};
 			}else{
-				add = function( $key ){sheet.addRule( $key, ' ' );};
+				add = function( $key ){sheet.addRule( $key, ' ' );return ruleSet[ruleSet.length - 1];};
 				del = function( $key ){sheet.removeRule( idx( this.r ) );};
 			}
 			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
 				
 			css = factory( 'c' );
 			css.init = function( $key ){
-					if( $key.indexOf(':') > -1 ) $key = $key.split(':'), console.log( $key[0], ruleKey[$key[0]],ruleKey),$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
+					if( $key.indexOf(':') > -1 ) $key = $key.split(':'), $key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
 					this.r = add( $key );
 					if( ( this.type = this.r.type ) == 1 ) this.s = new style( this.r.style );
 				};
