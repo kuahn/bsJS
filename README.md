@@ -38,7 +38,7 @@ bs( function(){
 [bsJS Wiki](https://github.com/projectBS/bsJS/wiki)
 ### APIs
 bs.$XXX [[ko](https://github.com/projectBS/bsJS/wiki/bs.$XXX-ko)]  
-bs.ANI [[ko](https://github.com/projectBS/bsJS/wiki/bs.ANI-ko)]  
+bs.ANI [[ko](https://github.com/projectBS/bsJS/wiki/bs.ANI-ko)][[ja](https://github.com/projectBS/bsJS/wiki/bs.ANI-ja)]  
 bs.dom [[ko](https://github.com/projectBS/bsJS/wiki/bs.dom-ko)][[ja](https://github.com/projectBS/bsJS/wiki/bs.dom-ja)]  
 bs Unit Test [[ko](https://github.com/projectBS/bsJS/wiki/Unit-Test-of-BS-ko)]  
 
