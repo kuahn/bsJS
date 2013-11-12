@@ -152,8 +152,8 @@ function init(doc){
 			rc++, rc %= 1000;
 			return ra[rc] || ( ra[rc] = Math.random() );
 		};
-		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; }
-		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); }
+		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; };
+		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
 		return function ex(){
 			var t0, i, j;
 			t0 = arguments[0], i = 1, j = arguments.length;
@@ -377,7 +377,7 @@ function init(doc){
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
-			b, bStyle, div,
+			b, bStyle, div, keyframe, keyframecss,
 			v, a, c;
 			
 		agent = navigator.userAgent.toLowerCase(),
@@ -518,7 +518,10 @@ function init(doc){
 		case'opera': cssPrefix = '-o-', stylePrefix = 'O'; transform3D = 0; break;
 		default: cssPrefix = '-webkit-', stylePrefix = 'webkit'; transform3D = os == 'android' ? ( osVersion < 4 ? 0 : 1 ) : 0;
 		}
-		
+		if( keyframe = W['CSSRule'] ) keyframe = keyframe.KEYFRAME_RULE ? ( keyframecss = 'keyframes', 'KEYFRAME' ) :
+						keyframe.WEBKIT_KEYFRAME_RULE ? ( keyframecss = '-webkit-keyframes', 'WEBKIT_KEYFRAME' ) :
+						keyframe.MOZ_KEYFRAME_RULE ? ( keyframecss = '-moz-keyframes', 'MOZ_KEYFRAME' ) :
+						null;
 		bs.DETECT = {
 			'device':device, 'browser':browser, 'browserVer':bVersion, 'os':os, 'osVer':osVersion, 'flash':flash, 'sony':agent.indexOf( 'sony' ) > -1,
 			//dom
@@ -535,6 +538,7 @@ function init(doc){
 			//css3
 			'mobileScroll':div.style.webkitOverflowScrolling ? 1 : 0, 'cssPrefix':cssPrefix, 'stylePrefix':stylePrefix, 'filterFix':browser == 'ie' && bVersion == 8 ? ';-ms-' : ';',
 			'transition':stylePrefix + 'Transition' in bStyle || 'transition' in bStyle ? 1 : 0, 'transform3D':transform3D,
+			'keyframe': keyframe, 'keyframecss': keyframecss,
 			//html5
 			'canvas':c ? 1: 0, 'canvasText':c && c.getContext('2d').fillText ? 1 : 0,
 			'audio':a ? 1 : 0,
@@ -613,14 +617,16 @@ function init(doc){
 								l = i;
 							}
 						}
-						style[kk + k.substring( l ).toLowerCase()] = ( p ? pf : '' ) + k;
+						style[kk + k.substring( l ).toLowerCase()] = p ? pf + k.charAt(0).toUpperCase()+k.substr(1) : k;
 					}
 				}
 			})();
+			
 			nopx = {'opacity':1,'zIndex':1};
-			style.prototype.$ = function( $arg ){
-				var t0, i, j, k, v, u;
-				i = 0, j = $arg.length;
+			style.prototype.init = function(){this.s.cssText = '';};
+			style.prototype.$ = function( $arg, i ){
+				var t0, j, k, v, u;
+				i = i || 0, j = $arg.length;
 				while( i < j ){
 					k = style[$arg[i++]], v = $arg[i++];
 					if( k ){
@@ -644,40 +650,54 @@ function init(doc){
 			};
 			style.prototype.$g = function( k ){return k = style[k], k ? filter[k] ? filter[k]( this ) : this[k].v:0};
 			bs.style = style;
+			console.log( style.animation );
 			return style;
 		})();
 		bs.module( 'c,css', ( function( style ){
-			var css, sheet, rule, del;
+			var css, sheet, rule, ruleSet, idx, add, del, ruleKey, keyframe;
 			sheet = doc.createElement( 'style' ),
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
 			sheet = sheet.styleSheet || sheet.sheet,
-			rule = sheet.cssRules || sheet.rules;
-			function idx( $sel ){
-				var i, j, k;
-				$sel = $sel.toLowerCase();
-				for( i = 0, j = rule.length ; i < j ; i++ )
-					if( rule[k = i].selectorText.toLowerCase() == $sel ||
-						rule[k = j - i - 1].selectorText.toLowerCase() == $sel
-					) return k;
-			}
-			css = factory( 'c' );
-			css.$ = function css$(){
-				if( arguments[0] === null ) return del( this.__d() );
-				return this.s.$( arguments );
+			ruleSet = sheet.cssRules || sheet.rules;
+			ruleKey = {'keyframes':bs.DETECT.keyframecss};
+			keyframe = bs.DETECT.keyframe;
+			idx = function( $rule ){
+				var i, j, k, l;
+				for( i = 0, j = ruleSet.length, k = parseInt( j * .5 ) + 1, j-- ; i < k ; i++ )
+					if( ruleSet[l = i] === $rule || ruleSet[l = j - i] === $rule ) return l;
 			};
 			if( sheet.insertRule ){
-				css.init = function( $key ){
-					sheet.insertRule( $key + '{}', rule.length ),
-					this.s = new style( rule[rule.length - 1].style );
-				};
-				del = function( $key ){sheet.deleteRule( idx( $key ) );};
+				add = function( $key ){sheet.insertRule( $key + '{}', ruleSet.length ); return ruleSet[ruleSet.length - 1];}
+				del = function( $key ){sheet.deleteRule( idx( this.r ) ); return ruleSet[ruleSet.length - 1];};
 			}else{
-				css.init = function( $key ){
-					sheet.addRule( $key, ' ' ),
-					this.s = new style( rule[rule.length - 1].style );
-				};
-				del = function( $key ){sheet.removeRule( idx( $key ) );};
+				add = function( $key ){sheet.addRule( $key, ' ' );};
+				del = function( $key ){sheet.removeRule( idx( this.r ) );};
 			}
+			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
+				
+			css = factory( 'c' );
+			css.init = function( $key ){
+					if( $key.indexOf(':') > -1 ) $key = $key.split(':'), console.log( $key[0], ruleKey[$key[0]],ruleKey),$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
+					this.r = add( $key );
+					if( ( this.type = this.r.type ) == 1 ) this.s = new style( this.r.style );
+				};
+			css.$ = function css$(){
+				var t0, r;
+				t0 = arguments[0];
+				if( t0 === null ) return del( this.__d() );
+				if( this.type == 1 ) return this.s.$( arguments );
+				else if( this.type == 7 ){
+					if( !this[t0] ){
+						if( this.r.appendRule ) this.r.appendRule( t0+'{}' );
+						else this.r.insertRule( t0+'{}' );
+						r = this.r.cssRules[this.r.cssRules.length - 1];
+						this[t0] = {r:r, s:new style( r.style )};
+					}
+					if( arguments[1] == null ) this[t0].s.init();
+					else this[t0].s.$( arguments, 1 );
+					return this;
+				}
+			};
 			return css;
 		})( style ) );
 		bs.module( 'd,dom', (function( bs, style, doc ){
