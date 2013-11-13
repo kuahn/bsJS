@@ -691,16 +691,24 @@ function init(doc){
 				
 			css = factory( 'c' );
 			css.init = function( $key ){
-					if( $key.indexOf(':') > -1 ) $key = $key.split(':'), $key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
+					if( $key.indexOf(':') > -1 ){
+						$key = $key.split(':');
+						if( $key[0] == 'keyframes' && !keyframe ){
+							this.type = -1;
+							return;
+						}else{
+							$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
+						}
+					}
 					this.r = add( $key );
 					if( ( this.type = this.r.type ) == 1 ) this.s = new style( this.r.style );
 				};
 			css.$ = function css$(){
-				var t0, r;
-				t0 = arguments[0];
-				if( t0 === null ) return del( this.__d() );
-				if( this.type == 1 ) return this.s.$( arguments );
-				else if( this.type == 7 ){
+				var type, t0, r;
+				t0 = arguments[0], type = this.type;
+				if( t0 === null ) return del( type < 0 ? 0 : this.__d() );
+				else if( type == 1 ) return this.s.$( arguments );
+				else if( type == 7 ){
 					if( !this[t0] ){
 						if( this.r.appendRule ) this.r.appendRule( t0+'{}' );
 						else this.r.insertRule( t0+'{}' );
@@ -709,8 +717,8 @@ function init(doc){
 					}
 					if( arguments[1] == null ) this[t0].s.init();
 					else this[t0].s.$( arguments, 1 );
-					return this;
 				}
+				return this;
 			};
 			return css;
 		})( style ) );
