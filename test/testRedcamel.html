@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>testHika</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<div id="stage"></div>
+<script src="../bs/bs5.js"></script>
+<script src="../bs/bsTest.js"></script>
+<script>
+
+bs( function(){
+var started; 
+bs.css( 'body' ).$( 'background', '#000' );
+bs.css( '.ani' ).$( 'position', 'absolute' );
+bs.WIN.sizer( function( w, h ){
+	var i, k, s;
+	if( started ) return;
+	started = 1, i = 300;
+	while( i-- ){
+		k = bs.$ex(0,'~',1), s = bs.$ex(3,'~',15);
+		bs.ANI.tween( 
+			bs.dom( '<div></div>' ).$( 
+				'border-radius', s, 'opacity', 1,
+				'left', bs.WIN.w*.5, 'top', bs.WIN.h*.5, 'width', 1, 'height', 1, 
+				'background', 'rgb('+bs.$ex(210,'~',255)+','+bs.$ex(210,'~',255)+','+bs.$ex(150,'~',200)+')',
+				'class', 'ani', '<', '#stage', 'this'
+			),
+			'opacity', 0, 'width', s, 'height', s,
+			'left', k ? bs.$ex(0,'~',1) ? 0 : bs.WIN.w-30 : bs.$ex(0,'~',bs.WIN.w-30), 
+			'top', k ? bs.$ex(0,'~',bs.WIN.h-30) : bs.$ex(0,'~',1) ? 0 : bs.WIN.h-30, 
+			'delay', bs.$ex(0,'~f',2), 'time', bs.$ex(.5,'~f',5), 'loop', 0
+		);
+	}
+});
+
+
+});
+
+</script>
+</body>
+</html>
