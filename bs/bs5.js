@@ -118,33 +118,6 @@ function init(doc){
 		};
 		return bs.factory = factory;
 	})(bs);
-	bs.module( 'D,data', (function(){
-		function b(c,f){return function(){return f.apply(c,arguments);};}
-		var D = factory( 'D' );
-		D.$ = function D$(){
-			var self, mode, i, j, k, v, s, e, p;
-			i = 0, j = arguments.length;
-			while( i < j ){
-				if( ( k = arguments[i++] ) === null ) return t0.__d();
-				switch( k.charAt(0) ){
-				case'~': mode = 1; k = k.substr(1); break;
-				case'=': mode = 2; k = k.substr(1); break;
-				default: mode = 0;
-				}
-				self = this, s = 0;
-				while( ( e = k.indexOf('.', s) ) > -1 ) self = self[p = k.substring( s, e )] || ( self[p] = bs.__('D') ), s = e + 1;
-				if( s ) k = k.substr( s );
-				if( mode == 1 ) return b( self, self[k] );
-				v = arguments[i++];
-				if( mode == 2 ) return self[k]( v );
-				if( v === undefined ) return self[k];
-				if( v === null ) delete self[k];
-				else self[k] = v;
-			}
-			return v;
-		};
-		return D;
-	} )() );
 	bs.$ex = (function(){
 		var ra, rc, random, rand, randf;
 		ra = {}, rc = 0;
@@ -653,7 +626,7 @@ function init(doc){
 						}else{
 							t0 = this[k]; 
 							if( t0 === undefined ) v = ( this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
-									( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
+									v.substr(0,3) == 'url' || ( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
 									sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) ) ).v, t0 = this[k];
 							else t0.v = v;
 							this.s[k] = t0.v + t0.u;
@@ -664,7 +637,6 @@ function init(doc){
 			};
 			style.prototype.$g = function( k ){return k = style[k], k ? filter[k] ? filter[k]( this ) : this[k].v:0};
 			bs.style = style;
-			console.log( style.animation );
 			return style;
 		})();
 		bs.module( 'c,css', ( function( style ){
@@ -700,8 +672,10 @@ function init(doc){
 							$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
 						}
 					}
-					this.r = add( $key );
-					if( ( this.type = this.r.type ) == 1 ) this.s = new style( this.r.style );
+					this.r = add( $key ),
+					this.type = this.r.type === undefined ? 1 : this.r.type;
+					
+					if( this.type == 1 ) this.s = new style( this.r.style );
 				};
 			css.$ = function css$(){
 				var type, t0, r;
@@ -837,9 +811,9 @@ function init(doc){
 			d.ly = function( $dom ){ return y( $dom ) - y( $dom.parentNode ); };
 			d.w = function( $dom ){ return $dom.offsetWidth; };
 			d.h = function( $dom ){ return $dom.offsetHeight; };
-			d.submit = function( $dom ){ $dom.submit(); };
-			d.focus = function( $dom ){ $dom.focus(); };
-			d.blur = function( $dom ){ $dom.blur(); };
+			d.s = function( $dom ){ $dom.submit(); };
+			d.f = function( $dom ){ $dom.focus(); };
+			d.b = function( $dom ){ $dom.blur(); };
 			d['<'] =function( $dom, $v ){
 				var t0;
 				if( $v ){
@@ -888,6 +862,7 @@ function init(doc){
 					if( $v === null ) return ( t0 = $dom.bsE ) ? t0.$( $k, null ) : ( $dom[$k] = null );
 				}
 				for( k in doc ) k.substr(0,2) == 'on' ? ( i = 1,ev$[k.substr(2).toLowerCase()] = 1 ) : 0;
+				for( k in doc.createElement('input') ) k.substr(0,2) == 'on' ? ( i = 1,ev$[k.substr(2).toLowerCase()] = 1 ) : 0;
 				if( !i ){
 					k = Object.getOwnPropertyNames(doc)
 						.concat(Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(doc))))
@@ -907,7 +882,7 @@ function init(doc){
 					};
 				}
 				ev = ( function( ev$, x, y ){
-					var pageX, pageY, evType, prevent;
+					var pageX, pageY, evType, prevent, keycode;
 					evType = {
 						'touchstart':2,'touchend':1,'touchmove':1,
 						'mousedown':4,'mouseup':3,'mousemove':3,'click':3,'mouseover':3,'mouseout':3
@@ -917,6 +892,14 @@ function init(doc){
 					}else{
 						pageX = 'pageX', pageY = 'pageY';
 					}
+					keycode = (function(){
+						var t0, t1, i, j;
+						t0 = 'a,65,b,66,c,67,d,68,e,69,f,70,g,71,h,72,i,73,j,74,k,75,l,76,m,77,n,78,o,79,p,80,q,81,r,82,s,83,t,84,u,85,v,86,w,87,x,88,y,88,z,90,back,8,tab,9,enter,13,shift,16,control,17,alt,18,pause,19,caps,20,esc,27,space,32,pageup,33,pagedown,34,end,35,home,36,left,37,up,38,right,39,down,40,insert,45,delete,46,numlock,144,scrolllock,145,0,48,1,49,2,50,3,51,4,52,5,53,6,54,7,55,8,56,9,57'.split(','),
+						t1 = {},
+						i = 0, j = t0.length;
+						while( i < j ) t1[t0[i++]] = parseInt(t0[i++]);
+						return t1;
+					})();
 					function ev( $dom ){
 						this.dom = $dom;
 					}
@@ -925,6 +908,7 @@ function init(doc){
 					} : function( $e ){
 						this.event.returnValue = false, this.event.cancelBubble = true;
 					};
+					ev.prototype.key = function( $key ){return this.code == keycode[$key];};
 					ev.prototype._ = function(){
 						var k;
 						for( k in this ) if( this.hasOwnProperty[k] && typeof this[k] == 'function' ) dom['on'+k] = null;
