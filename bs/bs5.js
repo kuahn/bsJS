@@ -152,8 +152,8 @@ function init(doc){
 			rc++, rc %= 1000;
 			return ra[rc] || ( ra[rc] = Math.random() );
 		};
-		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; }
-		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); }
+		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; };
+		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
 		return function ex(){
 			var t0, i, j;
 			t0 = arguments[0], i = 1, j = arguments.length;
@@ -293,7 +293,7 @@ function init(doc){
 		};
 	})(doc);
 	(function(){
-		var	_timeout = 5000, _cgiA = []; 
+		var	_timeout = 5000, _cgiA = [], _cgiH = [];
 		var rq = W['XMLHttpRequest'] ? function rq(){ return new XMLHttpRequest; } : ( function(){
 			var t0, i, j;
 			t0 = 'MSXML2.XMLHTTP', t0 = ['Microsoft.XMLHTTP',t0,t0+'.3.0',t0+'.4.0',t0+'.5.0'],
@@ -305,8 +305,11 @@ function init(doc){
 			return function rq(){ return new ActiveXObject( j ); };
 		} )();
 		function xhrSend( $type, $xhr, $data ){
+			var i, j;
+			i = 0, j = _cgiH.length,
 			$xhr.setRequestHeader( 'Content-Type', $type == 'GET' ? 'text/plain; charset=UTF-8' : 'application/x-www-form-urlencoded; charset=UTF-8' ),
-			$xhr.setRequestHeader( 'Cache-Control', 'no-cache' ),
+			$xhr.setRequestHeader( 'Cache-Control', 'no-cache' );
+			while(i < j) $xhr.setRequestHeader( _cgiH[i++], _cgiH[i++] );
 			$xhr.send( $data );
 		}
 		function xhr( $end ){
@@ -327,31 +330,42 @@ function init(doc){
 			return t0;
 		}
 		function cgi( $arguments, $idx ){
-			var t0, i, j;
-			t0 = _cgiA, t0.length = 0,
+			var t0, t1, i, j;
+			t0 = _cgiA, t0.length = 0, _cgiH.length = 0,
 			i = $idx ? $idx : 0, j = $arguments.length;
-			if( j - i > 1 ) while( i < j ) t0[t0.length] = encodeURIComponent( $arguments[i++] ) + '=' + encodeURIComponent( $arguments[i++] );
+			if( j - i > 1 ) while( i < j )
+				if ( $arguments[i].charAt(0) == '@' ) _cgiH[_cgiH.length] = $arguments[i++].substr(1), _cgiH[_cgiH.length] = $arguments[i++];
+				else t0[t0.length] = encodeURIComponent( $arguments[i++] ) + '=' + encodeURIComponent( $arguments[i++] );
 			t0[t0.length] = 'bsNoCache=' + bs.$ex( 1000, '~' ,9999 );
 			return t0.join( '&' );
+		}
+		function httpMethod( $type, $args, $end, $url ){
+			var t0;
+			t0 = xhr( $end ),
+			t0.open( $type, $url, $end ? true : false ),
+			xhrSend( $type, t0, cgi( $args, 2 ) || '' );
+			if( !$end )	return t0.responseText;
 		}
 		bs.$timeout = function timeout( $time ){_timeout = parseInt( $time * 1000 );};
 		bs.$get = function get( $end, $url ){
 			var t0;
-			t0 = cgi( arguments, 2 ), $url = $url.split( '#' ),
-			$url = $url[0] + ( $url[0].indexOf( '?' ) > -1 ? '&' : '?' ) + t0 + ( $url[1] ? '#' + $url[1] : '' ),
 			t0 = xhr( $end ),
+			$url = $url.split( '#' ),
+			$url = $url[0] + ( $url[0].indexOf( '?' ) > -1 ? '&' : '?' ) + cgi( arguments, 2 ) + ( $url[1] ? '#' + $url[1] : '' ),
 			t0.open( 'GET', $url, $end ? true : false ),
 			xhrSend( 'GET', t0, '' );
 			if( !$end )	return t0.responseText;
 		};
 		bs.$post = function post( $end, $url ){
-			var t0;
-			t0 = xhr( $end ),
-			t0.open( 'POST', $url, $end ? true : false ),
-			xhrSend( 'POST', t0, cgi( arguments, 2 ) || '' );
-			if( !$end )	return t0.responseText;
+			return httpMethod( 'POST', arguments, $end, $url );
 		};
-	})();
+		bs.$put = function put( $end, $url ){
+			return httpMethod( 'PUT', arguments, $end, $url );
+		};
+		bs.$delete = function post( $end, $url ){
+			return httpMethod( 'DELETE', arguments, $end, $url );
+		};
+	} )();
 	bs.$ck = function ck( $key ){
 		var r, t0, t1, t2, key, val, i, j;
 		t0 =  doc.cookie.split(';');
@@ -377,7 +391,7 @@ function init(doc){
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
-			b, bStyle, div,
+			b, bStyle, div, keyframe, keyframecss,
 			v, a, c;
 			
 		agent = navigator.userAgent.toLowerCase(),
@@ -518,7 +532,10 @@ function init(doc){
 		case'opera': cssPrefix = '-o-', stylePrefix = 'O'; transform3D = 0; break;
 		default: cssPrefix = '-webkit-', stylePrefix = 'webkit'; transform3D = os == 'android' ? ( osVersion < 4 ? 0 : 1 ) : 0;
 		}
-		
+		if( keyframe = W['CSSRule'] ) keyframe = keyframe.KEYFRAME_RULE ? ( keyframecss = 'keyframes', 'KEYFRAME' ) :
+						keyframe.WEBKIT_KEYFRAME_RULE ? ( keyframecss = '-webkit-keyframes', 'WEBKIT_KEYFRAME' ) :
+						keyframe.MOZ_KEYFRAME_RULE ? ( keyframecss = '-moz-keyframes', 'MOZ_KEYFRAME' ) :
+						null;
 		bs.DETECT = {
 			'device':device, 'browser':browser, 'browserVer':bVersion, 'os':os, 'osVer':osVersion, 'flash':flash, 'sony':agent.indexOf( 'sony' ) > -1,
 			//dom
@@ -535,6 +552,7 @@ function init(doc){
 			//css3
 			'mobileScroll':div.style.webkitOverflowScrolling ? 1 : 0, 'cssPrefix':cssPrefix, 'stylePrefix':stylePrefix, 'filterFix':browser == 'ie' && bVersion == 8 ? ';-ms-' : ';',
 			'transition':stylePrefix + 'Transition' in bStyle || 'transition' in bStyle ? 1 : 0, 'transform3D':transform3D,
+			'keyframe': keyframe, 'keyframecss': keyframecss,
 			//html5
 			'canvas':c ? 1: 0, 'canvasText':c && c.getContext('2d').fillText ? 1 : 0,
 			'audio':a ? 1 : 0,
@@ -613,14 +631,16 @@ function init(doc){
 								l = i;
 							}
 						}
-						style[kk + k.substring( l ).toLowerCase()] = ( p ? pf : '' ) + k;
+						style[kk + k.substring( l ).toLowerCase()] = p ? pf + k.charAt(0).toUpperCase()+k.substr(1) : k;
 					}
 				}
 			})();
+			
 			nopx = {'opacity':1,'zIndex':1};
-			style.prototype.$ = function( $arg ){
-				var t0, i, j, k, v, u;
-				i = 0, j = $arg.length;
+			style.prototype.init = function(){this.s.cssText = '';};
+			style.prototype.$ = function( $arg, i ){
+				var t0, j, k, v, u;
+				i = i || 0, j = $arg.length;
 				while( i < j ){
 					k = style[$arg[i++]], v = $arg[i++];
 					if( k ){
@@ -644,40 +664,62 @@ function init(doc){
 			};
 			style.prototype.$g = function( k ){return k = style[k], k ? filter[k] ? filter[k]( this ) : this[k].v:0};
 			bs.style = style;
+			console.log( style.animation );
 			return style;
 		})();
 		bs.module( 'c,css', ( function( style ){
-			var css, sheet, rule, del;
+			var css, sheet, rule, ruleSet, idx, add, del, ruleKey, keyframe;
 			sheet = doc.createElement( 'style' ),
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
 			sheet = sheet.styleSheet || sheet.sheet,
-			rule = sheet.cssRules || sheet.rules;
-			function idx( $sel ){
-				var i, j, k;
-				$sel = $sel.toLowerCase();
-				for( i = 0, j = rule.length ; i < j ; i++ )
-					if( rule[k = i].selectorText.toLowerCase() == $sel ||
-						rule[k = j - i - 1].selectorText.toLowerCase() == $sel
-					) return k;
-			}
-			css = factory( 'c' );
-			css.$ = function css$(){
-				if( arguments[0] === null ) return del( this.__d() );
-				return this.s.$( arguments );
+			ruleSet = sheet.cssRules || sheet.rules;
+			ruleKey = {'keyframes':bs.DETECT.keyframecss};
+			keyframe = bs.DETECT.keyframe;
+			idx = function( $rule ){
+				var i, j, k, l;
+				for( i = 0, j = ruleSet.length, k = parseInt( j * .5 ) + 1, j-- ; i < k ; i++ )
+					if( ruleSet[l = i] === $rule || ruleSet[l = j - i] === $rule ) return l;
 			};
 			if( sheet.insertRule ){
-				css.init = function( $key ){
-					sheet.insertRule( $key + '{}', rule.length ),
-					this.s = new style( rule[rule.length - 1].style );
-				};
-				del = function( $key ){sheet.deleteRule( idx( $key ) );};
+				add = function( $key ){sheet.insertRule( $key + '{}', ruleSet.length ); return ruleSet[ruleSet.length - 1];}
+				del = function( $key ){sheet.deleteRule( idx( this.r ) );};
 			}else{
-				css.init = function( $key ){
-					sheet.addRule( $key, ' ' ),
-					this.s = new style( rule[rule.length - 1].style );
-				};
-				del = function( $key ){sheet.removeRule( idx( $key ) );};
+				add = function( $key ){sheet.addRule( $key, ' ' );return ruleSet[ruleSet.length - 1];};
+				del = function( $key ){sheet.removeRule( idx( this.r ) );};
 			}
+			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
+				
+			css = factory( 'c' );
+			css.init = function( $key ){
+					if( $key.indexOf(':') > -1 ){
+						$key = $key.split(':');
+						if( $key[0] == 'keyframes' && !keyframe ){
+							this.type = -1;
+							return;
+						}else{
+							$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
+						}
+					}
+					this.r = add( $key );
+					if( ( this.type = this.r.type ) == 1 ) this.s = new style( this.r.style );
+				};
+			css.$ = function css$(){
+				var type, t0, r;
+				t0 = arguments[0], type = this.type;
+				if( t0 === null ) return del( type < 0 ? 0 : this.__d() );
+				else if( type == 1 ) return this.s.$( arguments );
+				else if( type == 7 ){
+					if( !this[t0] ){
+						if( this.r.appendRule ) this.r.appendRule( t0+'{}' );
+						else this.r.insertRule( t0+'{}' );
+						r = this.r.cssRules[this.r.cssRules.length - 1];
+						this[t0] = {r:r, s:new style( r.style )};
+					}
+					if( arguments[1] == null ) this[t0].s.init();
+					else this[t0].s.$( arguments, 1 );
+				}
+				return this;
+			};
 			return css;
 		})( style ) );
 		bs.module( 'd,dom', (function( bs, style, doc ){
