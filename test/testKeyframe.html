@@ -23,12 +23,12 @@
 
 bs( function(){
 
-bs.css( 'keyframes:test' ).
+bs.css( 'keyframes@test' ).
 	$( '0%', 'width', 10, 'height', 10 ).
 	$( '50%', 'width', 200, 'height', 200 ).
 	$( '100%', 'width', 100, 'height', 100 );
 	
-bs.css( 'keyframes:test' ).$( '100%', 'width', 100, 'height', 150 );
+bs.css( 'keyframes@test' ).$( '100%', 'width', 100, 'height', 150 );
 	
 	
 var a = bs.dom( '<div></div>' ).$( '<', '#stage', 'background', '#f00', 'animation', 'test 1s linear 2 alternate forwards','this' )[0];
