@@ -697,7 +697,7 @@ function init(doc){
 			return css;
 		})( style ) );
 		bs.module( 'd,dom', (function( bs, style, doc ){
-			var d, ds, ev, t, nodes;
+			var d, ds, ev, t, nodes, drill;
 			t = /^\s*|\s*$/g;
 			function x( $dom ){
 				var i = 0; do i += $dom.offsetLeft; while( $dom = $dom.offsetParent )
@@ -766,6 +766,15 @@ function init(doc){
 					if( $nodes[i].nodeType == 1 ) nodes[nodes.length++] = $nodes[i];
 				return nodes;
 			}
+			drill = function( $dom, $k ){
+				var i, j;
+				if( $k.indexOf( '>' ) > -1 ){
+					$k = $k.split('>');
+					i = 0, j = $k.length;
+					do $dom = childNodes( $dom.childNodes )[$k[i++]]; while( i < j )
+				}else $dom = childNodes( $dom.childNodes )[$k];
+				return $dom;
+			};
 			ds = {
 				'@':function( $dom, $k, $v ){
 					if( $v === undefined ) return $dom[$k] || $dom.getAttribute($k);
@@ -785,20 +794,26 @@ function init(doc){
 					};
 				} )( doc.defaultView, style ),
 				'>':function( $dom, $k, $v, $arg, $i ){
-					var t0, i, j, v;
+					var t0, i, j, k, l, v;
 					ds['>'].i = 0;
 					if( $v ){
 						if( $k ){
-							if( $k.indexOf( '>' ) > -1 ){
-								$k = $k.split('>');
-								i = 0, j = $k.length;
-								do $dom = childNodes( $dom.childNodes )[$k[i++]]; while( i < j )
-							}else $dom = childNodes( $dom.childNodes )[$k];
-							v = $arg.length > $i ? (ds['>'].i = $i + 1, $arg[$i] ) : undefined;
-							if( style[$v] ) return $dom.bsS ? ( ds.length = 1, ds[0] = $v, ds[1] = v, $dom.bsS.$( ds ) ) : 
-								v === undefined ? $dom.style[style[$v]] : ( $dom.style[style[$v]] = v );
-							else if( ev[$v] ) return ev( $dom, $v, v );
-							else return ( t0 = ds[$v.charAt(0)] ) ? t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 ) : d[$v]( $dom, v );
+							if( typeof $v == 'string' ){
+								if( style[$v] ) return $dom = drill( $dom, $k ), $dom.bsS ? ( ds.length=1,ds[0]=$v,ds[1]=undefined, $dom.bsS.$( ds ) ) : $dom.style[style[$v]];
+								else if( ev[$v] ) return $dom = drill( $dom, $k ), ev( $dom, $v );
+								else if( t0 = ds[$v.charAt(0)] ) return $dom = drill( $dom, $k ), t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 );
+								else if( t0 = d[$v] ) return $dom = drill( $dom, $k ), t0( $dom, v );
+							}
+							$v = bs( $v ),
+							t0 = Array.prototype.slice.call( $dom.childNodes, 0 );
+							if( j = t0.length ){
+								if( j - 1 < $k ) for( k = 0, l = $v.length ; k < l ; k++ ) $dom.appendChild( $v[k] );
+								else for( i = 0, j = t0.length ; i < j ; i++ ){
+									if( i < $k ) $dom.appendChild( t0[i] );
+									else if( i == $k ) for( k = 0, l = $v.length ; k < l ; k++ ) $dom.appendChild( $v[k] );
+									else $dom.appendChild( t0[i+1] );
+								}
+							}else for( i = 0, j = $v.length ; i < j ; i++ )$dom.appendChild( $v[i] );
 						}else for( $v = bs( $v ), i = 0, j = $v.length ; i < j ; i++ ) $dom.appendChild( $v[i] );
 					}else if( $v === null ){
 						if( $k ) d.method._.call( childNodes( $dom.childNodes ), nodes[0] = nodes[$k], nodes.length = 1, nodes );
@@ -931,7 +946,7 @@ function init(doc){
 							self[$k] = $v;
 							dom['on'+$k] = function( $e ){
 								var type, start, dx, dy, t0, t1, t2, i, j, X, Y;
-								self.event = $e || ( $e = event ), self.type = $e.type, self.code = $e.keyCode;
+								self.event = $e || ( $e = event ), self.type = $e.type, self.code = $e.keyCode, self.value = dom.value && bs.$trim( dom.value );
 								if( type = evType[$k] ){
 									dx = x( dom ), dy = y( dom );
 									if( type < 3 ){
