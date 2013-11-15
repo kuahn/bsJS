@@ -1,5 +1,5 @@
 function bsTest( $printer,$title ){
-	var id, i, j, k, r, t, s, f, check, title, target, origin, t0;
+	var id, i, j, k, r, t, s, f, check, title, target, origin, t0, t1;
 	if( typeof $printer != 'function' ){
 		title = $printer;
 		$printer = bsTest.printer;
@@ -22,27 +22,15 @@ function bsTest( $printer,$title ){
 			r += t0;
 			target = arguments[i++];
 		}
-		r += ' <b>'
+		r += ' <b>';
 		origin = arguments[i++];
-		if( target && target.bsTestType ){
-			switch( target.bsTestType ){
-			case'in':
-				r += 'of [' + target.join(',') +']';
-				check = target.indexOf( origin ) > -1 ? 1 : 0;
-				break;
-			case'range':
-				r += '( ' + target[0] + ' ~ ' + target[1] + ' ) ';
-				check = target[0] <= origin && origin <= target[1];
-				break;
-			case'not':
-				r += '!= ' + target[0];
-				check = origin !== target[0] ? 1 : 0;
-			}
-		}else{
+		if( target && target.bsTestType )	t1 = bsTest._bsCompare(target, origin, r), r = t1[0], check = t1[1];
+		else if( origin && origin.bsTestType ) t1 = bsTest._bsCompare(origin, target, r), r = t1[0], check = t1[1];
+		else{
 			r += '== ' + target;
 			check = origin === target;
 		}
-		r += '</b> :: <b>'+ origin + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b></li>';
+		r += '</b> :: <b>'+ (origin.bsTestType ? target:origin) + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b></li>';
 	}
 	if( f ) bsTest.isOK = 0;
 	r += '</ol></div><div style="padding:5px;float:right;border:1px dashed #999;text-align:center"><b style="font-size:30px;color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b><br>ok:<b style="color:#0a0">' + s + '</b> no:<b style="color:#a00">' + f + '</b></div><br clear="both"></div>'+
@@ -78,6 +66,23 @@ bsTest.NOT = function( a ){
 	var t0 = [a];
 	t0.bsTestType = 'not';
 	return t0;
+};
+bsTest._bsCompare = function($t, $o, $r) {
+	var chk;
+	switch( $t.bsTestType ){
+	case'in':
+		$r += 'of [' + $t.join(',') +']';
+		chk = $t.indexOf( $o ) > -1 ? 1 : 0;
+		break;
+	case'range':
+		$r += '( ' + $t[0] + ' ~ ' + $t[1] + ' ) ';
+		chk = $t[0] <= $o && $o <= $t[1];
+		break;
+	case'not':
+		$r += '!= ' + $t[0];
+		chk = $o !== $t[0] ? 1 : 0;
+	}
+	return [$r, chk];
 };
 bsTest.isOKsub = bsTest.isOK = 1, bsTest.id = 0, bsTest.IFid = 'bsTestIF';
 bsTest.off = function(dom){dom.style.display = 'none', document.getElementById('bsTestOn'+dom.id.substr(9)).style.display = 'block';};
