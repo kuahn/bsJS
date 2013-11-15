@@ -1144,7 +1144,7 @@ function init(doc){
 		if( timer ){
 			start = function(){
 				if( isLive ) return;
-				isLive = 1, loop();
+				isPause = 0, isLive = 1, loop();
 			};
 			end = function(){ani.length = isLive = 0;};
 			timer( function( $time ){if( Math.abs( $time - Date.now() ) < 1 ) time = 1;} );
