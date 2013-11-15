@@ -1315,7 +1315,7 @@ function init(doc){
 				};
 				return fps;
 			})(),
-			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
+			pause:function(){isPause = 1;},resume:function(){isPause = 0, loop();},
 			stop:function(){end();},
 			delay:(function(){
 				var delay = [];
