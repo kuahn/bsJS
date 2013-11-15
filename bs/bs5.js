@@ -61,7 +61,10 @@ function init(doc){
 			sz = {};
 			sel = function( $sel ){
 				var t0, i;
-				if( ( t0 = $sel.charAt(0) ) == '#' ) return sz[0] = doc.getElementById($sel.substr(1)), sz.length = 1, sz;
+				if( ( t0 = $sel.charAt(0) ) == '#' ){
+					if( sz[0] = doc.getElementById($sel.substr(1)) ) return sz.length = 1, sz;
+					return null;
+				}
 				if( t0 == '.' ){
 					$sel = $sel.substr(1), t0 = doc.getElementsByTagName('*'), sz.length = 0, i = t0.length;
 					while( i-- ) if( t0[i].className.indexOf( $sel ) > -1 ) sz[sz.length++] = t0[i];
@@ -616,6 +619,19 @@ function init(doc){
 				}else if( typeof k == 'function' ) return k( this, v );
 				return this[k] = v;
 			},
+			style.key = function( t0 ){
+				var k = style[t0];
+				if( !k ){
+					k = t0.replace( reg, regf );
+					if( k in b ) style[t0] = k;
+					else{
+						k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+						if( k in b ) style[t0] = k;
+						else return 0;
+					}
+				}
+				return k;
+			},
 			style.float = 'styleFloat' in b ? 'styleFloat' : 'cssFloat' in b ? 'cssFloat' : 'float',
 			bs.style = style;
 			
@@ -627,7 +643,7 @@ function init(doc){
 			};
 			return style;
 		})();
-		bs.module( 'c,css', ( function( style ){
+		bs.module( 'c,css', ( function( doc, style ){
 			var css, sheet, rule, ruleSet, idx, add, del, ruleKey, keyframe;
 			sheet = doc.createElement( 'style' ),
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
@@ -648,10 +664,9 @@ function init(doc){
 				del = function( $v ){sheet.removeRule( idx( $v ) );};
 			}
 			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
-				
 			css = factory( 'c' );
 			css.init = function( $key ){
-				var v;
+				var t0, v;
 				if( $key.indexOf('@') > -1 ){
 					$key = $key.split('@');
 					if( $key[0] == 'keyframes' && !keyframe ){
@@ -666,6 +681,14 @@ function init(doc){
 							"url('"+$key[1]+".svg') format('svg');",
 						$key = '@font-face',
 						this.type = 5;
+						try{ 
+							this.r = add( $key, v );
+						}catch($e){
+							t0 = doc.createElement( 'style' );
+							doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
+							(t0.styleSheet||t0.sheet).cssText = $key + '{' +v+'}';
+						}
+						return;
 					}else{
 						$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1],
 						this.type = 7;
@@ -692,9 +715,9 @@ function init(doc){
 				return this;
 			};
 			return css;
-		})( style ) );
+		})( doc, style ) );
 		bs.module( 'd,dom', (function( bs, style, doc ){
-			var d, ds, ev, t, nodes, drill;
+			var d, ds, ds0, ev, t, nodes, drill;
 			t = /^\s*|\s*$/g;
 			function x( $dom ){
 				var i = 0; do i += $dom.offsetLeft; while( $dom = $dom.offsetParent )
@@ -771,6 +794,7 @@ function init(doc){
 				}else $dom = childNodes( $dom.childNodes )[$k];
 				return $dom;
 			};
+			ds0 = {};
 			ds = {
 				'@':function( $dom, $k, $v ){
 					if( $v === undefined ) return $dom[$k] || $dom.getAttribute($k);
@@ -785,7 +809,7 @@ function init(doc){
 						var t0 = view.getComputedStyle($dom,'').getPropertyValue($k);
 						return t0.substr( t0.length - 2 ) == 'px' ? parseFloat( t0.substring( 0, t0.length - 2 ) ) : t0;
 					} : function( $dom, $k ){
-						var t0 = $dom.currentStyle[style[$k]];
+						var t0 = $dom.currentStyle[style.key($k)];
 						return t0.substr( t0.length - 2 ) == 'px' ? parseFloat( t0.substring( 0, t0.length - 2 ) ) : t0;
 					};
 				} )( doc.defaultView, style ),
@@ -800,14 +824,15 @@ function init(doc){
 								else if( t0 = ds[$v.charAt(0)] ) return $dom = drill( $dom, $k ), t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 );
 								else if( t0 = d[$v] ) return $dom = drill( $dom, $k ), t0( $dom, v );
 							}
-							$v = bs( $v ),
-							t0 = Array.prototype.slice.call( $dom.childNodes, 0 );
-							if( j = t0.length ){
+							$v = bs( $v );
+							t0 = $dom.childNodes, ds0.length = i = t0.length;
+							while( i-- ) ds0[i] = t0[i];
+							if( j = ds0.length ){
 								if( j - 1 < $k ) for( k = 0, l = $v.length ; k < l ; k++ ) $dom.appendChild( $v[k] );
-								else for( i = 0, j = t0.length ; i < j ; i++ ){
-									if( i < $k ) $dom.appendChild( t0[i] );
+								else for( i = 0, j = ds0.length ; i < j ; i++ ){
+									if( i < $k ) $dom.appendChild( ds0[i] );
 									else if( i == $k ) for( k = 0, l = $v.length ; k < l ; k++ ) $dom.appendChild( $v[k] );
-									else $dom.appendChild( t0[i+1] );
+									else $dom.appendChild( ds0[i+1] );
 								}
 							}else for( i = 0, j = $v.length ; i < j ; i++ )$dom.appendChild( $v[i] );
 						}else for( $v = bs( $v ), i = 0, j = $v.length ; i < j ; i++ ) $dom.appendChild( $v[i] );
@@ -1033,8 +1058,8 @@ function init(doc){
 				},
 				is:(function( sel ){
 					return function( $sel ){
-						var t0;
-						return ( t0 = sel( $sel ) ) && t0.length;
+						var t0 = sel( $sel );
+						return t0 && t0.length;
 					};
 				} )( bs.sel ),
 				touchScroll:(function( doc, isTouch ){

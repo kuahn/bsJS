@@ -41,14 +41,16 @@ bs( function(){
 	})();
 	M = {
 		tasks:[],
-		init:function( $data ){
-			if( $data && $data.length ) return this.tasks = $data;
-		},
-		add:function( $task ){
-			if( $task ) return this.tasks.unshift( $task, 1 ), this.tasks;
-		},
+		init:function( $data ){if( $data && $data.length ) return this.tasks = $data, this.tasks.slice(0);},
+		add:function( $task ){if( $task ) return this.tasks.unshift( $task, 1 ), this.tasks.slice(0);},
 		edit:function( $idx, $task ){
-			return $task ? (this.tasks[$idx*2]=$task,this.tasks[$idx*2+1]=1) : this.tasks.splice( $idx*2, 2 ), this.tasks;
+			return $task ? (this.tasks[$idx*2]=$task,this.tasks[$idx*2+1]=1) : this.tasks.splice( $idx*2, 2 ), this.tasks.slice(0);
+		},
+		check:function( $idx ){
+			var i, j;
+			if( $idx === undefined ) for( i = 0, j = this.tasks.length ; i < j ; i += 2 ) this.tasks[i+1] = 0;
+			else this.tasks[$idx*2+1] = this.tasks[$idx*2+1] ? 0 : 1;
+			return this.tasks.slice(0);
 		}
 	};
 	C = {
@@ -59,10 +61,13 @@ bs( function(){
 		},
 		input:function( $id, $value ){
 			var t0;
-			if( $id =='i' ) t0 = M.add( $value );
+			if( $id == 'i' ) t0 = M.add( $value );
 			else t0 = M.edit( $id.substr(1), $value );
-			storage.$('tasks',t0);
-			V.list( t0 );
+			storage.$('tasks',t0), V.list( t0 );
+		},
+		check:function( $id ){
+			var t0 = $id == 'c' ? M.check() : M.check( $id.substr(1) );
+			storage.$('tasks',t0), V.list( t0 );
 		}
 	};
 	V = {
@@ -71,20 +76,21 @@ bs( function(){
 			bs.c('font-face@batch batch');
 			bs.c('body').$( 'margin', 0, 'padding', 0, 'background', '#fff', 
 				'font-family', 'Helvetica,Arial', 'color', '#4d4d4d', 'font-smoothing', 'antialiased' );
+			bs.c('a').$('cursor','pointer');
 			bs.c('h1').$('font-family', 'Helvetica,Arial');
 			bs.c('#list').$('margin-top', 10, 'border-top', '1px solid #999');
 			bs.c('.list').$('width','100%', 'padding', '10px 0', 'border-bottom', '1px dashed #aaa' );
 			bs.c('.check').$('font-family', 'batch', 'font-size', 25 );
 			bs.c('.right').$('float', 'right', 'width', 75, 'text-align', 'right' );
 			bs.c('.left').$('margin-right', 80 );
-			bs.c('.text').$('background','#eee', 'color', '#999', 'font-size', 29, 'padding', '3 10','margin',0,'border', '0','width', '100%', 'height', 35, 'line-height', 35, 'font-family', 'Helvetica,Arial');
-			bs.c('.textL').$('color', '#a99', 'font-weight', 'bold', 'font-size', 25, 'padding', '3 10','margin',0,'border', '0','width', '90%', 'height', 35, 'line-height', 35, 'font-family', 'Helvetica,Arial');
+			bs.c('.text').$('background','#eee', 'color', '#999', 'font-size', 29, 'padding', '3 10','margin',0,'border', '0','width', '90%', 'height', 35, 'line-height', 35, 'font-family', 'Helvetica,Arial');
+			bs.c('.textL').$('color', '#966', 'font-weight', 'bold', 'font-size', 25, 'padding', '3 10','margin',0,'border', '0','width', '90%', 'height', 35, 'line-height', 35, 'font-family', 'Helvetica,Arial');
 			bs.c('.edit').$('background','#fff','border','1px solid #999', 'color','#000' );
-			bs.c('.clear').$('text-decoration','strike' );
+			bs.c('.clear').$('text-decoration','line-through', 'color', '#a99' );
 
 			bs.d('#stage').$( 'margin', '0 auto', 'width', '90%',
-			'>', bs.d('<div id="header"></div>'),
-			'>', bs.d('<div id="list"></div>')
+				'>', bs.d('<div id="header"></div>'),
+				'>', bs.d('<div id="list"></div>')
 			);
 			bs.d('<h1 id="title">Task Do</h1>').$('<', '#header', 'text-align', 'center');
 			bs.d('<div class="right"><a id="c" class="check">\uF164</a></div>' ).$('<', '#header');
@@ -94,28 +100,21 @@ bs( function(){
 		list:function( $tasks ){
 			var i, j, k, stat, task;
 			if( !$tasks || $tasks && !$tasks.length ) return this.clean(0);
-			this.tasks = $tasks;
-			setTimeout( this.list_, 1 );
-		},
-		list_:function(){
-			for( i = 0, j = V.tasks.length, k = 0 ; i < j ; i += 2, k++ ){
-				if( bs.WIN.is('#list'+k) ) bs.d('#list'+k).$( 'display', 'block' );
-				else V.addList( k );
-				bs.d('#i'+k).$( '@value', V.tasks[i] );
-				if( V.tasks[i+1] ) bs.d('#i'+k).$( 'class-', 'clear' ), bs.d('#c'+k).$( '@checked', null );
-				else bs.d('#i'+k).$( 'class+', 'clear' ), bs.d('#c'+k).$( '@checked', true );
+			for( i = 0, j = $tasks.length, k = 0 ; i < j ; i += 2, k++ ){
+				if( bs.WIN.is('#list'+k) ) bs.d('#list'+k).$( 'display', 'block', 'class-', 'edit' );
+				else this.addList( k );
+				bs.d('#i'+k).$( '@value', $tasks[i], 'b' );
+				bs.d('#i'+k).$( 'class' + ( $tasks[i+1] ? '-' : '+' ), 'clear' );
 			}
-			V.clean( j );
+			this.clean( j );
 		},
 		clean:function( $length ){
 			var i, j;
-			for( i = $length, j = V.listLength ; i < j ; i += 2 ) bs.d('#list'+(i*.5)).$( 'display', 'none' );
-			V.listLength = V.tasks ? V.tasks.length : 0;
-			V.tasks = null;
+			for( i = $length, j = this.listLength ; i < j ; i += 2 ) bs.d('#list'+(i*.5)).$( 'display', 'none' );
+			this.listLength = $length;
 		},
 		addList:function( $id ){
 			bs.d('#list').$( '>'+$id, '<div id="list'+$id+'" class="list">' );
-			
 			bs.d('<div class="right"><a id="t'+$id+'" class="check">\uF155</a> &nbsp; <a id="c'+$id+'" class="check">\uF164</a></div>').$('<','#list'+$id);
 			bs.d('<div class="left"><input id="i'+$id+'" class="textL" type="text"></div>').$('<','#list'+$id);
 			this.eventSet( $id );
@@ -123,18 +122,17 @@ bs( function(){
 		eventSet:(function(){
 			function f($e){bs.d(this).$('class+','edit');}
 			function b($e){bs.d(this).$('class-','edit');}
-			function t($e){console.log('t');}
-			function c($e){console.log('c');}
+			function t($e){C.input( this.id, '' );}
+			function c($e){C.check( this.id );}
 			function k($e){
-				if( $e.key('enter') ){
-					C.input( this.id, $e.value );
-					bs.d( this ).$( '@value', '', 'b' );
-				}
+				if( !$e.key('enter') ) return;
+				bs.d( this ).$( '@value', '' ),
+				C.input( this.id, $e.value );
 			}
 			return function( $id ){
 				bs.d( '#i'+$id ).$( 'focus', f, 'blur', b, 'keydown', k );
-				bs.d( '#t'+$id ).$( 'click', t );
 				bs.d( '#c'+$id ).$( 'click', c );
+				if( $id ) bs.d( '#t'+$id ).$( 'click', t );
 			};
 		})()
 	};
