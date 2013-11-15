@@ -367,7 +367,7 @@ function init(doc){
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
-			b, bStyle, div, keyframe, keyframecss,
+			b, bStyle, div, keyframe,
 			v, a, c;
 			
 		agent = navigator.userAgent.toLowerCase(),
@@ -509,10 +509,12 @@ function init(doc){
 		case'opera': cssPrefix = '-o-', stylePrefix = 'O'; transform3D = 0; break;
 		default: cssPrefix = '-webkit-', stylePrefix = 'webkit'; transform3D = os == 'android' ? ( osVersion < 4 ? 0 : 1 ) : 0;
 		}
-		if( keyframe = W['CSSRule'] ) keyframe = keyframe.KEYFRAME_RULE ? ( keyframecss = 'keyframes', 'KEYFRAME' ) :
-						keyframe.WEBKIT_KEYFRAME_RULE ? ( keyframecss = '-webkit-keyframes', 'WEBKIT_KEYFRAME' ) :
-						keyframe.MOZ_KEYFRAME_RULE ? ( keyframecss = '-moz-keyframes', 'MOZ_KEYFRAME' ) :
-						null;
+		if( keyframe = W['CSSRule'] ){
+			if( keyframe.WEBKIT_KEYFRAME_RULE ) keyframe = '-webkit-keyframes';
+			else if( keyframe.MOZ_KEYFRAME_RULE ) keyframe = '-moz-keyframes';
+			else if( keyframe.KEYFRAME_RULE ) keyframe = 'keyframes';
+			else keyframe = null;
+		}
 		bs.DETECT = {
 			'device':device, 'browser':browser, 'browserVer':bVersion, 'os':os, 'osVer':osVersion, 'flash':flash, 'sony':agent.indexOf( 'sony' ) > -1,
 			//dom
@@ -529,7 +531,7 @@ function init(doc){
 			//css3
 			'mobileScroll':div.style.webkitOverflowScrolling ? 1 : 0, 'cssPrefix':cssPrefix, 'stylePrefix':stylePrefix, 'filterFix':browser == 'ie' && bVersion == 8 ? ';-ms-' : ';',
 			'transition':stylePrefix + 'Transition' in bStyle || 'transition' in bStyle ? 1 : 0, 'transform3D':transform3D,
-			'keyframe': keyframe, 'keyframecss': keyframecss,
+			'keyframe': keyframe,
 			//html5
 			'canvas':c ? 1: 0, 'canvasText':c && c.getContext('2d').fillText ? 1 : 0,
 			'audio':a ? 1 : 0,
@@ -649,7 +651,7 @@ function init(doc){
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
 			sheet = sheet.styleSheet || sheet.sheet,
 			ruleSet = sheet.cssRules || sheet.rules;
-			ruleKey = {'keyframes':bs.DETECT.keyframecss};
+			ruleKey = {'keyframes':bs.DETECT.keyframe};
 			keyframe = bs.DETECT.keyframe;
 			idx = function( $rule ){
 				var i, j, k, l;
