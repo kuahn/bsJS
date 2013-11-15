@@ -30,7 +30,7 @@ function bsTest( $printer,$title ){
 			r += '== ' + target;
 			check = origin === target;
 		}
-		r += '</b> :: <b>'+ (origin.bsTestType ? target:origin) + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b></li>';
+		r += '</b> :: <b>'+ (origin ? (origin.bsTestType ? target:origin) : origin) + '</b> <b style="color:#' + ( check ? ( s++,'0a0">OK') : (f++,'a00">NO') ) + '</b></li>';
 	}
 	if( f ) bsTest.isOK = 0;
 	r += '</ol></div><div style="padding:5px;float:right;border:1px dashed #999;text-align:center"><b style="font-size:30px;color:#' + ( f ? 'a00">FAIL' : '0a0">OK' ) + '</b><br>ok:<b style="color:#0a0">' + s + '</b> no:<b style="color:#a00">' + f + '</b></div><br clear="both"></div>'+
@@ -67,6 +67,32 @@ bsTest.NOT = function( a ){
 	t0.bsTestType = 'not';
 	return t0;
 };
+bsTest.ITEM = function( a ){
+	var t0 = a;
+	t0.bsTestType = 'item';
+	return t0;
+}
+bsTest._deepCompare = function( $a, $b ){
+	var t0, i, j, l;
+	if( (t0 = typeof $a) != typeof $b ) return false;
+	switch( t0 ){
+	case'number':case'boolean':
+	case'undefined':case'null':
+	case'string': return $a === $b;
+	case'object':
+		if( l=0, $a.splice ){
+			if( $a.length != $b.length ) return false;
+			for( i = 0, j = $a.length ; i < j ; i++ )	if( !bsTest._deepCompare( $a[i], $b[i] ) ) return false;
+		}else{
+			for( i in $b ) l++;
+			for( i in $a ){
+				if( !bsTest._deepCompare( $a[i], $b[i] ) ) return false;
+				l--;
+			}
+		}
+		return !l;
+	}
+};
 bsTest._bsCompare = function($t, $o, $r) {
 	var chk;
 	switch( $t.bsTestType ){
@@ -81,6 +107,10 @@ bsTest._bsCompare = function($t, $o, $r) {
 	case'not':
 		$r += '!= ' + $t[0];
 		chk = $o !== $t[0] ? 1 : 0;
+		break;
+	case'item':
+		$r += '== ' + $t;
+		chk = bsTest._deepCompare($t, $o);
 	}
 	return [$r, chk];
 };
