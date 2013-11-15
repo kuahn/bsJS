@@ -653,34 +653,43 @@ function init(doc){
 					if( ruleSet[l = i] === $rule || ruleSet[l = j - i] === $rule ) return l;
 			};
 			if( sheet.insertRule ){
-				add = function( $key ){sheet.insertRule( $key + '{}', ruleSet.length ); return ruleSet[ruleSet.length - 1];}
-				del = function( $key ){sheet.deleteRule( idx( this.r ) );};
+				add = function( $k, $v ){sheet.insertRule( $k + ($v?'{'+$v+'}':'{}'), ruleSet.length ); return ruleSet[ruleSet.length - 1];}
+				del = function( $v ){sheet.deleteRule( idx( $v ) );};
 			}else{
-				add = function( $key ){sheet.addRule( $key, ' ' );return ruleSet[ruleSet.length - 1];};
-				del = function( $key ){sheet.removeRule( idx( this.r ) );};
+				add = function( $k, $v ){sheet.addRule( $k, $v||' ' );return ruleSet[ruleSet.length - 1];};
+				del = function( $v ){sheet.removeRule( idx( $v ) );};
 			}
 			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
 				
 			css = factory( 'c' );
 			css.init = function( $key ){
-					if( $key.indexOf(':') > -1 ){
-						$key = $key.split(':');
-						if( $key[0] == 'keyframes' && !keyframe ){
-							this.type = -1;
-							return;
-						}else{
-							$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
-						}
+				var v;
+				if( $key.indexOf('@') > -1 ){
+					$key = $key.split('@');
+					if( $key[0] == 'keyframes' && !keyframe ){
+						this.type = -1;
+						return;
+					}else if( $key[0] == 'font-face' ){
+						$key = $key[1].split(' '),
+						v = 'font-family:'+$key[0]+";src:url('"+$key[1]+".eot');src:"+
+							"url('"+$key[1]+".eot?#iefix') format('embedded-opentype'),"+
+							"url('"+$key[1]+".woff') format('woff'),"+
+							"url('"+$key[1]+".ttf') format('truetype'),"+
+							"url('"+$key[1]+".svg') format('svg');",
+						$key = '@font-face',
+						this.type = 5;
+					}else{
+						$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1],
+						this.type = 7;
 					}
-					this.r = add( $key ),
-					this.type = this.r.type === undefined ? 1 : this.r.type;
-					
-					if( this.type == 1 ) this.s = new style( this.r.style );
-				};
+				}else this.type = 1;
+				this.r = add( $key, v );
+				if( this.type == 1 ) this.s = new style( this.r.style );
+			};
 			css.$ = function css$(){
 				var type, t0, r;
 				t0 = arguments[0], type = this.type;
-				if( t0 === null ) return del( type < 0 ? 0 : this.__d() );
+				if( t0 === null ) return del( type < 0 ? 0 : this.__d(), this.r );
 				else if( type == 1 ) return this.s.$( arguments );
 				else if( type == 7 ){
 					if( !this[t0] ){
@@ -778,7 +787,7 @@ function init(doc){
 			ds = {
 				'@':function( $dom, $k, $v ){
 					if( $v === undefined ) return $dom[$k] || $dom.getAttribute($k);
-					if( $v === null ){
+					else if( $v === null ){
 						$dom.removeAttribute($k);
 						try{delete $dom[$k];}catch(e){};
 					}else $dom[$k] = $v, $dom.setAttribute($k, $v);
@@ -1268,6 +1277,15 @@ function init(doc){
 			if( this.update ) this.update( rate, $time, this );
 		};
 		return {
+                        tweenStop:function(){
+                            for(var i=0; i < ani.length; i++){
+                                if(ani[i].t){
+                                    if(arguments[0].__k == ani[i].t.__k){
+                                        ani[i] = {ANI:function(){}};
+                                    }
+                                }
+                            }
+                        },
 			tween:function(){
 				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
 			},
