@@ -374,9 +374,10 @@ function init(doc){
 		device = 'pc';
 		( function(){
 			function ie(){
-				if ( agent.indexOf( 'msie' ) < 0 ) return;
+				if ( agent.indexOf( 'msie' ) < 0 && agent.indexOf( 'trident' ) < 0 ) return;
 				if( agent.indexOf( 'iemobile' ) > -1 ) os = 'winMobile';
 				browser = 'ie';
+				if( agent.indexOf( 'msie' ) < 0 ) return bVersion = 11;
 				return bVersion = parseFloat( /msie ([\d]+)/.exec( agent )[1] );
 			}
 			function chrome( i ){
@@ -553,90 +554,77 @@ function init(doc){
 	(function( doc ){
 		var style;
 		style = (function(){
-			var filter, sv, nopx;
-			sv = (function(){
-				var i = 0;
-				function sv(){this.v = arguments[0], this.u = arguments[1];}
-				function sv$(){return i ? sv$[--i] : new sv( arguments[0], arguments[1] );}
-				sv._ = function sv_(){sv$[i++] = arguments[0];}
-				return sv$;
-			})();
-			filter = (function(){
-				var filter;
-				filter = {};
-				if( !bs.DETECT.opacity )
-					filter.opacity = function(s){
-						var v;
-						switch( v = arguments[1] ){
-						case undefined: return s.opacity;
-						case null:
-							delete s.opacity;
-							s.s.filter = '';
-							return v;
-						}
-						s.opacity = v;
-						s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')';
-						return v;
-					}, style.opacity = 'opacity';
-				return filter;
-			})();
-			bs.filter = filter;
-			function style(){this.s = arguments[0];}
-			(function(){
-				var p, pf, pfL, i, j, k, kk, l, patch, b, r0, r1;
-				b = doc.body.style;
-				patch = {styleFloat:'float',cssFloat:'float'};
-				pf = bs.DETECT.stylePrefix, pfL = pf.length;
-				r0 = /[-][A-Z]/g;
-				r1 = function($0){return $0.substr(1).toLowerCase();};
-				for( k in b ){
-					if( k == 'length' ) continue;
-					if( patch[k] ) style[patch[k]] = k;
-					else{
-						if( k.substr( 0, pfL ) == pf ){
-							k = k.charAt(pfL).toLowerCase() + k.substr( pfL + 1 ).replace( r0, r1 );
-							if( k in b ) continue;
-							p = 1;
-						}else p = 0;
-						for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
-							if( k.charCodeAt(i) < 90 ){
-								kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
-								l = i;
-							}
-						}
-						style[kk + k.substring( l ).toLowerCase()] = p ? pf + k.charAt(0).toUpperCase()+k.substr(1) : k;
-					}
-				}
-			})();
-			
-			nopx = {'opacity':1,'zIndex':1};
-			style.prototype.init = function(){this.s.cssText = '';};
+			var style, nopx, b, pf, reg, regf;
+			b = doc.body.style,
+			reg = /-[a-z]/g, regf = function($0){return $0.charAt(1).toUpperCase();},
+			pf = bs.DETECT.stylePrefix, nopx = {'opacity':1,'zIndex':1},
+			style = function(){this.s = arguments[0], this.u = {};},
+			style.prototype.init = function(){this.s.cssText = '';},
 			style.prototype.$ = function( $arg, i ){
-				var t0, j, k, v, u;
-				i = i || 0, j = $arg.length;
+				var t0, j, k, v, v0, u, s;
+				u = this.u, s = this.s, i = i || 0, j = $arg.length;
 				while( i < j ){
-					k = style[$arg[i++]], v = $arg[i++];
-					if( k ){
-						if( filter[k] ) v = filter[k]( this, v );
-						else if( v === undefined ) return this[k].v; //get
-						else if( v === null ){//del
-							sv._( this[k] );
-							delete this[k];
-							this.s[k] = '';
-						}else{
-							t0 = this[k]; 
-							if( t0 === undefined ) v = ( this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
-									v.substr(0,3) == 'url' || ( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
-									sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) ) ).v, t0 = this[k];
-							else t0.v = v;
-							this.s[k] = t0.v + t0.u;
+					t0 = $arg[i++], v = $arg[i++];
+					if( !( k = style[t0] ) ){
+						k = t0.replace( reg, regf );
+						if( k in b ) style[t0] = k;
+						else{
+							k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+							if( k in b ) style[t0] = k;
+							else continue;
 						}
+					}else if( typeof k == 'function' ){
+						v = k( this, v );
+						continue;
 					}
+					if( v || v === 0 ){ 
+						if( this[k] === undefined ){ //add
+							if( ( t0 = typeof v ) == 'number' ) this[k] = v, u[k] = nopx[k] ? '' : 'px';
+							else if( t0 == 'string' )
+								if( v.substr(0,3) == 'url' || ( v0 = v.indexOf( ':' ) ) == -1 ) this[k] = v, u[k] = '';
+								else this[k] = parseFloat( v.substr( 0, v0 ) ), u[k] = v.substr( v0 + 1 ), v = this[k];
+						}else this[k] = v; //set
+						s[k] = v + u[k];
+					}else if( v === null ) delete this[k], delete u[k], s[k] = '';//del
+					else return this[k]; //get
 				}
 				return v;
-			};
-			style.prototype.$g = function( k ){return k = style[k], k ? filter[k] ? filter[k]( this ) : this[k].v:0};
+			},
+			style.prototype.$g = function( t0 ){
+				var k = style[t0];
+				if( !k ){
+					k = t0.replace( reg, regf );
+					if( k in b ) style[t0] = k;
+					else{
+						k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+						if( k in b ) style[t0] = k;
+						else return 0;
+					}
+				}else if( typeof k == 'function' ) return k( this );
+				return this[k];
+			},
+			style.prototype.$s = function( t0, v ){
+				var k = style[t0];
+				if( !k ){
+					k = t0.replace( reg, regf );
+					if( k in b ) style[t0] = k;
+					else{
+						k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+						if( k in b ) style[t0] = k;
+						else return 0;
+					}
+				}else if( typeof k == 'function' ) return k( this, v );
+				return this[k] = v;
+			},
+			style.float = 'styleFloat' in b ? 'styleFloat' : 'cssFloat' in b ? 'cssFloat' : 'float',
 			bs.style = style;
+			
+			if( !( 'opacity' in b ) ) style.opacity = function(s){
+				var v = arguments[1];
+				if( v === undefined ) return s.opacity;
+				else if( v === null ) return delete s.opacity, s.s.filter = '', v;
+				else return s.opacity = v, s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')', v;
+			};
 			return style;
 		})();
 		bs.module( 'c,css', ( function( style ){
@@ -731,16 +719,15 @@ function init(doc){
 						k = arguments[i++];
 						if( k === null ) return this._();
 						if( ( v = arguments[i++] ) === undefined ){ //get
-							return style[k] ? ( dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : dom.style[style[k]] ) :
-								ev[k] ? ev( dom, k ) :
+							return ev[k] ? ev( dom, k ) :
 								( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) :
 								k == 'this' ? ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined, this ) :
-								d[k] ? d[k]( dom ) : undefined;
+								d[k] ? d[k]( dom ) :
+								dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
 						}
-						v = style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
-							ev[k] ? ev( dom, k, v ) :
+						v = ev[k] ? ev( dom, k, v ) :
 							( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
-							d[k] ? d[k]( dom, v ) : undefined ;
+							d[k] ? d[k]( dom, v ) : ( ds[ds.length++] = k, ds[ds.length++] = v );
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 					if( target ) break;
@@ -1230,7 +1217,7 @@ function init(doc){
 		};
 		tTemp = {length:0};
 		tween.prototype.ANIstyle = function( $time ){
-			var t0, t1, term, time, rate, i, j, l, k, v, e, v0;
+			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
 			if( !this.start ) return 1;
 			if( ( term = $time - this.stime ) < 0 ) return;
 			e = this.ease, time = this.time, rate = term * this.timeR, 
@@ -1239,18 +1226,18 @@ function init(doc){
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
 					while( l-- ){
-						t0 = this[l], t1 = this[l][0], i = 1;
-						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++];
-							v0 = t1[k], t1.s[k] = ( v0.v = filter[k] ? filter[k]( t1, v ) : v ) + v0.u;
+						t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
+							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k];
 					}
 					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
 					return 1;
 				}
 			while( l-- ){
-				t0 = this[l], t1 = this[l][0], i = 1;
+				t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
-					v0 = t1[k], t1.s[k] = ( v0.v = filter[k] ? filter[k]( t1, v ) : v ) + v0.u;
+					typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k];
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
