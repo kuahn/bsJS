@@ -1264,6 +1264,15 @@ function init(doc){
 			if( this.update ) this.update( rate, $time, this );
 		};
 		return {
+                        tweenStop:function(){
+                            for(var i=0; i < ani.length; i++){
+                                if(ani[i].t){
+                                    if(arguments[0].__k == ani[i].t.__k){
+                                        ani[i] = {ANI:function(){}};
+                                    }
+                                }
+                            }
+                        },
 			tween:function(){
 				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
 			},
@@ -1293,7 +1302,7 @@ function init(doc){
 				};
 				return fps;
 			})(),
-			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
+			pause:function(){isPause = 1;},resume:function(){isPause = 0, loop();},
 			stop:function(){end();},
 			delay:(function(){
 				var delay = [];
