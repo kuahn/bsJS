@@ -1135,28 +1135,28 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
+		var ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
 		style = bs.style;
 		filter = bs.filter;
 		bs.style = bs.filter = null;
-		ani = [];
+		ani = [], time = len = 0;
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
 			start = function(){
 				if( isLive ) return;
 				isPause = 0, isLive = 1, loop();
 			};
-			end = function(){ani.length = isLive = 0;};
-			timer( function( $time ){if( Math.abs( $time - Date.now() ) < 1 ) time = 1;} );
-			loop = function loop( $time ){
+			end = function(){len = ani.length = isLive = 0;};
+			timer( function( $time ){
+				time = Date.now() - $time;
+			} );
+			loop = function( $time ){
 				var t, i, j;
 				if( isPause ) return;
-				if( isLive ){
-					t = time ? $time : Date.now();
-					i = ani.length;
-					while( i-- ) if( ani[i].ANI(t) ) ani.splice( i, 1 );
-					ani.length ? timer( loop ) : end();
-				}
+				if( !isLive ) return;
+				t = $time+time, i = len;
+				while( i-- ) if( ani[i].ANI(t) ) len--, ani.splice( i, 1 );
+				ani.length ? timer( loop ) : end();
 			};
 		}else{
 			start = function start(){
@@ -1172,8 +1172,8 @@ function init(doc){
 				if( isPause ) return;
 				if( isLive ){
 					t = Date.now();
-					i = ani.length;
-					while( i-- ) if( ani[i].ANI(t) ) ani.splice( i, 1 );
+					i = len;
+					while( i-- ) if( ani[i].ANI(t) ) len--, ani.splice( i, 1 );
 					ani.length ? 0 : end();
 				}
 			};
@@ -1204,6 +1204,12 @@ function init(doc){
 		})();
 		tweenPool = {length:0};
 		function tween(){}
+		(function(){
+			var t0, i;
+			t0 = 'time,ease,delay,loop,end,key,update'.split(',');
+			i = t0.length;
+			while( i-- ) tween[t0[i]] = 1;
+		})();
 		tween.prototype.$ = function( $arg ){
 			var t0, l, i, j, k, v, isDom, v0;
 			
@@ -1217,24 +1223,19 @@ function init(doc){
 			i = 1, j = $arg.length;
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
-				if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
-				else if( k == 'ease' ) this.ease = ease[v];
-				else if( k == 'delay' ) this.delay = parseInt(v*1000);
-				else if( k == 'loop' ) this.loop = this.loopC = v;
-				else if( k == 'end' || k == 'update' ) this[k] = v;
-				else if( k == 'key' ) tween[v] = this;
-				else{
+				if( tween[k] ){
+					if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
+					else if( k == 'ease' ) this.ease = ease[v];
+					else if( k == 'delay' ) this.delay = parseInt(v*1000);
+					else if( k == 'loop' ) this.loop = this.loopC = v;
+					else if( k == 'end' || k == 'update' ) this[k] = v;
+					else if( k == 'key' ) tween[v] = this;
+				}else{
 					l = this.length;
 					while( l-- ){
 						if( isDom ){
-							if( style[k] ){
-								v0 = this[l][0].$g( k ),
-								this[l].push( style[k], v0, v - v0 );
-							}
-						}else{
-							v0 = this[l][0][k],
-							this[l].push( k, v0, v - v0 );
-						}
+							v0 = this[l][0].$g( k ), this[l].push( style[k], v0, v - v0 );
+						}else v0 = this[l][0][k], this[l].push( k, v0, v - v0 );
 					}
 				}
 			}
@@ -1301,9 +1302,9 @@ function init(doc){
                             }
                         },
 			tween:function(){
-				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
+				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments ), len++;
 			},
-			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
+			ani:function( $ani ){if( $ani.ANI ) ani[ani.length] = $ani,start(), len++;},
 			fps:(function(){
 				var printer, prev, sum, cnt, isStop;
 				prev = sum = cnt = 0;
@@ -1320,16 +1321,17 @@ function init(doc){
 				}
 				fps.ANI = function( $time ){
 					var i;
-					i = parseInt(1000/($time - prev)),
-					sum += i,
-					cnt++,
-					printer.innerHTML = "fps:"+i+", average:"+parseInt( sum / cnt ),
+					i = parseInt(1000/(($time - prev)||1)),
+					sum += i, cnt++,
+					printer.innerHTML = "fps("+i+"/"+parseInt( sum / cnt )+')',
 					prev = $time;
+					if( cnt > 60000 ) cnt = sum = 0;
 					return isStop;
 				};
 				return fps;
 			})(),
 			pause:function(){isPause = 1;},resume:function(){isPause = 0, loop();},
+			toggle:function(){isPause ? ( isPause = 0, loop() ) : isPause = 1; return isPause;},
 			stop:function(){end();},
 			delay:(function(){
 				var delay = [];
