@@ -31,6 +31,11 @@ bs.dom( '<div id="toggle"></div>' ).$( '<', 'body',
 		bs.dom("#toggle").$( 'html', isPause ? 'resume' : 'pause', 'background', isPause ? '#ffd' :'#fdd' );
 	}
 );
+bs.dom( '<div id="stop"></div>' ).$( '<', 'body', 
+	'position','absolute', 'top', 60, 'left', 30, 'width', 70, 'height', 20, 'border-radius', 15, 'html', 'stop',
+	'background', '#fff', 'line-height', 20, 'text-align', 'center', 'font-weight', 'bold', 'cursor', 'pointer', 'font-size', 11,
+	'down', bs.ANI.stop
+);
 bs.WIN.sizer( function( w, h ){
 	var i, k, s;
 	if( started ) return;
