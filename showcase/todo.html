@@ -132,7 +132,7 @@ bs( function(){
 			return function( $id ){
 				bs.d( '#i'+$id ).$( 'focus', f, 'blur', b, 'keydown', k );
 				bs.d( '#c'+$id ).$( 'click', c );
-				if( $id ) bs.d( '#t'+$id ).$( 'click', t );
+				if( $id !== '' ) bs.d( '#t'+$id ).$( 'click', t );
 			};
 		})()
 	};
