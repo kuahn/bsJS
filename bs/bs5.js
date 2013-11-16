@@ -61,7 +61,10 @@ function init(doc){
 			sz = {};
 			sel = function( $sel ){
 				var t0, i;
-				if( ( t0 = $sel.charAt(0) ) == '#' ) return sz[0] = doc.getElementById($sel.substr(1)), sz.length = 1, sz;
+				if( ( t0 = $sel.charAt(0) ) == '#' ){
+					if( sz[0] = doc.getElementById($sel.substr(1)) ) return sz.length = 1, sz;
+					return null;
+				}
 				if( t0 == '.' ){
 					$sel = $sel.substr(1), t0 = doc.getElementsByTagName('*'), sz.length = 0, i = t0.length;
 					while( i-- ) if( t0[i].className.indexOf( $sel ) > -1 ) sz[sz.length++] = t0[i];
@@ -364,7 +367,7 @@ function init(doc){
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
-			b, bStyle, div, keyframe, keyframecss,
+			b, bStyle, div, keyframe,
 			v, a, c;
 			
 		agent = navigator.userAgent.toLowerCase(),
@@ -374,9 +377,10 @@ function init(doc){
 		device = 'pc';
 		( function(){
 			function ie(){
-				if ( agent.indexOf( 'msie' ) < 0 ) return;
+				if ( agent.indexOf( 'msie' ) < 0 && agent.indexOf( 'trident' ) < 0 ) return;
 				if( agent.indexOf( 'iemobile' ) > -1 ) os = 'winMobile';
 				browser = 'ie';
+				if( agent.indexOf( 'msie' ) < 0 ) return bVersion = 11;
 				return bVersion = parseFloat( /msie ([\d]+)/.exec( agent )[1] );
 			}
 			function chrome( i ){
@@ -505,10 +509,12 @@ function init(doc){
 		case'opera': cssPrefix = '-o-', stylePrefix = 'O'; transform3D = 0; break;
 		default: cssPrefix = '-webkit-', stylePrefix = 'webkit'; transform3D = os == 'android' ? ( osVersion < 4 ? 0 : 1 ) : 0;
 		}
-		if( keyframe = W['CSSRule'] ) keyframe = keyframe.KEYFRAME_RULE ? ( keyframecss = 'keyframes', 'KEYFRAME' ) :
-						keyframe.WEBKIT_KEYFRAME_RULE ? ( keyframecss = '-webkit-keyframes', 'WEBKIT_KEYFRAME' ) :
-						keyframe.MOZ_KEYFRAME_RULE ? ( keyframecss = '-moz-keyframes', 'MOZ_KEYFRAME' ) :
-						null;
+		if( keyframe = W['CSSRule'] ){
+			if( keyframe.WEBKIT_KEYFRAME_RULE ) keyframe = '-webkit-keyframes';
+			else if( keyframe.MOZ_KEYFRAME_RULE ) keyframe = '-moz-keyframes';
+			else if( keyframe.KEYFRAME_RULE ) keyframe = 'keyframes';
+			else keyframe = null;
+		}
 		bs.DETECT = {
 			'device':device, 'browser':browser, 'browserVer':bVersion, 'os':os, 'osVer':osVersion, 'flash':flash, 'sony':agent.indexOf( 'sony' ) > -1,
 			//dom
@@ -525,7 +531,7 @@ function init(doc){
 			//css3
 			'mobileScroll':div.style.webkitOverflowScrolling ? 1 : 0, 'cssPrefix':cssPrefix, 'stylePrefix':stylePrefix, 'filterFix':browser == 'ie' && bVersion == 8 ? ';-ms-' : ';',
 			'transition':stylePrefix + 'Transition' in bStyle || 'transition' in bStyle ? 1 : 0, 'transform3D':transform3D,
-			'keyframe': keyframe, 'keyframecss': keyframecss,
+			'keyframe': keyframe,
 			//html5
 			'canvas':c ? 1: 0, 'canvasText':c && c.getContext('2d').fillText ? 1 : 0,
 			'audio':a ? 1 : 0,
@@ -553,99 +559,99 @@ function init(doc){
 	(function( doc ){
 		var style;
 		style = (function(){
-			var filter, sv, nopx;
-			sv = (function(){
-				var i = 0;
-				function sv(){this.v = arguments[0], this.u = arguments[1];}
-				function sv$(){return i ? sv$[--i] : new sv( arguments[0], arguments[1] );}
-				sv._ = function sv_(){sv$[i++] = arguments[0];}
-				return sv$;
-			})();
-			filter = (function(){
-				var filter;
-				filter = {};
-				if( !bs.DETECT.opacity )
-					filter.opacity = function(s){
-						var v;
-						switch( v = arguments[1] ){
-						case undefined: return s.opacity;
-						case null:
-							delete s.opacity;
-							s.s.filter = '';
-							return v;
-						}
-						s.opacity = v;
-						s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')';
-						return v;
-					}, style.opacity = 'opacity';
-				return filter;
-			})();
-			bs.filter = filter;
-			function style(){this.s = arguments[0];}
-			(function(){
-				var p, pf, pfL, i, j, k, kk, l, patch, b, r0, r1;
-				b = doc.body.style;
-				patch = {styleFloat:'float',cssFloat:'float'};
-				pf = bs.DETECT.stylePrefix, pfL = pf.length;
-				r0 = /[-][A-Z]/g;
-				r1 = function($0){return $0.substr(1).toLowerCase();};
-				for( k in b ){
-					if( k == 'length' ) continue;
-					if( patch[k] ) style[patch[k]] = k;
-					else{
-						if( k.substr( 0, pfL ) == pf ){
-							k = k.charAt(pfL).toLowerCase() + k.substr( pfL + 1 ).replace( r0, r1 );
-							if( k in b ) continue;
-							p = 1;
-						}else p = 0;
-						for( i = l = 0, j = k.length, kk = '' ; i < j ; i++ ){
-							if( k.charCodeAt(i) < 90 ){
-								kk += k.substring( l, i ).toLowerCase() + ( i ? '-' : '' );
-								l = i;
-							}
-						}
-						style[kk + k.substring( l ).toLowerCase()] = p ? pf + k.charAt(0).toUpperCase()+k.substr(1) : k;
-					}
-				}
-			})();
-			
-			nopx = {'opacity':1,'zIndex':1};
-			style.prototype.init = function(){this.s.cssText = '';};
+			var style, nopx, b, pf, reg, regf;
+			b = doc.body.style,
+			reg = /-[a-z]/g, regf = function($0){return $0.charAt(1).toUpperCase();},
+			pf = bs.DETECT.stylePrefix, nopx = {'opacity':1,'zIndex':1},
+			style = function(){this.s = arguments[0], this.u = {};},
+			style.prototype.init = function(){this.s.cssText = '';},
 			style.prototype.$ = function( $arg, i ){
-				var t0, j, k, v, u;
-				i = i || 0, j = $arg.length;
+				var t0, j, k, v, v0, u, s;
+				u = this.u, s = this.s, i = i || 0, j = $arg.length;
 				while( i < j ){
-					k = style[$arg[i++]], v = $arg[i++];
-					if( k ){
-						if( filter[k] ) v = filter[k]( this, v );
-						else if( v === undefined ) return this[k].v; //get
-						else if( v === null ){//del
-							sv._( this[k] );
-							delete this[k];
-							this.s[k] = '';
-						}else{
-							t0 = this[k]; 
-							if( t0 === undefined ) v = ( this[k] = typeof v == 'number' ? sv( v, nopx[k]?'':'px' ) :
-									v.substr(0,3) == 'url' || ( u = v.indexOf( ':' ) ) == -1 ? sv( v, '' ):
-									sv(  parseFloat( v.substr( 0, u ) ), v.substr( u + 1 ) ) ).v, t0 = this[k];
-							else t0.v = v;
-							this.s[k] = t0.v + t0.u;
+					t0 = $arg[i++], v = $arg[i++];
+					if( !( k = style[t0] ) ){
+						k = t0.replace( reg, regf );
+						if( k in b ) style[t0] = k;
+						else{
+							k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+							if( k in b ) style[t0] = k;
+							else continue;
 						}
+					}else if( typeof k == 'function' ){
+						v = k( this, v );
+						continue;
 					}
+					if( v || v === 0 ){ 
+						if( this[k] === undefined ){ //add
+							if( ( t0 = typeof v ) == 'number' ) this[k] = v, u[k] = nopx[k] ? '' : 'px';
+							else if( t0 == 'string' )
+								if( v.substr(0,3) == 'url' || ( v0 = v.indexOf( ':' ) ) == -1 ) this[k] = v, u[k] = '';
+								else this[k] = parseFloat( v.substr( 0, v0 ) ), u[k] = v.substr( v0 + 1 ), v = this[k];
+						}else this[k] = v; //set
+						s[k] = v + u[k];
+					}else if( v === null ) delete this[k], delete u[k], s[k] = '';//del
+					else return this[k]; //get
 				}
 				return v;
-			};
-			style.prototype.$g = function( k ){return k = style[k], k ? filter[k] ? filter[k]( this ) : this[k].v:0};
+			},
+			style.prototype.$g = function( t0 ){
+				var k = style[t0];
+				if( !k ){
+					k = t0.replace( reg, regf );
+					if( k in b ) style[t0] = k;
+					else{
+						k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+						if( k in b ) style[t0] = k;
+						else return 0;
+					}
+				}else if( typeof k == 'function' ) return k( this );
+				return this[k];
+			},
+			style.prototype.$s = function( t0, v ){
+				var k = style[t0];
+				if( !k ){
+					k = t0.replace( reg, regf );
+					if( k in b ) style[t0] = k;
+					else{
+						k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+						if( k in b ) style[t0] = k;
+						else return 0;
+					}
+				}else if( typeof k == 'function' ) return k( this, v );
+				return this[k] = v;
+			},
+			style.key = function( t0 ){
+				var k = style[t0];
+				if( !k ){
+					k = t0.replace( reg, regf );
+					if( k in b ) style[t0] = k;
+					else{
+						k = pf+k.charAt(0).toUpperCase()+k.substr(1);
+						if( k in b ) style[t0] = k;
+						else return 0;
+					}
+				}
+				return k;
+			},
+			style.float = 'styleFloat' in b ? 'styleFloat' : 'cssFloat' in b ? 'cssFloat' : 'float',
 			bs.style = style;
+			
+			if( !( 'opacity' in b ) ) style.opacity = function(s){
+				var v = arguments[1];
+				if( v === undefined ) return s.opacity;
+				else if( v === null ) return delete s.opacity, s.s.filter = '', v;
+				else return s.opacity = v, s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')', v;
+			};
 			return style;
 		})();
-		bs.module( 'c,css', ( function( style ){
+		bs.module( 'c,css', ( function( doc, style ){
 			var css, sheet, rule, ruleSet, idx, add, del, ruleKey, keyframe;
 			sheet = doc.createElement( 'style' ),
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
 			sheet = sheet.styleSheet || sheet.sheet,
 			ruleSet = sheet.cssRules || sheet.rules;
-			ruleKey = {'keyframes':bs.DETECT.keyframecss};
+			ruleKey = {'keyframes':bs.DETECT.keyframe};
 			keyframe = bs.DETECT.keyframe;
 			idx = function( $rule ){
 				var i, j, k, l;
@@ -653,34 +659,50 @@ function init(doc){
 					if( ruleSet[l = i] === $rule || ruleSet[l = j - i] === $rule ) return l;
 			};
 			if( sheet.insertRule ){
-				add = function( $key ){sheet.insertRule( $key + '{}', ruleSet.length ); return ruleSet[ruleSet.length - 1];}
-				del = function( $key ){sheet.deleteRule( idx( this.r ) );};
+				add = function( $k, $v ){sheet.insertRule( $k + ($v?'{'+$v+'}':'{}'), ruleSet.length ); return ruleSet[ruleSet.length - 1];}
+				del = function( $v ){sheet.deleteRule( idx( $v ) );};
 			}else{
-				add = function( $key ){sheet.addRule( $key, ' ' );return ruleSet[ruleSet.length - 1];};
-				del = function( $key ){sheet.removeRule( idx( this.r ) );};
+				add = function( $k, $v ){sheet.addRule( $k, $v||' ' );return ruleSet[ruleSet.length - 1];};
+				del = function( $v ){sheet.removeRule( idx( $v ) );};
 			}
 			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
-				
 			css = factory( 'c' );
 			css.init = function( $key ){
-					if( $key.indexOf(':') > -1 ){
-						$key = $key.split(':');
-						if( $key[0] == 'keyframes' && !keyframe ){
-							this.type = -1;
-							return;
-						}else{
-							$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1];
+				var t0, v;
+				if( $key.indexOf('@') > -1 ){
+					$key = $key.split('@');
+					if( $key[0] == 'keyframes' && !keyframe ){
+						this.type = -1;
+						return;
+					}else if( $key[0] == 'font-face' ){
+						$key = $key[1].split(' '),
+						v = 'font-family:'+$key[0]+";src:url('"+$key[1]+".eot');src:"+
+							"url('"+$key[1]+".eot?#iefix') format('embedded-opentype'),"+
+							"url('"+$key[1]+".woff') format('woff'),"+
+							"url('"+$key[1]+".ttf') format('truetype'),"+
+							"url('"+$key[1]+".svg') format('svg');",
+						$key = '@font-face',
+						this.type = 5;
+						try{ 
+							this.r = add( $key, v );
+						}catch($e){
+							t0 = doc.createElement( 'style' );
+							doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
+							(t0.styleSheet||t0.sheet).cssText = $key + '{' +v+'}';
 						}
+						return;
+					}else{
+						$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1],
+						this.type = 7;
 					}
-					this.r = add( $key ),
-					this.type = this.r.type === undefined ? 1 : this.r.type;
-					
-					if( this.type == 1 ) this.s = new style( this.r.style );
-				};
+				}else this.type = 1;
+				this.r = add( $key, v );
+				if( this.type == 1 ) this.s = new style( this.r.style );
+			};
 			css.$ = function css$(){
 				var type, t0, r;
 				t0 = arguments[0], type = this.type;
-				if( t0 === null ) return del( type < 0 ? 0 : this.__d() );
+				if( t0 === null ) return del( type < 0 ? 0 : this.__d(), this.r );
 				else if( type == 1 ) return this.s.$( arguments );
 				else if( type == 7 ){
 					if( !this[t0] ){
@@ -695,9 +717,9 @@ function init(doc){
 				return this;
 			};
 			return css;
-		})( style ) );
+		})( doc, style ) );
 		bs.module( 'd,dom', (function( bs, style, doc ){
-			var d, ds, ev, t, nodes, drill;
+			var d, ds, ds0, ev, t, nodes, drill;
 			t = /^\s*|\s*$/g;
 			function x( $dom ){
 				var i = 0; do i += $dom.offsetLeft; while( $dom = $dom.offsetParent )
@@ -722,16 +744,15 @@ function init(doc){
 						k = arguments[i++];
 						if( k === null ) return this._();
 						if( ( v = arguments[i++] ) === undefined ){ //get
-							return style[k] ? ( dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : dom.style[style[k]] ) :
-								ev[k] ? ev( dom, k ) :
+							return ev[k] ? ev( dom, k ) :
 								( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) :
 								k == 'this' ? ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined, this ) :
-								d[k] ? d[k]( dom ) : undefined;
+								d[k] ? d[k]( dom ) :
+								dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
 						}
-						v = style[k] ? ( ds[ds.length++] = k, ds[ds.length++] = v ) :
-							ev[k] ? ev( dom, k, v ) :
+						v = ev[k] ? ev( dom, k, v ) :
 							( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
-							d[k] ? d[k]( dom, v ) : undefined ;
+							d[k] ? d[k]( dom, v ) : ( ds[ds.length++] = k, ds[ds.length++] = v );
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 					if( target ) break;
@@ -775,10 +796,11 @@ function init(doc){
 				}else $dom = childNodes( $dom.childNodes )[$k];
 				return $dom;
 			};
+			ds0 = {};
 			ds = {
 				'@':function( $dom, $k, $v ){
 					if( $v === undefined ) return $dom[$k] || $dom.getAttribute($k);
-					if( $v === null ){
+					else if( $v === null ){
 						$dom.removeAttribute($k);
 						try{delete $dom[$k];}catch(e){};
 					}else $dom[$k] = $v, $dom.setAttribute($k, $v);
@@ -789,7 +811,7 @@ function init(doc){
 						var t0 = view.getComputedStyle($dom,'').getPropertyValue($k);
 						return t0.substr( t0.length - 2 ) == 'px' ? parseFloat( t0.substring( 0, t0.length - 2 ) ) : t0;
 					} : function( $dom, $k ){
-						var t0 = $dom.currentStyle[style[$k]];
+						var t0 = $dom.currentStyle[style.key($k)];
 						return t0.substr( t0.length - 2 ) == 'px' ? parseFloat( t0.substring( 0, t0.length - 2 ) ) : t0;
 					};
 				} )( doc.defaultView, style ),
@@ -804,14 +826,15 @@ function init(doc){
 								else if( t0 = ds[$v.charAt(0)] ) return $dom = drill( $dom, $k ), t0( $dom, $v.substr(1), $arg[$i], $arg, $i+1 );
 								else if( t0 = d[$v] ) return $dom = drill( $dom, $k ), t0( $dom, v );
 							}
-							$v = bs( $v ),
-							t0 = Array.prototype.slice.call( $dom.childNodes, 0 );
-							if( j = t0.length ){
+							$v = bs( $v );
+							t0 = $dom.childNodes, ds0.length = i = t0.length;
+							while( i-- ) ds0[i] = t0[i];
+							if( j = ds0.length ){
 								if( j - 1 < $k ) for( k = 0, l = $v.length ; k < l ; k++ ) $dom.appendChild( $v[k] );
-								else for( i = 0, j = t0.length ; i < j ; i++ ){
-									if( i < $k ) $dom.appendChild( t0[i] );
+								else for( i = 0, j = ds0.length ; i < j ; i++ ){
+									if( i < $k ) $dom.appendChild( ds0[i] );
 									else if( i == $k ) for( k = 0, l = $v.length ; k < l ; k++ ) $dom.appendChild( $v[k] );
-									else $dom.appendChild( t0[i+1] );
+									else $dom.appendChild( ds0[i+1] );
 								}
 							}else for( i = 0, j = $v.length ; i < j ; i++ )$dom.appendChild( $v[i] );
 						}else for( $v = bs( $v ), i = 0, j = $v.length ; i < j ; i++ ) $dom.appendChild( $v[i] );
@@ -912,7 +935,7 @@ function init(doc){
 						t0 = 'a,65,b,66,c,67,d,68,e,69,f,70,g,71,h,72,i,73,j,74,k,75,l,76,m,77,n,78,o,79,p,80,q,81,r,82,s,83,t,84,u,85,v,86,w,87,x,88,y,88,z,90,back,8,tab,9,enter,13,shift,16,control,17,alt,18,pause,19,caps,20,esc,27,space,32,pageup,33,pagedown,34,end,35,home,36,left,37,up,38,right,39,down,40,insert,45,delete,46,numlock,144,scrolllock,145,0,48,1,49,2,50,3,51,4,52,5,53,6,54,7,55,8,56,9,57'.split(','),
 						t1 = {},
 						i = 0, j = t0.length;
-						while( i < j ) t1[t0[i++]] = parseInt(t0[i++]);
+						while( i < j ) console.log(t0[i]), t1[t0[i++]] = parseInt(t0[i++]);
 						return t1;
 					})();
 					function ev( $dom ){
@@ -1037,8 +1060,8 @@ function init(doc){
 				},
 				is:(function( sel ){
 					return function( $sel ){
-						var t0;
-						return ( t0 = sel( $sel ) ) && t0.length;
+						var t0 = sel( $sel );
+						return t0 && t0.length;
 					};
 				} )( bs.sel ),
 				touchScroll:(function( doc, isTouch ){
@@ -1112,28 +1135,25 @@ function init(doc){
 		})();
 	})( W.document );
 	bs.ANI = ( function(){
-		var ani, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
+		var ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
 		style = bs.style;
 		filter = bs.filter;
 		bs.style = bs.filter = null;
-		ani = [];
+		ani = [], time = len = 0;
 		timer = W['requestAnimationFrame'] || W['webkitRequestAnimationFrame'] || W['msRequestAnimationFrame'] || W['mozRequestAnimationFrame'] || W['oRequestAnimationFrame'];
 		if( timer ){
 			start = function(){
 				if( isLive ) return;
-				isLive = 1, loop();
+				isPause = 0, isLive = 1, loop();
 			};
-			end = function(){ani.length = isLive = 0;};
-			timer( function( $time ){if( Math.abs( $time - Date.now() ) < 1 ) time = 1;} );
-			loop = function loop( $time ){
+			end = function(){len = ani.length = isLive = 0;};
+			timer( function( $time ){time = Date.now() - $time;} );
+			loop = function( $time ){
 				var t, i, j;
-				if( isPause ) return;
-				if( isLive ){
-					t = time ? $time : Date.now();
-					i = ani.length;
-					while( i-- ) if( ani[i].ANI(t) ) ani.splice( i, 1 );
-					ani.length ? timer( loop ) : end();
-				}
+				if( isPause || !isLive ) return;
+				t = $time + time, i = len;
+				while( i-- ) if( ani[i].ANI(t) ) len--, ani.splice( i, 1 );
+				ani.length ? timer( loop ) : end();
 			};
 		}else{
 			start = function start(){
@@ -1146,13 +1166,10 @@ function init(doc){
 			};
 			loop = function loop(){
 				var t, i;
-				if( isPause ) return;
-				if( isLive ){
-					t = Date.now();
-					i = ani.length;
-					while( i-- ) if( ani[i].ANI(t) ) ani.splice( i, 1 );
-					ani.length ? 0 : end();
-				}
+				if( isPause || !isLive ) return;
+				t = +new Date, i = len;
+				while( i-- ) if( ani[i].ANI(t) ) len--, ani.splice( i, 1 );
+				ani.length ? 0 : end();
 			};
 		}
 		ease = (function(){
@@ -1181,12 +1198,17 @@ function init(doc){
 		})();
 		tweenPool = {length:0};
 		function tween(){}
-		tween.prototype.$ = function( $arg ){
+		(function(){
+			var t0, i;
+			t0 = 'id,time,ease,delay,loop,end,update'.split(','), i = t0.length;
+			while( i-- ) tween[t0[i]] = 1;
+		})();
+		tween.prototype.init = function( $arg ){
 			var t0, l, i, j, k, v, isDom, v0;
-			
-			this.t = t0 = $arg[0], this.isDom = isDom = t0.isDom, this.start = 1,
-			this.time = 1000, this.timeR = .001, this.delay = 0, this.loop = this.loopC = 1,
-			this.k = this.end = this.update = null, this.ease = ease.linear,
+			this.t = t0 = $arg[0], this.isDom = isDom = t0.isDom,
+			this.delay = this.stop = this.pause = 0,
+			this.time = 1000, this.timeR = .001, this.loop = this.loopC = 1,
+			this.id = this.end = this.update = null, this.ease = ease.linear,
 			this.length = i = t0.length || 1;
 			while(i--)
 				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
@@ -1194,35 +1216,33 @@ function init(doc){
 			i = 1, j = $arg.length;
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
-				if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
-				else if( k == 'ease' ) this.ease = ease[v];
-				else if( k == 'delay' ) this.delay = parseInt(v*1000);
-				else if( k == 'loop' ) this.loop = this.loopC = v;
-				else if( k == 'end' || k == 'update' ) this[k] = v;
-				else if( k == 'key' ) tween[v] = this;
-				else{
+				if( tween[k] ){
+					if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
+					else if( k == 'ease' ) this.ease = ease[v];
+					else if( k == 'delay' ) this.delay = parseInt(v*1000);
+					else if( k == 'loop' ) this.loop = this.loopC = v;
+					else if( k == 'end' || k == 'update' ) this[k] = v;
+					else if( k == 'id' ) this.id = v;
+				}else{
 					l = this.length;
-					while( l-- ){
+					while( l-- )
 						if( isDom ){
-							if( style[k] ){
-								v0 = this[l][0].$g( k ),
-								this[l].push( style[k], v0, v - v0 );
-							}
-						}else{
-							v0 = this[l][0][k],
-							this[l].push( k, v0, v - v0 );
-						}
-					}
+							v0 = this[l][0].$g( k ), this[l].push( style[k], v0, v - v0 );
+						}else v0 = this[l][0][k], this[l].push( k, v0, v - v0 );
 				}
 			}
-			this.ANI = isDom ? this.ANIstyle : this.ANIobj;
-			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time;
+			this.ANI = isDom ? this.ANIstyle : this.ANIobj,
+			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time,
 			ani[ani.length] = this, start();
 		};
 		tTemp = {length:0};
-		tween.prototype.ANIstyle = function( $time ){
-			var t0, t1, term, time, rate, i, j, l, k, v, e, v0;
-			if( !this.start ) return 1;
+		tween.prototype.ANIstyle = function( $time, $pause ){
+			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
+			if( this.stop ) return 1;
+			if( $pause )
+				if( $pause == 1 && this.pause == 0 ) return this.pause = $time, 0;
+				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
+			if( this.pause ) return;
 			if( ( term = $time - this.stime ) < 0 ) return;
 			e = this.ease, time = this.time, rate = term * this.timeR, 
 			l = this.length, j = this[0].length;
@@ -1230,24 +1250,24 @@ function init(doc){
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
 					while( l-- ){
-						t0 = this[l], t1 = this[l][0], i = 1;
-						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++];
-							v0 = t1[k], t1.s[k] = ( v0.v = filter[k] ? filter[k]( t1, v ) : v ) + v0.u;
+						t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
+							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k];
 					}
 					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
 					return 1;
 				}
 			while( l-- ){
-				t0 = this[l], t1 = this[l][0], i = 1;
+				t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
-					v0 = t1[k], t1.s[k] = ( v0.v = filter[k] ? filter[k]( t1, v ) : v ) + v0.u;
+					typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k];
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
 		tween.prototype.ANIobj = function( $time ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e;
-			if( !this.start ) return 1;
+			if( this.stop ) return 1;
 			if( ( term = $time - this.stime ) < 0 ) return;
 			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
 			if( term > this.time )
@@ -1267,11 +1287,76 @@ function init(doc){
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
-		return {
+		return ANI = {
+			ani:function( $ani ){if( $ani.ANI ) ani[ani.length] = $ani,start(), len++;},
 			tween:function(){
-				( tweenPool.length ? tweenPool[--tweenPool.length] : new tween ).$( arguments );
+				var t0 = tweenPool.length ? tweenPool[--tweenPool.length] : new tween;
+				return len++, t0.init( arguments ), t0;
 			},
-			ani:function( $ani ){if( $ani.ANI )ani[ani.length] = $ani,start();},
+			tweenStop:function(){
+				var t0, i, j, k;
+				i = len, j = arguments.length;
+				while( i-- ){
+					t0 = ani[i].id, k = j;
+					while( k-- ) if( t0 == arguments[k] ) ani.stop = 1, len--, ani.splice( i, 1 );
+				}
+			},
+			tweenPause:function(){
+				var t0, t, i, j, k;
+				t = Date.now(), i = len, j = arguments.length;
+				while( i-- ){
+					t0 = ani[i].id, k = j;
+					while( k-- ) if( t0 == arguments[k] ) ani[i].ANI( t, 1 );
+				}
+			},
+			tweenResume:function(){
+				var t0, t, i, j, k;
+				t = Date.now(), i = len, j = arguments.length;
+				while( i-- ){
+					t0 = ani[i].id, k = j;
+					while( k-- ) if( t0 == arguments[k] ) ani[i].ANI( t, 2 );
+				}
+			},
+			tweenToggle:function(){
+				var t0, t, i, j, k;
+				t = Date.now(), i = len, j = arguments.length;
+				while( i-- ){
+					t0 = ani[i].id, k = j;
+					while( k-- ) if( t0 == arguments[k] ) ani[i].ANI( t, ani[i].pause ? 2 : 1 );
+				}
+			},
+			pause:function(){
+				var i, t;
+				isPause = 1;
+				t = Date.now(), i = len;
+				while( i-- ) ani[i].ANI( t, 1 );
+			},
+			resume:function(){
+				var i, t;
+				isPause = 0;
+				t = Date.now(), i = len;
+				while( i-- ) ani[i].ANI( t, 2 );
+				loop();
+			},
+			toggle:function(){
+				isPause ? ANI.resume() : ANI.pause();
+				return isPause;
+			},
+			stop:function(){end();},
+			delay:(function(){
+				var delay = [];
+				return function( $f ){
+					var i;
+					if( (i = deley.indexOf( $f ) ) == -1 ){
+						delay[delay.length] = $f;
+						$f.bsDelay = setTimeout( $f, ( arguments[1] || 1 ) * 1000 );
+					}else{
+						delay.splice( i, 1 );
+						clearTimeout( $f.bsDelay );
+						delete $f.bsDelay;
+					}
+				};
+			})(),
 			fps:(function(){
 				var printer, prev, sum, cnt, isStop;
 				prev = sum = cnt = 0;
@@ -1288,30 +1373,14 @@ function init(doc){
 				}
 				fps.ANI = function( $time ){
 					var i;
-					i = parseInt(1000/($time - prev)),
-					sum += i,
-					cnt++,
-					printer.innerHTML = "fps:"+i+", average:"+parseInt( sum / cnt ),
+					i = parseInt(1000/(($time - prev)||1)),
+					sum += i, cnt++,
+					printer.innerHTML = "fps("+i+"/"+parseInt( sum / cnt )+')',
 					prev = $time;
+					if( cnt > 60000 ) cnt = sum = 0;
 					return isStop;
 				};
 				return fps;
-			})(),
-			pause:function(){isPause = 1;},resume:function(){isPause = 0;},
-			stop:function(){end();},
-			delay:(function(){
-				var delay = [];
-				return function( $f ){
-					var i;
-					if( (i = deley.indexOf( $f ) ) == -1 ){
-						delay[delay.length] = $f;
-						$f.bsDelay = setTimeout( $f, ( arguments[1] || 1 ) * 1000 );
-					}else{
-						delay.splice( i, 1 );
-						clearTimeout( $f.bsDelay );
-						delete $f.bsDelay;
-					}
-				};
 			})()
 		};
 	})();

@@ -41,6 +41,9 @@
         </div>
       </div>
       <div>
+        <div id="pause">pause</div>
+        <div id="resume">resume</div>
+        <div id="stop">stop</div>
         <div id="nav0">nav0</div>
         <div id="nav1">nav1</div>
         <div id="nav2">nav2</div>
@@ -54,9 +57,11 @@
 <script>
 bs( function(){
 
+  var xs, xe, d;
   var slideshow = {
-    xs:0, xe:0, xc:0, d:{}, wl:[],
-    update:function( $rate, $time, $ANI ){
+    xs:0, xe:0, d:{},
+    update:function( $rate, $time, $tween ){
+      var xc;
       xc = ( xe - xs ) * $rate + xs;
       bs.WIN.scroll(xc + '', 0);
     },
@@ -64,10 +69,11 @@ bs( function(){
       bs.WIN.scroll(xe + '', 0);
     },
     start:function( $s, $e ){
-      xs = $s, xe = $e, d = {r:0};
+      d = {r:0};
+      xs = $s, xe = $e;
       bs.ANI.tween( d, 
-              d.r, 1,
-              'time', 1,
+              'r', 1,
+              'time', 5,
               'ease', 'sineIn',
               'update', slideshow.update,
               'end', slideshow.end
@@ -101,11 +107,16 @@ bs( function(){
           }
         );
       }
-    },
-    ANI:function( $time ){}
+      bs.c( '#pause' ).$( 'position', 'fixed', 'left', 0, 'bottom', 100);
+      bs.c( '#resume' ).$( 'position', 'fixed', 'left', 100, 'bottom', 100);
+      bs.c( '#stop' ).$( 'position', 'fixed', 'left', 200, 'bottom', 100)
+      bs.d( '#pause' ).$( 'mousedown', function( $e ){ bs.ANI.pause(); });
+      bs.d( '#resume' ).$( 'mousedown', function( $e ){ bs.ANI.resume(); });
+      bs.d( '#stop' ).$( 'mousedown', function( $e ){ bs.ANI.stop(); });
+    }
   };
   slideshow.init();
-  bs.ANI.ani( slideshow );
+
 } );
 </script>
 </body>

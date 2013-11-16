@@ -23,14 +23,33 @@
 <script src="./printer.js"></script>
 <script>
 bs( function(){
+	bsTest( 'bs.$ex',
+		function() {
+			return bs.$ex( 5, '~', 10 )
+		}, bsTest.RANGE(5, 10),
+		"bs.$ex( 5, '~', 10 )", bsTest.RANGE(5,10), bs.$ex( 5, '~', 10 ),
+		function() {
+			return bs.$ex( 5, '~f', 10 )
+		}, bsTest.RANGE(5, 10)
+	);
+	
+	bsTest( 'bs.$trim',
+		function() {
+			return bs.$trim( "   test   " )
+		}, 'test',
+		function() {
+			return bs.$trim( [" a ", " b "] )
+		}, bsTest.ITEM( ["a", "b"] )
+	);
+	
 	bsTest.tear( "Cookie Set",
 	function(){
 		bs.$ck( 'bsName', "bs5" );
 	} );
-	bsTest( 'function',
-		"bs.$ck( 'bsName' )", 'bs5', bs.$ck( 'bsName' ),
-		"bs.$ex( 5, '~', 10 )", bsTest.RANGE(5,10), bs.$ex( 5, '~', 10 ),
-		"bs.$trim( ' foo bar ' )", 'foo bar', bs.$trim( ' foo bar ' )
+	bsTest( 'bs.$ck',
+		function() {
+			return bs.$ck( 'bsName' )
+		}, 'bs5'
 	);
 
 } );
