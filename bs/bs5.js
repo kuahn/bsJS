@@ -1356,11 +1356,16 @@ function init(doc){
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
-		tween.prototype.ANIobj = function( $time ){
+		tween.prototype.ANIobj = function( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e;
 			if( this.stop ) return 1;
+			if( $pause )
+				if( $pause == 1 && this.pause == 0 ) return this.pause = $time, 0;
+				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
+			if( this.pause ) return;
 			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			e = this.ease, time = this.time, rate = term * this.timeR, 
+			l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
