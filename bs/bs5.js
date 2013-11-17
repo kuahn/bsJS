@@ -1218,6 +1218,7 @@ function init(doc){
 				i = 0, j = arguments.length;
 				while( i < j ) t[arguments[i++]] = arguments[i++];
 			},
+			go:function( $str ){location.hash = $str;},
 			route:function(){arguments[0] === null ? bs.WIN.on( 'hash', '@ROUTER' ) : ( bs.WIN.on( 'hashchange', '@ROUTER', router ), router() );},
 			historyMax:function($len){count=$len;}, history:h
 		};
