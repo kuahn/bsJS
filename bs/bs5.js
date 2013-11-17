@@ -20,6 +20,7 @@ if( !Array.prototype.indexOf )
 Date.now || ( Date.now = function(){return +new Date;} );
 
 if( !W['JSON'] ) W['JSON'] = {
+	parse:function( $str ){return (0,eval)( $str );},
 	stringify:(function(){
 		function stringify( $obj ){
 			var t0, i, j;
@@ -39,14 +40,8 @@ if( !W['JSON'] ) W['JSON'] = {
 			}
 		}
 		return stringify;
-	})(),
-	parse:function( $str ){
-		var t0;
-		eval( 't0='+$str );
-		return t0;
-	}
+	})()
 };
-
 function init(doc){
 	var bs = (function(doc){
 		var sel,sz,t0,div,nodes;
@@ -140,6 +135,23 @@ function init(doc){
 				}
 			}
 			return t0;
+		};
+	})();
+	bs.$tmpl = (function(){
+		var arg, reg;
+		reg = /@[^@]+@/g;
+		function r( $0 ){
+			var t0, t1, i, j, k, l;
+			t0 = $0.substring( 1, $0.length - 1 ).split('.'), i = 1, j = arg.length, l = t0.length;
+			while( i < j ){
+				t1 = arg[i++], k = 0;
+				while( k < l && t1 !== undefined ) t1 = t1[t0[k++]];
+				if( t1 !== undefined ) return t1;
+			}
+			return $0;
+		}
+		return function( $str ){
+			return arg = arguments, bs.$trim( $str.replace( reg, r ) );
 		};
 	})();
 	bs.$trim = (function(){
@@ -935,7 +947,7 @@ function init(doc){
 						t0 = 'a,65,b,66,c,67,d,68,e,69,f,70,g,71,h,72,i,73,j,74,k,75,l,76,m,77,n,78,o,79,p,80,q,81,r,82,s,83,t,84,u,85,v,86,w,87,x,88,y,88,z,90,back,8,tab,9,enter,13,shift,16,control,17,alt,18,pause,19,caps,20,esc,27,space,32,pageup,33,pagedown,34,end,35,home,36,left,37,up,38,right,39,down,40,insert,45,delete,46,numlock,144,scrolllock,145,0,48,1,49,2,50,3,51,4,52,5,53,6,54,7,55,8,56,9,57'.split(','),
 						t1 = {},
 						i = 0, j = t0.length;
-						while( i < j ) console.log(t0[i]), t1[t0[i++]] = parseInt(t0[i++]);
+						while( i < j ) t1[t0[i++]] = parseInt(t0[i++]);
 						return t1;
 					})();
 					function ev( $dom ){
@@ -1204,8 +1216,8 @@ function init(doc){
 			while( i-- ) tween[t0[i]] = 1;
 		})();
 		tween.prototype.init = function( $arg ){
-			var t0, l, i, j, k, v, isDom, v0;
-			this.t = t0 = $arg[0], this.isDom = isDom = t0.isDom,
+			var t0, l, i, j, k, v, isDom, v0, o, p;
+			this.t = t0 = $arg[0].nodeType == 1 ? bs.dom( $arg[0] ) : $arg[0], this.isDom = isDom = t0.isDom,
 			this.delay = this.stop = this.pause = 0,
 			this.time = 1000, this.timeR = .001, this.loop = this.loopC = 1,
 			this.id = this.end = this.update = null, this.ease = ease.linear,
@@ -1224,6 +1236,7 @@ function init(doc){
 					else if( k == 'end' || k == 'update' ) this[k] = v;
 					else if( k == 'id' ) this.id = v;
 				}else{
+					
 					l = this.length;
 					while( l-- )
 						if( isDom ){
@@ -1252,16 +1265,17 @@ function init(doc){
 					while( l-- ){
 						t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
-							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k];
+							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 					}
 					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
 					return 1;
 				}
+			
 			while( l-- ){
 				t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
-					typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k];
+					typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
@@ -1291,38 +1305,38 @@ function init(doc){
 			ani:function( $ani ){if( $ani.ANI ) ani[ani.length] = $ani,start(), len++;},
 			tween:function(){
 				var t0 = tweenPool.length ? tweenPool[--tweenPool.length] : new tween;
-				return len++, t0.init( arguments ), t0;
+				return t0.init( arguments ), len++, t0;
 			},
 			tweenStop:function(){
 				var t0, i, j, k;
 				i = len, j = arguments.length;
 				while( i-- ){
-					t0 = ani[i].id, k = j;
-					while( k-- ) if( t0 == arguments[k] ) ani.stop = 1, len--, ani.splice( i, 1 );
+					t0 = ani[i], k = j;
+					while( k-- ) if( t0.id == arguments[k] || t0.isDom && t0.t[0] == arguments[k] ) tweenPool[tweenPool.length++] = t0, t0.stop = 1, len--, ani.splice( i, 1 );
 				}
 			},
 			tweenPause:function(){
 				var t0, t, i, j, k;
 				t = Date.now(), i = len, j = arguments.length;
 				while( i-- ){
-					t0 = ani[i].id, k = j;
-					while( k-- ) if( t0 == arguments[k] ) ani[i].ANI( t, 1 );
+					t0 = ani[i], k = j;
+					while( k-- ) if( t0.id == arguments[k] || t0.isDom && t0.t[0] == arguments[k] ) t0.ANI( t, 1 );
 				}
 			},
 			tweenResume:function(){
 				var t0, t, i, j, k;
 				t = Date.now(), i = len, j = arguments.length;
 				while( i-- ){
-					t0 = ani[i].id, k = j;
-					while( k-- ) if( t0 == arguments[k] ) ani[i].ANI( t, 2 );
+					t0 = ani[i], k = j;
+					while( k-- ) if( t0.id == arguments[k] || t0.isDom && t0.t[0] == arguments[k] ) ani[i].ANI( t, 2 );
 				}
 			},
 			tweenToggle:function(){
 				var t0, t, i, j, k;
 				t = Date.now(), i = len, j = arguments.length;
 				while( i-- ){
-					t0 = ani[i].id, k = j;
-					while( k-- ) if( t0 == arguments[k] ) ani[i].ANI( t, ani[i].pause ? 2 : 1 );
+					t0 = ani[i], k = j;
+					while( k-- ) if( t0.id == arguments[k] || t0.isDom && t0.t[0] == arguments[k] ) ani[i].ANI( t, ani[i].pause ? 2 : 1 );
 				}
 			},
 			pause:function(){

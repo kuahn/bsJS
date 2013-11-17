@@ -31,56 +31,34 @@
 <script src="./printer.js"></script>
 <script>
 bs( function(){
-	/*
-		config
-	*/
-	bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
+	
+bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '90:%', 'padding', 10, 'background-color', '#eee' );
+bs.c( 'ol, ul' ).$( 'list-style', 'none' );
+bs.c( 'li' ).$( 'position', 'relative', 'margin', '15px' );
+bs.c( '.off' ).$( 
+	'display', 'block', 'background-color', '#34AADC', 
+	'color', '#FFF', 'font-weight', 'bold', 'text-align', 'center', 'line-height', '80px',
+	'width', '200px', 'height', '80px'
+);
+bs.c( '.on' ).$(
+	'display', 'block', 'background-color', '#4CD964', 
+	'color', '#FFF', 'font-weight', 'bold', 'text-align', 'center', 'line-height', '80px',
+	'width', '200px', 'height', '80px', 
+	'position', 'absolute', 'top', '0px', 'left', '0px'
+);
 
-	/*
-		pre process
-	*/
-        bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '90:%', 'padding', 10, 'background-color', '#eee' );
-        bs.c( 'ol, ul' ).$( 'list-style', 'none' );
-	bs.c( 'li' ).$( 'position', 'relative', 'margin', '15px' );
-        bs.c( '.off' ).$( 'display', 'block', 
-                          'background-color', '#34AADC', 
-                          'color', '#FFF',
-                          'font-weight', 'bold',
-                          'text-align', 'center',
-                          'line-height', '80px',
-                          'width', '200px', 
-                          'height', '80px' );
-        bs.c( '.on' ).$( 'display', 'block', 
-                         'background-color', '#4CD964', 
-                         'color', '#FFF',
-                         'font-weight', 'bold',
-                         'text-align', 'center',
-                         'line-height', '80px',
-                         'width', '200px', 
-                         'height', '80px', 
-                         'position', 'absolute',
-                         'top', '0px',
-                         'left', '0px' );
-        
-	bs( function(){
-            var test = bs.d("li");
-            for(var i=0; i < test.length; i++){
-                var over = bs.d(test[i]).$(">1");
-                if(over){
-                    bs.d(over).$("mouseover", function(e){
-                        var t = bs.d(this);
-                        bs.ANI.tweenStop(t);
-                        bs.ANI.tween( t, "opacity", 1, "time", .7, "ease", "sineOut" );
-                    } );
-                    bs.d(over).$("mouseout", function(e){
-                        var t = bs.d(this);
-                        bs.ANI.tweenStop(t);
-                        bs.ANI.tween( t, "opacity", 0, "time", .7, "ease", "sineOut" );                    
-                    } );
-                    bs.d(over).$("opacity", 0);
-                }
-            }
-        } );
+bs.d( '.on' ).$(
+	"mouseover", function(e){
+		bs.ANI.tweenStop(this);
+		bs.ANI.tween( this, "opacity", 1, "time", .3, "ease", "sineOut" );
+	},
+	"mouseout", function(e){
+		bs.ANI.tweenStop(this);
+		bs.ANI.tween( this, "opacity", 0, "time", .3, "ease", "sineOut" );
+	},
+	"opacity", 0
+);
+
 } );
 </script>
 </body>
