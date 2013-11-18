@@ -62,14 +62,14 @@ bs( function(){
 		Rresult:function( $uri ){
 			var t0;
 			t0 = $uri.substr( '#result/'.length ).split('/'),
-			C._type = t0[0], C._id = t0[1], C._back = 'result';
+			C._type = t0[0], C._id = decodeURIComponent(t0[1]), C._back = 'result';
 			if( t0 = M.$( type, C._id ) ) V.result( C._type, C._id, t0 );
 			else V.result( C._type, C._id, 'wait' ), bs.$js( C.loaded, M.url(  C._type, C._id ) );
 		},
 		Rdetail:function( $uri ){
 			var t0;
 			t0 = $uri.substr( '#detail/'.length ).split('/'),
-			C._type = t0[0], C._id = t0[1], C._isbn = t0[2], C._back = 'detail';
+			C._type = t0[0], C._id = decodeURIComponent(t0[1]), C._isbn = t0[2], C._back = 'detail';
 			if( t0 = M.$( type, C._id ) ) V.detail( C._type, C._id, C._isbn, t0 );
 			else V.detail( C._type, C._id, C._isbn, 'wait' ), bs.$js( C.loaded, M.url(  C._type, C._id ) );
 		},
@@ -161,7 +161,7 @@ bs( function(){
 			}else{
 				for( t0 = '', i = 0, j = $data.length ; i < j ; i++ ) t0 += '<img data="'+$type+'/'+$id+'/'+$data[i].isbn+'" src="'+ $data[i].cover_l_url +'" class="thumb">';
 				bs.d('#list').$( 'html', t0 );
-				bs.d('@.thumb').$( 'mouseover', this.resultOver, 'mouseout', this.resultOut, 'down', this.resultDown );
+				bs.d('@.thumb').$( 'mouseover', this.resultOver, 'mouseout', this.resultOut, 'up', this.resultDown );
 			}
 		},
 		modal:function($e){$e.prevent();},
@@ -172,6 +172,7 @@ bs( function(){
 			t0 = V.resultStat.split( '/' );
 			C.query( t0[0], t0[1] );
 		},
+		strip:/[&]lt[;][^&]+[&]gt[;]/g,
 		detail:function( $type, $id, $isbn, $data ){
 			var t0, i;
 			if( this.resultStat != $type + '/' + $id ) return C.query( $type, $id );
@@ -186,11 +187,9 @@ bs( function(){
 					break;
 				}
 				if( t0 ){
-					var r = /[<][^>]+[>]/g;
-					console.log( r instanceof RegExp );
-					t0 = bs.CORE.deco( t0, /[&]lt[;][^&]+[&]gt[;]/g, '' );
+					t0 = bs.CORE.deco( t0, this.strip, '' );
 					t0.L = '\uF144';
-					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', innerHeight, 'down', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
+					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', innerHeight, 'up', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
 					'>', bs.d('<div class="detail"></div>').$( 'html', bs.$tmpl( '#Tdetail', t0 ), 'this' )
 					);
 				}
