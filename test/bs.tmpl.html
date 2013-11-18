@@ -41,7 +41,7 @@ bs( function(){
 		var temp, obj0, obj1;
 		
 		//get template string
-		console.log( temp = bs.d( '#tmpl_a' ).$( '@text' ) );
+		temp = bs.d( '#tmpl_a' ).$( '@text' );
 		/*
 		<div id="label0">
 			<h1>@label.0@</h1>
@@ -64,10 +64,12 @@ bs( function(){
 			},
 			label:['info', 'data']
 		};
-		obj1 = [20, 'male', {address:'mapo', group:'bs5'}];
+		obj1 = [20, 'male', {address:['mapo','test'], group:'bs5'}];
+		
+		console.log( obj1[2].address = bs.CORE.deco( obj1[2].address, '<li>', '</li>' ) );
 		
 		//run template
-		console.log( temp = bs.$tmpl( temp, obj0, obj1 ) );
+		temp = bs.$tmpl( temp, obj0, obj1 );
 		
 		//into dom
 		bs.dom( temp ).$( '<', '#stage' );
