@@ -73,7 +73,7 @@ function init(doc){
 			var r, t0, i, j, k;
 			t0 = typeof $sel; 
 			if( t0 == 'function' ) return $sel();
-			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, div.childNodes ) : sel( $sel );
+			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, bs.CORE.reverse(div.childNodes) ) : sel( $sel );
 			if( $sel.isDom ) return $sel;
 			r = $node ? {} : nodes;
 			if( $sel.nodeType == 1 ) return r[0] = $sel, r.length = 1, r;
@@ -137,34 +137,112 @@ function init(doc){
 			return t0;
 		};
 	})();
+	bs.CORE = {
+		reverse:function( $obj ){
+			var t0, i;
+			i = $obj.length;
+			if( $obj.splice ){
+				t0 = [];
+				while( i-- ) t0[t0.length] = $obj[i];
+			}else{
+				t0 = {length:0};
+				while( i-- ) t0[t0.length++] = $obj[i];
+			}
+			return t0;
+		},
+		deco:function( $obj, $start, $end ){ //$obj, $reg, $replace, $reg, $replace
+			var type0, reg0, type1, reg1, t0, t1, i;
+			type0 = ( typeof $start ).charAt(0), i = 3;
+			if( $start instanceof RegExp ){
+				type0 = 'r';
+				reg0 = $end;
+				$end = arguments[3];
+				i = 4;
+			}
+			if( !$end ) type1 = '-';
+			else{
+				type1 = ( typeof $end ).charAt(0);
+				if( $end instanceof RegExp ){
+					type1 = 'reg';
+					reg1 = arguments[i];
+				}	
+			}
+			if( $obj.splice ){
+				t0 = $obj.slice(0), i = t0.length;
+				while( i-- ){
+					t1 = t0[i];
+					if( type0 == 'f' ) t1 = $start( t1, i );
+					else if( type0 == 'r' ) t1 = typeof t1 == 'string' ? t1.replace( $start, reg0 ) : t1;
+					else t1 = $start + t1;
+					if( type1 != '-' )
+						if( type1 == 'f' ) t1 = $end( t1, i );
+						else if( type1 == 'r' ) t1 = typeof t1 == 'string' ? t1.replace( $end, reg1 ) : t1;
+						else t1 = t1 + $end;
+					t0[i] = t1;
+				}
+			}else{
+				t0 = {};
+				for( i in $obj ){
+					t1 = $obj[i];
+					if( type0 == 'f' ) t1 = $start( t1, i );
+					else if( type0 == 'r' ) t1 = typeof t1 == 'string' ? t1.replace( $start, reg0 ) : t1;
+					else t1 = $start + t1;
+					if( type1 != '-' )
+						if( type1 == 'f' ) t1 = $end( t1, i );
+						else if( type1 == 'r' ) t1 = typeof t1 == 'string' ? t1.replace( $end, reg1 ) : t1;
+						else t1 = t1 + $end;
+					console.log( i, t1, $obj[i] );
+					t0[i] = t1;
+				}
+			}
+			return t0;
+		}
+	};
 	bs.$tmpl = (function(){
 		var arg, reg;
 		reg = /@[^@]+@/g;
 		function r( $0 ){
-			var t0, t1, i, j, k, l;
-			t0 = $0.substring( 1, $0.length - 1 ).split('.'), i = 1, j = arg.length, l = t0.length;
+			var t0, t1, t2, i, j, k, l, cnt;
+			t0 = $0.substring( 1, $0.length - 1 ).split('.'), i = 1, j = arg.length, l = t0.length, cnt = 0;
 			while( i < j ){
 				t1 = arg[i++], k = 0;
 				while( k < l && t1 !== undefined ) t1 = t1[t0[k++]];
-				if( t1 !== undefined ) return t1;
+				if( t1 !== undefined ) cnt++, t2 = t1;
 			}
-			return $0;
+			if( cnt == 0 ) return $0;
+			if( cnt > 1 ) return '@ERROR matchs '+cnt+'times@'
+			if( typeof t2 == 'object' )
+				if( t2.TMPL ) return t1.TMPL();
+				else if( t2.splice ) return t2.join('');
+			return t2;
 		}
 		return function( $str ){
+			if( $str.substr(0,2) == '#T' ) $str = bs.d( $str ).$('@text');
 			return arg = arguments, bs.$trim( $str.replace( reg, r ) );
 		};
 	})();
-	bs.$trim = (function(){
-		var t = /^\s*|\s*$/g;
-		return function trim( $v ){
-			var i, j;
-			switch( typeof $v ){
-			case'object':
-				for( i = 0, j = $v.length ; i < j ; i++ ) $v[i] = $v[i].replace( t, '' );
+	(function(){
+		function factory( r ){	
+			function strip( $v ){
+				var t0, i;
+				if( typeof $v == 'string' ) return $v.replace( r, '' );
+				else if( !$v ) return $v;
+				if( typeof $v == 'object' ){
+					if( $v.splice ){
+						t0 = [], i = $v.length;
+						while( i-- ) t0[i] = strip( $v[i] );
+					}else{
+						t0 = {};
+						for( i in $v ) t0[i] = strip( $v[i] ), console.log( i, t0[i], $v[i] );
+					}
+					return t0;
+				}
 				return $v;
-			case'string': return $v.replace( t, '' );
-			}
-		};
+			};
+			return strip;
+		}
+		bs.$stripTag = factory( /[<][^>]+[>]/g );
+		bs.$trim = factory( /^\s*|\s*$/g );
 	})();
 	bs.$xml = (function(){
 		var type, parser, t;
@@ -266,7 +344,7 @@ function init(doc){
 		bs.__callback = {};
 		return function js( $end, $url ){
 			var t0, i;
-			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8', t0.src = $url;
+			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8';
 			if( $url.charAt( $url.length -1 ) == '=' ){
 				$url += 'bs.__callback.' + ( i = 'c' + (_callback++) ),
 				bs.__callback[i] = function(){
@@ -277,7 +355,7 @@ function init(doc){
 				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $end();}
 				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $end() );}
 			}
-			doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
+			t0.src = $url, doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
 		};
 	})(doc);
 	(function(){
@@ -754,17 +832,18 @@ function init(doc){
 					dom = target || this[l], i = s, ds.length = 0;
 					while( i < j ){
 						k = arguments[i++];
-						if( k === null ) return this._();
-						if( ( v = arguments[i++] ) === undefined ){ //get
+						if( k === null ) this._();
+						else if( ( v = arguments[i++] ) === undefined ){ //get
 							return ev[k] ? ev( dom, k ) :
 								( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) :
 								k == 'this' ? ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined, this ) :
 								d[k] ? d[k]( dom ) :
 								dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
+						}else{
+							v = ev[k] ? ev( dom, k, v ) :
+								( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
+								d[k] ? d[k]( dom, v ) : ( ds[ds.length++] = k, ds[ds.length++] = v );
 						}
-						v = ev[k] ? ev( dom, k, v ) :
-							( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
-							d[k] ? d[k]( dom, v ) : ( ds[ds.length++] = k, ds[ds.length++] = v );
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 					if( target ) break;
@@ -895,8 +974,8 @@ function init(doc){
 				};
 				d['class-'] = function( $dom, $v ){
 					var t0, i;
-					if( !( t0 = $dom.className.replace(t,'') ) ) return t0;
-					t0 = bs.$ex( t0.split( ' ' ) );
+					if( !( t0 = bs.$trim( $dom.className ) ) ) return t0;
+					t0 = t0.split( ' ' ); 
 					if( ( i = t0.indexOf( $v ) ) > -1 ) t0.splice( i, 1 );
 					return $dom.className = t0.join(' ');
 				};
