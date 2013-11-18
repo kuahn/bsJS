@@ -15,30 +15,7 @@
 <script src="../bs/bs5.js"></script> 
 <script>
 bs( function(){
-	var storage, M, V, C;
-	storage = (function(){
-		var t0 = {};
-		t0.$ = bs.DETECT.local ? function(){
-			var t0, i, j, k, v;
-			i = 0, j = arguments.length;
-			while( i < j ){
-				k = arguments[i++], v = arguments[i++];
-				if( v === undefined ) return t0 = localStorage.getItem( k ), t0 && t0.charAt(0) == '@' ? JSON.parse( t0.substr(1) ) : t0;
-				else if( v === null ) return localStorage.removeItem( k );
-				else return localStorage.setItem( k, typeof v == 'object' ? '@' + JSON.stringify( v ) : v ), v;
-			}
-		} : function(){
-			var t0, i, j, k, v;
-			i = 0, j = arguments.length;
-			while( i < j ){
-				k = arguments[i++], v = arguments[i++];
-				if( v === undefined ) return (t0 = bs.$ck( k )).charAt(0) == '@' ? JSON.parse( t0.substr(1) ) : t0;
-				else if( v === null ) return bs.$ck( k, null );
-				else return bs.$ck( k, typeof v == 'object' ? '@' + JSON.stringify( v ) : v, 365 ), v;
-			}
-		};
-		return t0;
-	})();
+	var M, V, C;
 	M = {
 		tasks:[],
 		init:function( $data ){if( $data && $data.length ) return this.tasks = $data, this.tasks.slice(0);},
@@ -57,17 +34,17 @@ bs( function(){
 		init:function(){
 			var t0;
 			V.init();
-			V.list( M.init( storage.$('tasks') ) );
+			V.list( M.init( bs.SAVE.$('tasks') ) );
 		},
 		input:function( $id, $value ){
 			var t0;
 			if( $id == 'i' ) t0 = M.add( $value );
 			else t0 = M.edit( $id.substr(1), $value );
-			storage.$('tasks',t0), V.list( t0 );
+			bs.SAVE.$('tasks',t0), V.list( t0 );
 		},
 		check:function( $id ){
 			var t0 = $id == 'c' ? M.check() : M.check( $id.substr(1) );
-			storage.$('tasks',t0), V.list( t0 );
+			bs.SAVE.$('tasks',t0), V.list( t0 );
 		}
 	};
 	V = {
