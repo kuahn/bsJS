@@ -41,6 +41,7 @@ bs( function(){
 * bs.ANI [[ko](https://github.com/projectBS/bsJS/wiki/bs.ANI-ko)][[ja](https://github.com/projectBS/bsJS/wiki/bs.ANI-ja)]  
 * bs.dom [[ko](https://github.com/projectBS/bsJS/wiki/bs.dom-ko)][[ja](https://github.com/projectBS/bsJS/wiki/bs.dom-ja)]  
 * bs Unit Test [[ko](https://github.com/projectBS/bsJS/wiki/Unit-Test-of-BS-ko)][[ja](https://github.com/projectBS/bsJS/wiki/Unit-Test-of-BS-ja)]  
+* Structure of BS [[ko](https://github.com/projectBS/bsJS/wiki/Structure-of-BS)][[ja](https://github.com/projectBS/bsJS/wiki/Structure-of-BS-ja)]  
 
 ## License
 Dual licensed under the MIT or GPL Version 2 licenses.

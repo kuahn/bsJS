@@ -73,7 +73,7 @@ function init(doc){
 			var r, t0, i, j, k;
 			t0 = typeof $sel; 
 			if( t0 == 'function' ) return $sel();
-			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, div.childNodes ) : sel( $sel );
+			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, bs.$reverse(div.childNodes) ) : sel( $sel );
 			if( $sel.isDom ) return $sel;
 			r = $node ? {} : nodes;
 			if( $sel.nodeType == 1 ) return r[0] = $sel, r.length = 1, r;
@@ -89,7 +89,7 @@ function init(doc){
 		bs.sel = sel;
 		return bs;
 	})(doc);
-	var factory = (function(bs){
+	(function(bs){
 		function cls( $arg ){
 			var key, factory, t0, k;
 			key = $arg[0], factory = $arg[1],
@@ -99,7 +99,12 @@ function init(doc){
 			return factory;
 		}
 		function del(){return delete this.__f[this.__k], this.__k;}
-		function factory( $key ){
+		bs.factory = function(){
+			var t0, t1, i;
+			t0 = arguments[0].split(','), arguments[0] = t0[0], t1 = new cls(arguments), i = t0.length;
+			while( i-- ) bs[t0[i]] = t1;
+		};
+		bs.factory.creator = function( $key ){
 			function F(){
 				var t0, t1;
 				return typeof ( t0 = arguments[0] ) == 'string' ? 
@@ -109,12 +114,6 @@ function init(doc){
 			}
 			return F;
 		}
-		bs.module = function(){
-			var t0, t1, i;
-			t0 = arguments[0].split(','), arguments[0] = t0[0], t1 = new cls(arguments), i = t0.length;
-			while( i-- ) bs[t0[i]] = t1;
-		};
-		return bs.factory = factory;
 	})(bs);
 	bs.$ex = (function(){
 		var ra, rc, random, rand, randf;
@@ -137,34 +136,93 @@ function init(doc){
 			return t0;
 		};
 	})();
-	bs.$tmpl = (function(){
+	(function(){
+		function deco( $v, $t, $f, $r ){
+			var t0 = $v;
+			switch( $t ){
+			case's':case'n': t0 = $f + t0; break;
+			case'f': t0 = $f( t0, i ); break;
+			case'r': if( typeof t0 == 'string' ) t0 = t0.replace( $f, $r );
+			}
+			return t0;
+		}
+		bs.$deco = function( $obj, $start, $end ){
+			var type0, reg0, type1, reg1, t0, i;
+			type0 = ( typeof $start ).charAt(0), i = 3;
+			if( $start instanceof RegExp ) type0 = 'r', reg0 = $end,  $end = arguments[3], i = 4;
+			if( !$end ) type1 = '-';
+			else{
+				type1 = ( typeof $end ).charAt(0);
+				if( $end instanceof RegExp ) type1 = 'reg', reg1 = arguments[i];
+			}
+			if( $obj.splice ){
+				t0 = [], i = $obj.length;
+				while( i-- ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1 );
+			}else{
+				t0 = {};
+				for( i in $obj ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1 );
+			}
+			return t0;
+		};
+		bs.$reverse = function( $obj ){
+			var t0, i;
+			i = $obj.length;
+			if( $obj.splice ){
+				t0 = [];
+				while( i-- ) t0[t0.length] = $obj[i];
+			}else{
+				t0 = {length:0};
+				while( i-- ) t0[t0.length++] = $obj[i];
+			}
+			return t0;
+		};
+	})();
+	(function(){
 		var arg, reg;
 		reg = /@[^@]+@/g;
 		function r( $0 ){
-			var t0, t1, i, j, k, l;
-			t0 = $0.substring( 1, $0.length - 1 ).split('.'), i = 1, j = arg.length, l = t0.length;
+			var t0, t1, t2, i, j, k, l, cnt;
+			$0 = $0.substring( 1, $0.length - 1 );
+			t0 = $0.split('.'), i = 1, j = arg.length, l = t0.length, cnt = 0;
 			while( i < j ){
 				t1 = arg[i++], k = 0;
 				while( k < l && t1 !== undefined ) t1 = t1[t0[k++]];
-				if( t1 !== undefined ) return t1;
+				if( t1 !== undefined ) cnt++, t2 = t1;
 			}
-			return $0;
+			if( cnt == 0 ) return $0;
+			if( cnt > 1 ) return '@ERROR matchs '+cnt+'times@'
+			i = typeof t2;
+			if( i == 'object' )
+				if( t2.TMPL ) return t1.TMPL( $0 );
+				else if( t2.splice ) return t2.join('');
+			else if( i == 'function' ) return t2( $0 );
+			return t2;
 		}
-		return function( $str ){
+		bs.$tmpl = function( $str ){
+			if( $str.substr(0,2) == '#T' ) $str = bs.d( $str ).$('@text');
 			return arg = arguments, bs.$trim( $str.replace( reg, r ) );
 		};
-	})();
-	bs.$trim = (function(){
-		var t = /^\s*|\s*$/g;
-		return function trim( $v ){
-			var i, j;
-			switch( typeof $v ){
-			case'object':
-				for( i = 0, j = $v.length ; i < j ; i++ ) $v[i] = $v[i].replace( t, '' );
+		function factory( r, v ){	
+			function f( $v ){
+				var t0, i;
+				if( typeof $v == 'string' ) return $v.replace( r, v );
+				else if( !$v ) return $v;
+				if( typeof $v == 'object' ){
+					if( $v.splice ){
+						t0 = [], i = $v.length;
+						while( i-- ) t0[i] = f( $v[i] );
+					}else{
+						t0 = {};
+						for( i in $v ) t0[i] = f( $v[i] );
+					}
+					return t0;
+				}
 				return $v;
-			case'string': return $v.replace( t, '' );
-			}
-		};
+			};
+			return f;
+		}
+		bs.$stripTag = factory( /[<][^>]+[>]/g, '' );
+		bs.$trim = factory( /^\s*|\s*$/g, '' );
 	})();
 	bs.$xml = (function(){
 		var type, parser, t;
@@ -266,7 +324,7 @@ function init(doc){
 		bs.__callback = {};
 		return function js( $end, $url ){
 			var t0, i;
-			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8', t0.src = $url;
+			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8';
 			if( $url.charAt( $url.length -1 ) == '=' ){
 				$url += 'bs.__callback.' + ( i = 'c' + (_callback++) ),
 				bs.__callback[i] = function(){
@@ -277,7 +335,7 @@ function init(doc){
 				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $end();}
 				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $end() );}
 			}
-			doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
+			t0.src = $url, doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
 		};
 	})(doc);
 	(function(){
@@ -657,7 +715,7 @@ function init(doc){
 			};
 			return style;
 		})();
-		bs.module( 'c,css', ( function( doc, style ){
+		bs.factory( 'c,css', ( function( doc, style ){
 			var css, sheet, rule, ruleSet, idx, add, del, ruleKey, keyframe;
 			sheet = doc.createElement( 'style' ),
 			doc.getElementsByTagName( 'head' )[0].appendChild( sheet ),
@@ -678,15 +736,12 @@ function init(doc){
 				del = function( $v ){sheet.removeRule( idx( $v ) );};
 			}
 			rule = function( $rule ){this.r = $rule, this.s = new style( $rule );}
-			css = factory( 'c' );
+			css = bs.factory.creator( 'c' );
 			css.init = function( $key ){
 				var t0, v;
 				if( $key.indexOf('@') > -1 ){
 					$key = $key.split('@');
-					if( $key[0] == 'keyframes' && !keyframe ){
-						this.type = -1;
-						return;
-					}else if( $key[0] == 'font-face' ){
+					if( $key[0] == 'font-face' ){
 						$key = $key[1].split(' '),
 						v = 'font-family:'+$key[0]+";src:url('"+$key[1]+".eot');src:"+
 							"url('"+$key[1]+".eot?#iefix') format('embedded-opentype'),"+
@@ -703,9 +758,14 @@ function init(doc){
 							(t0.styleSheet||t0.sheet).cssText = $key + '{' +v+'}';
 						}
 						return;
-					}else{
-						$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1],
-						this.type = 7;
+					}else if( $key[0] == 'keyframes' ){
+						if( !keyframe ){
+							this.type = -1;
+							return;
+						}else{
+							$key = '@' + ( ruleKey[$key[0]] || $key[0] )+ ' ' + $key[1],
+							this.type = 7;
+						}
 					}
 				}else this.type = 1;
 				this.r = add( $key, v );
@@ -730,7 +790,33 @@ function init(doc){
 			};
 			return css;
 		})( doc, style ) );
-		bs.module( 'd,dom', (function( bs, style, doc ){
+		(function(){
+			var r = /^[0-9.-]+$/;
+			function parse( $data ){
+				var t0, t1, t2, c, i, j, k, v;
+				t2 = [], t0 = $data.split('}');
+				for( i = 0, j = t0.length ; i < j ; i++ ){
+					if( t0[i] ){
+						t0[i] = bs.$trim( t0[i].split('{') );
+						if( t0[i][0].charAt(0) != '@' ){
+							c = bs.c( t0[i][0] ),
+							t1 = bs.$trim( t0[i][1].split(';') ),
+							k = t1.length, t2.length = 0;
+							while( k-- ){
+								v = bs.$trim( t1[k].split(':') ),
+								t2[t2.length] = v[0], t2[t2.length] = r.test(v[1]) ? parseFloat(v[1]) : v[1];
+							}
+							c.$.apply( c, t2 );
+						}
+					}
+				}
+			}
+			bs.$css = function( $v ){
+				if( $v.substr( $v.length - 3 ) == 'css' ) bs.$get( parse, $v ); 
+				else parse( $v );
+			};
+		})();
+		bs.factory( 'd,dom', (function( bs, style, doc ){
 			var d, ds, ds0, ev, t, nodes, drill;
 			t = /^\s*|\s*$/g;
 			function x( $dom ){
@@ -741,7 +827,7 @@ function init(doc){
 				var i = 0; do i += $dom.offsetTop; while( $dom = $dom.offsetParent )
 				return i;
 			}
-			d = factory( 'd' ),
+			d = bs.factory.creator( 'd' ),
 			d.init = function( $key ){
 				var t0, i;
 				t0 = bs( $key ), this.length = i = t0.length;
@@ -754,17 +840,18 @@ function init(doc){
 					dom = target || this[l], i = s, ds.length = 0;
 					while( i < j ){
 						k = arguments[i++];
-						if( k === null ) return this._();
-						if( ( v = arguments[i++] ) === undefined ){ //get
+						if( k === null ) this._();
+						else if( ( v = arguments[i++] ) === undefined ){ //get
 							return ev[k] ? ev( dom, k ) :
 								( t0 = ds[k.charAt(0)] ) ? t0( dom, k.substr(1) ) :
 								k == 'this' ? ( ds.length ? ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds ) : undefined, this ) :
 								d[k] ? d[k]( dom ) :
 								dom.bsS ? ( ds.length = 1, ds[0] = k, ds[1] = undefined, dom.bsS.$( ds ) ) : undefined;
+						}else{
+							v = ev[k] ? ev( dom, k, v ) :
+								( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
+								d[k] ? d[k]( dom, v ) : ( ds[ds.length++] = k, ds[ds.length++] = v );
 						}
-						v = ev[k] ? ev( dom, k, v ) :
-							( t0 = ds[k.charAt(0)] ) ? ( v = t0( dom, k.substr(1), v, arguments, i ), i = t0.i || i, v ) :
-							d[k] ? d[k]( dom, v ) : ( ds[ds.length++] = k, ds[ds.length++] = v );
 					}
 					if( ds.length ) ( dom.bsS || ( dom.bsS = new style( dom.style ) ) ).$( ds );
 					if( target ) break;
@@ -895,8 +982,8 @@ function init(doc){
 				};
 				d['class-'] = function( $dom, $v ){
 					var t0, i;
-					if( !( t0 = $dom.className.replace(t,'') ) ) return t0;
-					t0 = bs.$ex( t0.split( ' ' ) );
+					if( !( t0 = bs.$trim( $dom.className ) ) ) return t0;
+					t0 = t0.split( ' ' ); 
 					if( ( i = t0.indexOf( $v ) ) > -1 ) t0.splice( i, 1 );
 					return $dom.className = t0.join(' ');
 				};
@@ -1035,7 +1122,7 @@ function init(doc){
 				}
 			}
 			function hash( e, k, v ){
-				var old, w, h;
+				var t0, old, w, h;
 				if( v ){
 					t0 = ev[e] || ( ev[e] = [] );
 					t0[t0.length] = t0[k] = v;
@@ -1065,12 +1152,13 @@ function init(doc){
 			}
 			win = {
 				on:function( e, k, v ){
-					if( e == 'hashchange' && !W['HashChangeEvent'] ) return hash( e, k, v );
-					if( e == 'orientationchange' && !W['DeviceOrientationEvent'] ) return 0;
+					if( e == 'hashchange' && !'onhashchange' in W ) return hash( e, k, v );
+					if( e == 'orientationchange' && !'onorientationchange' in W ) return 0;
 					if( e.substr(0,3) == 'key' ) return ev( e, k, v, doc );
 					ev( e, k, v );
 				},
 				is:(function( sel ){
+					bs.sel = null;
 					return function( $sel ){
 						var t0 = sel( $sel );
 						return t0 && t0.length;
@@ -1146,6 +1234,53 @@ function init(doc){
 			return win;
 		})();
 	})( W.document );
+	bs.ROUTER =(function(){
+		var s, e, t, h, count;
+		s = {'#':[]}, e = {'#':[]}, t = {}, h = [], count = 5;
+		function make( t ){
+			return function( $path, $func ){
+				var t0, i, j, k, v;
+				i = 0, j = arguments.length;
+				while( i < j ){
+					k = arguments[i++], v = arguments[i++];
+					if( !( t0 = t[k] ) ) t[k] = t0 = [];
+					t0[t0.length] = v;
+				}
+			};
+		}
+		function router(){
+			var uri, t0, i, j, k;
+			if( !( uri = location.hash ) ) uri = location.hash = '#';
+			h[h.length] = uri;
+			if( h.length > count ) h.splice( 0, h.length - count );
+			t0 = s['#'], i = 0, j = t0.length;
+			while( i < j ) t0[i++]( uri );
+			if( uri != '#' )
+				for( k in s ) if( k != '#' && uri.indexOf( k ) > -1 ){
+					t0 = s[k], i = 0, j = t0.length;
+					while( i < j ) t0[i++]( uri );
+				}
+			for( i in t ) if( uri.indexOf( i ) > -1 ) t[i](uri);
+			t0 = e['#'], i = 0, j = t0.length;
+			while( i < j ) t0[i++]( uri );
+			if( uri != '#' )
+				for( k in e ) if( k != '#' && uri.indexOf( k ) > -1 ){
+					t0 = e[k], i = 0, j = t0.length;
+					while( i < j ) t0[i++]( uri );
+				}
+		}
+		return {
+			start:make(s),end:make(e),
+			table:function(){
+				var i, j;
+				i = 0, j = arguments.length;
+				while( i < j ) t[arguments[i++]] = arguments[i++];
+			},
+			go:function( $str ){location.hash = $str;},
+			route:function(){arguments[0] === null ? bs.WIN.on( 'hash', '@ROUTER' ) : ( bs.WIN.on( 'hashchange', '@ROUTER', router ), router() );},
+			historyMax:function($len){count=$len;}, history:h
+		};
+	})();
 	bs.ANI = ( function(){
 		var ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
 		style = bs.style;
@@ -1279,11 +1414,16 @@ function init(doc){
 			}
 			if( this.update ) this.update( rate, $time, this );
 		};
-		tween.prototype.ANIobj = function( $time ){
+		tween.prototype.ANIobj = function( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e;
 			if( this.stop ) return 1;
+			if( $pause )
+				if( $pause == 1 && this.pause == 0 ) return this.pause = $time, 0;
+				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
+			if( this.pause ) return;
 			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
+			e = this.ease, time = this.time, rate = term * this.timeR, 
+			l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
@@ -1398,6 +1538,31 @@ function init(doc){
 			})()
 		};
 	})();
+	(function(bs){
+		//http://goo.gl/OaWaAd LZstring
+		var LZString={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",_f:String.fromCharCode,compressToBase64:function(c){if(c==null){return""}var a="";var k,h,f,j,g,e,d;var b=0;c=LZString.compress(c);while(b<c.length*2){if(b%2==0){k=c.charCodeAt(b/2)>>8;h=c.charCodeAt(b/2)&255;if(b/2+1<c.length){f=c.charCodeAt(b/2+1)>>8}else{f=NaN}}else{k=c.charCodeAt((b-1)/2)&255;if((b+1)/2<c.length){h=c.charCodeAt((b+1)/2)>>8;f=c.charCodeAt((b+1)/2)&255}else{h=f=NaN}}b+=3;j=k>>2;g=((k&3)<<4)|(h>>4);e=((h&15)<<2)|(f>>6);d=f&63;if(isNaN(h)){e=d=64}else{if(isNaN(f)){d=64}}a=a+LZString._keyStr.charAt(j)+LZString._keyStr.charAt(g)+LZString._keyStr.charAt(e)+LZString._keyStr.charAt(d)}return a},decompressFromBase64:function(g){if(g==null){return""}var a="",d=0,e,o,m,k,n,l,j,h,b=0,c=LZString._f;g=g.replace(/[^A-Za-z0-9\+\/\=]/g,"");while(b<g.length){n=LZString._keyStr.indexOf(g.charAt(b++));l=LZString._keyStr.indexOf(g.charAt(b++));j=LZString._keyStr.indexOf(g.charAt(b++));h=LZString._keyStr.indexOf(g.charAt(b++));o=(n<<2)|(l>>4);m=((l&15)<<4)|(j>>2);k=((j&3)<<6)|h;if(d%2==0){e=o<<8;if(j!=64){a+=c(e|m)}if(h!=64){e=k<<8}}else{a=a+c(e|o);if(j!=64){e=m<<8}if(h!=64){a+=c(e|k)}}d+=3}return LZString.decompress(a)},compressToUTF16:function(d){if(d==null){return""}var b="",e,j,h,a=0,g=LZString._f;d=LZString.compress(d);for(e=0;e<d.length;e++){j=d.charCodeAt(e);switch(a++){case 0:b+=g((j>>1)+32);h=(j&1)<<14;break;case 1:b+=g((h+(j>>2))+32);h=(j&3)<<13;break;case 2:b+=g((h+(j>>3))+32);h=(j&7)<<12;break;case 3:b+=g((h+(j>>4))+32);h=(j&15)<<11;break;case 4:b+=g((h+(j>>5))+32);h=(j&31)<<10;break;case 5:b+=g((h+(j>>6))+32);h=(j&63)<<9;break;case 6:b+=g((h+(j>>7))+32);h=(j&127)<<8;break;case 7:b+=g((h+(j>>8))+32);h=(j&255)<<7;break;case 8:b+=g((h+(j>>9))+32);h=(j&511)<<6;break;case 9:b+=g((h+(j>>10))+32);h=(j&1023)<<5;break;case 10:b+=g((h+(j>>11))+32);h=(j&2047)<<4;break;case 11:b+=g((h+(j>>12))+32);h=(j&4095)<<3;break;case 12:b+=g((h+(j>>13))+32);h=(j&8191)<<2;break;case 13:b+=g((h+(j>>14))+32);h=(j&16383)<<1;break;case 14:b+=g((h+(j>>15))+32,(j&32767)+32);a=0;break}}return b+g(h+32)},decompressFromUTF16:function(d){if(d==null){return""}var b="",h,j,a=0,e=0,g=LZString._f;while(e<d.length){j=d.charCodeAt(e)-32;switch(a++){case 0:h=j<<1;break;case 1:b+=g(h|(j>>14));h=(j&16383)<<2;break;case 2:b+=g(h|(j>>13));h=(j&8191)<<3;break;case 3:b+=g(h|(j>>12));h=(j&4095)<<4;break;case 4:b+=g(h|(j>>11));h=(j&2047)<<5;break;case 5:b+=g(h|(j>>10));h=(j&1023)<<6;break;case 6:b+=g(h|(j>>9));h=(j&511)<<7;break;case 7:b+=g(h|(j>>8));h=(j&255)<<8;break;case 8:b+=g(h|(j>>7));h=(j&127)<<9;break;case 9:b+=g(h|(j>>6));h=(j&63)<<10;break;case 10:b+=g(h|(j>>5));h=(j&31)<<11;break;case 11:b+=g(h|(j>>4));h=(j&15)<<12;break;case 12:b+=g(h|(j>>3));h=(j&7)<<13;break;case 13:b+=g(h|(j>>2));h=(j&3)<<14;break;case 14:b+=g(h|(j>>1));h=(j&1)<<15;break;case 15:b+=g(h|j);a=0;break}e++}return LZString.decompress(b)},compress:function(e){if(e==null){return""}var h,l,n={},m={},o="",c="",r="",d=2,g=3,b=2,q="",a=0,j=0,p,k=LZString._f;for(p=0;p<e.length;p+=1){o=e.charAt(p);if(!Object.prototype.hasOwnProperty.call(n,o)){n[o]=g++;m[o]=true}c=r+o;if(Object.prototype.hasOwnProperty.call(n,c)){r=c}else{if(Object.prototype.hasOwnProperty.call(m,r)){if(r.charCodeAt(0)<256){for(h=0;h<b;h++){a=(a<<1);if(j==15){j=0;q+=k(a);a=0}else{j++}}l=r.charCodeAt(0);for(h=0;h<8;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}}else{l=1;for(h=0;h<b;h++){a=(a<<1)|l;if(j==15){j=0;q+=k(a);a=0}else{j++}l=0}l=r.charCodeAt(0);for(h=0;h<16;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}}d--;if(d==0){d=Math.pow(2,b);b++}delete m[r]}else{l=n[r];for(h=0;h<b;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}}d--;if(d==0){d=Math.pow(2,b);b++}n[c]=g++;r=String(o)}}if(r!==""){if(Object.prototype.hasOwnProperty.call(m,r)){if(r.charCodeAt(0)<256){for(h=0;h<b;h++){a=(a<<1);if(j==15){j=0;q+=k(a);a=0}else{j++}}l=r.charCodeAt(0);for(h=0;h<8;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}}else{l=1;for(h=0;h<b;h++){a=(a<<1)|l;if(j==15){j=0;q+=k(a);a=0}else{j++}l=0}l=r.charCodeAt(0);for(h=0;h<16;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}}d--;if(d==0){d=Math.pow(2,b);b++}delete m[r]}else{l=n[r];for(h=0;h<b;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}}d--;if(d==0){d=Math.pow(2,b);b++}}l=2;for(h=0;h<b;h++){a=(a<<1)|(l&1);if(j==15){j=0;q+=k(a);a=0}else{j++}l=l>>1}while(true){a=(a<<1);if(j==15){q+=k(a);break}else{j++}}return q},decompress:function(k){if(k==null){return""}if(k==""){return null}var o=[],j,d=4,l=4,h=3,q="",t="",g,p,r,s,a,b,n,m=LZString._f,e={string:k,val:k.charCodeAt(0),position:32768,index:1};for(g=0;g<3;g+=1){o[g]=g}r=0;a=Math.pow(2,2);b=1;while(b!=a){s=e.val&e.position;e.position>>=1;if(e.position==0){e.position=32768;e.val=e.string.charCodeAt(e.index++)}r|=(s>0?1:0)*b;b<<=1}switch(j=r){case 0:r=0;a=Math.pow(2,8);b=1;while(b!=a){s=e.val&e.position;e.position>>=1;if(e.position==0){e.position=32768;e.val=e.string.charCodeAt(e.index++)}r|=(s>0?1:0)*b;b<<=1}n=m(r);break;case 1:r=0;a=Math.pow(2,16);b=1;while(b!=a){s=e.val&e.position;e.position>>=1;if(e.position==0){e.position=32768;e.val=e.string.charCodeAt(e.index++)}r|=(s>0?1:0)*b;b<<=1}n=m(r);break;case 2:return""}o[3]=n;p=t=n;while(true){if(e.index>e.string.length){return""}r=0;a=Math.pow(2,h);b=1;while(b!=a){s=e.val&e.position;e.position>>=1;if(e.position==0){e.position=32768;e.val=e.string.charCodeAt(e.index++)}r|=(s>0?1:0)*b;b<<=1}switch(n=r){case 0:r=0;a=Math.pow(2,8);b=1;while(b!=a){s=e.val&e.position;e.position>>=1;if(e.position==0){e.position=32768;e.val=e.string.charCodeAt(e.index++)}r|=(s>0?1:0)*b;b<<=1}o[l++]=m(r);n=l-1;d--;break;case 1:r=0;a=Math.pow(2,16);b=1;while(b!=a){s=e.val&e.position;e.position>>=1;if(e.position==0){e.position=32768;e.val=e.string.charCodeAt(e.index++)}r|=(s>0?1:0)*b;b<<=1}o[l++]=m(r);n=l-1;d--;break;case 2:return t}if(d==0){d=Math.pow(2,h);h++}if(o[n]){q=o[n]}else{if(n===l){q=p+p.charAt(0)}else{return null}}t+=q;o[l++]=p+q.charAt(0);d--;p=q;if(d==0){d=Math.pow(2,h);h++}}}};if(typeof module!=="undefined"&&module!=null){module.exports=LZString};
+		bs.$compress = function( $str ){return LZString.compress( $str );};
+		bs.$decompress = function( $str ){return LZString.decompress( $str );};
+		bs.$save = bs.DETECT.local ? function(){
+			var t0, i, j, k, v;
+			i = 0, j = arguments.length;
+			while( i < j ){
+				k = arguments[i++], v = arguments[i++];
+				if( v === undefined ) return t0 = localStorage.getItem( k ), t0 && t0.charAt(0) == '@' ? JSON.parse( LZString.decompress(t0.substr(1)) ) : t0;
+				else if( v === null ) return localStorage.removeItem( k );
+				else return localStorage.setItem( k, typeof v == 'object' ? '@' + LZString.compress(JSON.stringify( v )) : v ), v;
+			}
+		} : function(){
+			var t0, i, j, k, v;
+			i = 0, j = arguments.length;
+			while( i < j ){
+				k = arguments[i++], v = arguments[i++];
+				if( v === undefined ) return (t0 = bs.$ck( k )).charAt(0) == '@' ? JSON.parse( LZString.decompress(t0.substr(1)) ) : t0;
+				else if( v === null ) return bs.$ck( k, null );
+				else return bs.$ck( k, typeof v == 'object' ? '@' + LZString.compress(JSON.stringify( v )) : v, 365 ), v;
+			}
+		};
+	})(bs);
 	W[N||'bs'] = bs;
 }
 init.len = 0;
