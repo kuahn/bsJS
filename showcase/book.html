@@ -17,8 +17,8 @@
 	<div class="right"><a id="go">@go@</a></div>
 	<div class="left"><input id="query" type="text" class="text" ></div>
 </div>
-<div id="list" class="panel"></div>
-<div id="detail" class="panel"></div>
+<div id="summary"></div>
+<div id="result" class="panel"></div>
 </script>
 <script id="Tdetail" type="text/bsTemplate">
 <div class="detail">
@@ -27,12 +27,13 @@
 		<h2>@title@ <a class="batch" href="@link@" target="_blank">@L@</a></h2>
 		<img src="@cover_l_url@" class="d2">
 		<div class="d3">
-			<div>저자/역자 : @author@ / @translator@</div>
-			<div>출판사(출판일) : @pub_nm@ (@pub_date@)</div>
-			<div>ISBN/13 : @isbn@ / @isbn13@</div>
-			<div>정가 : @list_price@</div>
-			<div>@description@</div>
+			<div><span>저자/역자</span> @author@ / @translator@</div>
+			<div><span>출판사(출판일)</span> @pub_nm@ (@pub_date@)</div>
+			<div><span>ISBN/13</span> @isbn@ / @isbn13@</div>
+			<div><span>정가</span> @list_price@</div>
 		</div>
+		<br clear="both">
+		<div class="d4">@description@</div>
 	</div>
 </div>
 </script>
@@ -44,9 +45,12 @@ bs( function(){
 	var M,V,C;
 	M = {
 		type:['all', 'title', 'isbn', 'writer', 'publisher', 'keyword', 'overview', 'contents'],
-		url:function( $type, $id ){
-			return 'http://apis.daum.net/search/book?apikey=76aaa32e1a78cf26f1f9f714eaf6c85089acf6f1&output=json&searchType=' + $type +
-				'&q=' + encodeURIComponent($id) + '&callback=';
+		url:function( $type, $id, $page ){
+			return 'http://apis.daum.net/search/book?apikey=76aaa32e1a78cf26f1f9f714eaf6c85089acf6f1&result=20&sort=date&output=json'+
+				'&pageno='+($page||1)+
+				'&searchType=' + $type +
+				'&q=' + encodeURIComponent($id) +
+				'&callback=';
 		},
 		$:function( $type, $id, $val ){
 			$id = $id || '@';
@@ -55,7 +59,13 @@ bs( function(){
 	};
 	C = {
 		loaded:function( $data ){
-			var t0 = $data.channel.result == 0 ? 'nodata' : M.$( C._type, C.id, $data.channel.item );
+			var t0;
+			if( $data.channel.result == 0 ) t0 = 'nodata';
+			else{
+				$data.channel.item.total = parseInt( parseInt($data.channel.totalCount)/parseInt($data.channel.result) ),
+				$data.channel.item.page = C._page || 1,
+				t0 = M.$( C._type, C._id, $data.channel.item );
+			}
 			if( C._back == 'result' ) V.result( C._type, C._id, t0 );
 			else if( C._back == 'detail' ) V.detail( C._type, C._id, C._isbn, t0 );
 		},
@@ -73,7 +83,7 @@ bs( function(){
 			if( t0 = M.$( type, C._id ) ) V.detail( C._type, C._id, C._isbn, t0 );
 			else V.detail( C._type, C._id, C._isbn, 'wait' ), bs.$js( C.loaded, M.url(  C._type, C._id ) );
 		},
-		query:function( $type, $val ){
+		result:function( $type, $val ){
 			bs.ROUTER.go( '#result/'+$type+'/'+( $val ? bs.$trim( $val ) : '' ) );
 		},
 		detail:function( $data ){
@@ -96,7 +106,7 @@ bs( function(){
 			bs.d( bs.$tmpl('#Tsearch', {type:bs.$deco( $type, '<li class="type">', '</li>' ), go:'\uF097', book:'\uF0D0 \uF0D1 \uF0D2 \uF0D3'} ) ).$('<','#stage' );
 			bs.d('.type').$( 'down', function($e){
 				bs.d( '.type' ).$( 'class-', 'selectType' );
-				C.query( bs.d( this ).$( 'class+', 'selectType', 'html' ), bs.d('#query').$('@value') );
+				C.result( bs.d( this ).$( 'class+', 'selectType', 'html' ), bs.d('#query').$('@value') );
 			});
 			bs.d(bs.d('.type')[0]).$('class+', 'selectType');
 			bs.d('#query').$(
@@ -104,25 +114,24 @@ bs( function(){
 				'blur', function($e){bs.d(this).$('class-','edit');},
 				'keydown', function k($e){
 					if( !$e.key('enter') ) return;
-					C.query( bs.d( '@.selectType' ).$('html'), $e.value||'' );
+					C.result( bs.d( '@.selectType' ).$('html'), $e.value||'' );
 					bs.d(this).$('b');
 				}
 			);
 			bs.d('#go').$(
 				'down', function k($e){
-					C.query( bs.d( '@.selectType' ).$('html'), bs.d('#query').$('@value')||'' );
+					C.result( bs.d( '@.selectType' ).$('html'), bs.d('#query').$('@value')||'' );
 					bs.d('#query').$('b');
 				}
 			);
 		},
-		resultDown:function($e){C.detail( bs.d( this ).$('@data') );},
-		resultOver:function($e){bs.d(this).$('class+','thumbOver');},
-		resultOut:function($e){bs.d(this).$('class-','thumbOver');},
-		resultStat:'',
+		//result
 		result:function( $type, $id, $data ){
 			var t0, i, j, k;
 			this.resultStat = $type+'/'+$id;
 			if( bs.WIN.is('.modal') ) bs.d('@.modal').$(null);
+			//summary
+			bs.d('#summary').$('html','page : '+$data.page+' / '+$data.total);
 			//type
 			t0 = bs.d( '.type' ), t0.$( 'class-', 'selectType' ), i = t0.length;
 			while( i-- ) if( t0[i].innerHTML == $type ){
@@ -133,31 +142,27 @@ bs( function(){
 			bs.d('#query').$( '@value', $id );
 			//data
 			if( $data == 'nodata' ){
-				bs.d('#list').$('html','데이터가 없습니다');
+				bs.d('#result').$('html','데이터가 없습니다');
 			}else if( $data == 'wait' ){
-				bs.d('#list').$('html','wait');
+				bs.d('#result').$('html','wait');
 			}else{
 				for( t0 = '', i = 0, j = $data.length ; i < j ; i++ ) t0 += '<img data="'+$type+'/'+$id+'/'+$data[i].isbn+'" src="'+ $data[i].cover_l_url +'" class="thumb">';
-				bs.d('#list').$( 'html', t0 );
+				bs.d('#result').$( 'html', t0 );
 				bs.d('@.thumb').$( 'mouseover', this.resultOver, 'mouseout', this.resultOut, 'up', this.resultDown );
 			}
 		},
-		modal:function($e){$e.prevent();},
-		close:function($e){
-			var t0;
-			$e.prevent();
-			bs.d('@.modal').$(null);
-			t0 = V.resultStat.split( '/' );
-			C.query( t0[0], t0[1] );
-		},
-		strip:/[&]lt[;][^&]+[&]gt[;]/g,
+		resultDown:function($e){C.detail( bs.d( this ).$('@data') );},
+		resultOver:function($e){bs.d(this).$('class+','thumbOver');},
+		resultOut:function($e){bs.d(this).$('class-','thumbOver');},
+		resultStat:'',
+		//detail
 		detail:function( $type, $id, $isbn, $data ){
 			var t0, i;
-			if( this.resultStat != $type + '/' + $id ) return C.query( $type, $id );
+			if( this.resultStat != $type + '/' + $id ) return C.result( $type, $id );
 			if( $data == 'nodata' ){
-				bs.d('#list').$('html','데이터가 없습니다');
+				bs.d('@.detail').$('html','데이터가 없습니다');
 			}else if( $data == 'wait' ){
-				bs.d('#list').$('html','wait');
+				bs.d('@.detail').$('html','wait');
 			}else{
 				i = $data.length;
 				while( i-- ) if( $data[i].isbn == $isbn ){
@@ -168,11 +173,20 @@ bs( function(){
 					t0 = bs.$deco( t0, this.strip, '' );
 					t0.L = '\uF144';
 					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', innerHeight, 'up', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
-					'>', bs.d('<div class="detail"></div>').$( 'html', bs.$tmpl( '#Tdetail', t0 ), 'this' )
+					'>', bs.$tmpl( '#Tdetail', t0 )
 					);
 				}
 			}
-		}
+		},
+		modal:function($e){$e.prevent();},
+		close:function($e){
+			var t0;
+			$e.prevent();
+			bs.d('@.modal').$(null);
+			t0 = V.resultStat.split( '/' );
+			C.result( t0[0], t0[1] );
+		},
+		strip:/[&]lt[;][^&]+[&]gt[;]/g
 	};
 	
 	C.init();

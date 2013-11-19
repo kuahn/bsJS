@@ -182,7 +182,8 @@ function init(doc){
 		reg = /@[^@]+@/g;
 		function r( $0 ){
 			var t0, t1, t2, i, j, k, l, cnt;
-			t0 = $0.substring( 1, $0.length - 1 ).split('.'), i = 1, j = arg.length, l = t0.length, cnt = 0;
+			$0 = $0.substring( 1, $0.length - 1 );
+			t0 = $0.split('.'), i = 1, j = arg.length, l = t0.length, cnt = 0;
 			while( i < j ){
 				t1 = arg[i++], k = 0;
 				while( k < l && t1 !== undefined ) t1 = t1[t0[k++]];
@@ -190,9 +191,11 @@ function init(doc){
 			}
 			if( cnt == 0 ) return $0;
 			if( cnt > 1 ) return '@ERROR matchs '+cnt+'times@'
-			if( typeof t2 == 'object' )
-				if( t2.TMPL ) return t1.TMPL();
+			i = typeof t2;
+			if( i == 'object' )
+				if( t2.TMPL ) return t1.TMPL( $0 );
 				else if( t2.splice ) return t2.join('');
+			else if( i == 'function' ) return t2( $0 );
 			return t2;
 		}
 		bs.$tmpl = function( $str ){
