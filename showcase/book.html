@@ -146,7 +146,7 @@ bs( function(){
 			}else if( $data == 'wait' ){
 				bs.d('#result').$('html','wait');
 			}else{
-				for( t0 = '', i = 0, j = $data.length ; i < j ; i++ ) t0 += '<img data="'+$type+'/'+$id+'/'+$data[i].isbn+'" src="'+ $data[i].cover_l_url +'" class="thumb">';
+				for( t0 = '', i = 0, j = $data.length ; i < j ; i++ ) t0 += '<img onerror="this.src=\'noimage.png\'"  data="'+$type+'/'+$id+'/'+$data[i].isbn+'" src="'+ $data[i].cover_l_url +'" class="thumb">';
 				bs.d('#result').$( 'html', t0 );
 				bs.d('@.thumb').$( 'mouseover', this.resultOver, 'mouseout', this.resultOut, 'up', this.resultDown );
 			}
@@ -172,7 +172,7 @@ bs( function(){
 				if( t0 ){
 					t0 = bs.$deco( t0, this.strip, '' );
 					t0.L = '\uF144';
-					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', innerHeight, 'up', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
+					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', bs.WIN.scroll('h'), 'up', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
 					'>', bs.$tmpl( '#Tdetail', t0 )
 					);
 				}
