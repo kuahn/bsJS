@@ -77,7 +77,6 @@ bs( function(){
 			bs.ROUTER.go( '#result/'+$type+'/'+( $val ? bs.$trim( $val ) : '' ) );
 		},
 		detail:function( $data ){
-			console.log( 'C:detail-#detail/'+$data );
 			bs.ROUTER.go( '#detail/'+$data );
 		},
 		init:function(){
@@ -92,36 +91,9 @@ bs( function(){
 	V = {
 		init:function( $type ){
 			bs.c('font-face@batch batch');
-			bs.c('body').$( 'margin', 0, 'padding', 0, 'background', '#fff', 
-				'font-family', 'Helvetica,Arial', 'color', '#4d4d4d', 'font-smoothing', 'antialiased' );
-			bs.c('.panel').$('margin-bottom',20);
+			bs.$css( 'book.css' );
 			
-			bs.c('h1').$('font-family', 'Helvetica,Arial', 'text-align', 'center');
-			bs.c('ul').$( 'margin',0, 'padding',0, 'list-style-type','none', 'list-style-position','outside' );
-			bs.c('li').$( 'cursor','pointer', 'float', 'left', 'margin', '10px 5px', 'padding', '5px 15px', 'height', 20, 'border-radius', 10, 'border', '1px dashed #999' );
-			bs.c('.left').$('margin', '0 100px 0 10px' );
-			bs.c('.right').$('float', 'right', 'width', 75, 'text-align', 'center','font-family', 'batch', 'font-size', 29 );
-			bs.c('.batch').$('font-family', 'batch');
-			bs.c('.text').$('background','#eee', 'color', '#999', 'font-size', 29, 'padding', '3px 10px', 'border', '0','width', '100%', 'height', 35, 'line-height', 35, 'font-family', 'Helvetica,Arial');
-			bs.c('.edit').$('background','#fff','border','1px solid #999', 'color','#000' );
-			bs.c('.selectType').$('background', '#faa' );
-			
-			bs.c('#list').$('border-top', '1px dashed #999','padding', 10);
-			bs.c('.thumb').$('cursor','pointer', 'float','left', 'border-radius', 5, 'border', '1px dashed #ddd', 'padding', 5, 'margin', 5);
-			bs.c('.thumbOver').$('border-radius', 0, 'border', '1px solid #ddd', 'background', '#cc8');
-			
-			bs.c('.modal').$( 'position', 'absolute', 'top', 0, 'width', '100%', 'background', 'rgba(0,0,0,.5)' );
-			bs.c('.detail').$( 'overflow', 'hidden', 'position', 'absolute', 'top', '5%', 'left', '5%', 'width', '90%', 'height', '90%', 'background', '#fff', 'border-radius', 10 );
-			bs.c('h2').$('text-align', 'center', 'margin', 10, 'padding', 10, 'border', '1px dashed #999');
-			bs.c('h2 a').$('text-decoration','none', 'color', '#000' );
-			bs.c('h2 a:hover').$('text-decoration','none', 'color', '#900' );
-			bs.c('.d0').$('position','absolute','top',0,'right',0,'height','100%','opacity', .2);
-			bs.c('.d1').$('position','absolute','width','100%','height','100%');
-			bs.c('.d2').$('float', 'right', 'margin-right', 10, 'border', '1px solid #000' );
-			bs.c('.d3').$('margin', '0 132px 0 10px' );
-			bs.c('.d3 div').$('margin', '5px 0', 'padding', 5, 'border-bottom', '1px dashed #009' );
-			
-			bs.d( bs.$tmpl('#Tsearch', {type:bs.CORE.deco( $type, '<li class="type">', '</li>' ),go:'\uF097', book:'\uF0D0 \uF0D1 \uF0D2 \uF0D3'} ) ).$('<','#stage' );
+			bs.d( bs.$tmpl('#Tsearch', {type:bs.$deco( $type, '<li class="type">', '</li>' ), go:'\uF097', book:'\uF0D0 \uF0D1 \uF0D2 \uF0D3'} ) ).$('<','#stage' );
 			bs.d('.type').$( 'down', function($e){
 				bs.d( '.type' ).$( 'class-', 'selectType' );
 				C.query( bs.d( this ).$( 'class+', 'selectType', 'html' ), bs.d('#query').$('@value') );
@@ -134,6 +106,12 @@ bs( function(){
 					if( !$e.key('enter') ) return;
 					C.query( bs.d( '@.selectType' ).$('html'), $e.value||'' );
 					bs.d(this).$('b');
+				}
+			);
+			bs.d('#go').$(
+				'down', function k($e){
+					C.query( bs.d( '@.selectType' ).$('html'), bs.d('#query').$('@value')||'' );
+					bs.d('#query').$('b');
 				}
 			);
 		},
@@ -187,7 +165,7 @@ bs( function(){
 					break;
 				}
 				if( t0 ){
-					t0 = bs.CORE.deco( t0, this.strip, '' );
+					t0 = bs.$deco( t0, this.strip, '' );
 					t0.L = '\uF144';
 					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', innerHeight, 'up', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
 					'>', bs.d('<div class="detail"></div>').$( 'html', bs.$tmpl( '#Tdetail', t0 ), 'this' )
