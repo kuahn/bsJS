@@ -22,10 +22,10 @@
 </script>
 <script id="Tdetail" type="text/bsTemplate">
 <div class="detail">
-	<img src="@cover_l_url@" class="d0">
+	<img src="@cover_l_url@" onerror="this.src='noimage.png'" class="d0">
 	<div class="d1">
 		<h2>@title@ <a class="batch" href="@link@" target="_blank">@L@</a></h2>
-		<img src="@cover_l_url@" class="d2">
+		<img src="@cover_l_url@" onerror="this.src='noimage.png'" class="d2">
 		<div class="d3">
 			<div><span>저자/역자</span> @author@ / @translator@</div>
 			<div><span>출판사(출판일)</span> @pub_nm@ (@pub_date@)</div>
@@ -146,7 +146,7 @@ bs( function(){
 			}else if( $data == 'wait' ){
 				bs.d('#result').$('html','wait');
 			}else{
-				for( t0 = '', i = 0, j = $data.length ; i < j ; i++ ) t0 += '<img onerror="this.src=\'noimage.png\'"  data="'+$type+'/'+$id+'/'+$data[i].isbn+'" src="'+ $data[i].cover_l_url +'" class="thumb">';
+				for( t0 = '', i = 0, j = $data.length ; i < j ; i++ ) t0 += '<img onerror="this.src=\'noimage.png\'" data="'+$type+'/'+$id+'/'+$data[i].isbn+'" src="'+ $data[i].cover_l_url +'" class="thumb">';
 				bs.d('#result').$( 'html', t0 );
 				bs.d('@.thumb').$( 'mouseover', this.resultOver, 'mouseout', this.resultOut, 'up', this.resultDown );
 			}
