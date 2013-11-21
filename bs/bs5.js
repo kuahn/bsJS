@@ -193,13 +193,14 @@ function init(doc){
 			if( cnt > 1 ) return '@ERROR matchs '+cnt+'times@'
 			i = typeof t2;
 			if( i == 'object' )
-				if( t2.TMPL ) return t1.TMPL( $0 );
+				if( t2.TMPL ) return t2.TMPL( $0 );
 				else if( t2.splice ) return t2.join('');
 			else if( i == 'function' ) return t2( $0 );
 			return t2;
 		}
 		bs.$tmpl = function( $str ){
 			if( $str.substr(0,2) == '#T' ) $str = bs.d( $str ).$('@text');
+			else if( $str.substr($str.length-5) == '.html' ) $str = bs.$get( null, $str );
 			return arg = arguments, bs.$trim( $str.replace( reg, r ) );
 		};
 		function factory( r, v ){	
@@ -655,10 +656,12 @@ function init(doc){
 					if( v || v === 0 ){ 
 						if( this[k] === undefined ){ //add
 							if( ( t0 = typeof v ) == 'number' ) this[k] = v, u[k] = nopx[k] ? '' : 'px';
-							else if( t0 == 'string' )
-								if( v.substr(0,3) == 'url' || ( v0 = v.indexOf( ':' ) ) == -1 ) this[k] = v, u[k] = '';
+							else if( t0 == 'string' ){
+								if( v0 = style[v.substr(0,4)] ) this[k] = v = v0(v), u[k]='';
+								else if( ( v0 = v.indexOf( ':' ) ) == -1 ) this[k] = v, u[k] = '';
 								else this[k] = parseFloat( v.substr( 0, v0 ) ), u[k] = v.substr( v0 + 1 ), v = this[k];
-						}else this[k] = v; //set
+							}
+						}else this[k] = (typeof v == 'string' && (v0 = style[v.substr(0,4)])) ? v0(v) : v; //set
 						s[k] = v + u[k];
 					}else if( v === null ) delete this[k], delete u[k], s[k] = '';//del
 					else return this[k]; //get
@@ -705,14 +708,22 @@ function init(doc){
 				return k;
 			},
 			style.float = 'styleFloat' in b ? 'styleFloat' : 'cssFloat' in b ? 'cssFloat' : 'float',
+			style['url('] = function($v){return $v;},
 			bs.style = style;
 			
-			if( !( 'opacity' in b ) ) style.opacity = function(s){
-				var v = arguments[1];
-				if( v === undefined ) return s.opacity;
-				else if( v === null ) return delete s.opacity, s.s.filter = '', v;
-				else return s.opacity = v, s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')', v;
-			};
+			if( !( 'opacity' in b ) ){
+				style.opacity = function(s){
+					var v = arguments[1];
+					if( v === undefined ) return s.opacity;
+					else if( v === null ) return delete s.opacity, s.s.filter = '', v;
+					else return s.opacity = v, s.s.filter = 'alpha(opacity=' + parseInt( v * 100 ) + ')', v;
+				};
+				style['rgba'] = function($v){
+					var t0 = $v.substring( 5, $v.length - 1 ).split(',');
+					t0[3] = parseFloat(t0[3]);
+					return 'rgb('+parseInt((255+t0[0]*t0[3])*.5)+','+parseInt((255+t0[1]*t0[3])*.5)+','+parseInt((255+t0[2]*t0[3])*.5)+')';
+				};
+			}
 			return style;
 		})();
 		bs.factory( 'c,css', ( function( doc, style ){
@@ -812,7 +823,7 @@ function init(doc){
 				}
 			}
 			bs.$css = function( $v ){
-				if( $v.substr( $v.length - 3 ) == 'css' ) bs.$get( parse, $v ); 
+				if( $v.substr( $v.length - 4 ) == '.css' ) bs.$get( parse, $v ); 
 				else parse( $v );
 			};
 		})();

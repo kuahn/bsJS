@@ -10,33 +10,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
-<script id="Tsearch" type="text/bsTemplate">
-<h1 class="batch">@book@</h1>
-<div id="search" class="panel">
-	<ul id="type">@type@</ul><br clear="both">
-	<div class="right"><a id="go">@go@</a></div>
-	<div class="left"><input id="query" type="text" class="text" ></div>
-</div>
-<div id="summary"></div>
-<div id="result" class="panel"></div>
-</script>
-<script id="Tdetail" type="text/bsTemplate">
-<div class="detail">
-	<img src="@cover_l_url@" onerror="this.src='noimage.png'" class="d0">
-	<div class="d1">
-		<h2>@title@ <a class="batch" href="@link@" target="_blank">@L@</a></h2>
-		<img src="@cover_l_url@" onerror="this.src='noimage.png'" class="d2">
-		<div class="d3">
-			<div><span>저자/역자</span> @author@ / @translator@</div>
-			<div><span>출판사(출판일)</span> @pub_nm@ (@pub_date@)</div>
-			<div><span>ISBN/13</span> @isbn@ / @isbn13@</div>
-			<div><span>정가</span> @list_price@</div>
-		</div>
-		<br clear="both">
-		<div class="d4">@description@</div>
-	</div>
-</div>
-</script>
 </head><body>
 <div id="stage"></div>
 <script src="../bs/bs5.js"></script> 
@@ -99,11 +72,12 @@ bs( function(){
 		}
 	};
 	V = {
+		detailTmpl:'',
 		init:function( $type ){
 			bs.c('font-face@batch batch');
 			bs.$css( 'book.css' );
-			
-			bs.d( bs.$tmpl('#Tsearch', {type:bs.$deco( $type, '<li class="type">', '</li>' ), go:'\uF097', book:'\uF0D0 \uF0D1 \uF0D2 \uF0D3'} ) ).$('<','#stage' );
+			this.detailTmpl = bs.$get( null, 'book1.html' );
+			bs.d( bs.$tmpl('book0.html', {type:bs.$deco( $type, '<li class="type">', '</li>' ), go:'\uF097', book:'\uF0D0 \uF0D1 \uF0D2 \uF0D3'} ) ).$('<','#stage' );
 			bs.d('.type').$( 'down', function($e){
 				bs.d( '.type' ).$( 'class-', 'selectType' );
 				C.result( bs.d( this ).$( 'class+', 'selectType', 'html' ), bs.d('#query').$('@value') );
@@ -173,7 +147,7 @@ bs( function(){
 					t0 = bs.$deco( t0, this.strip, '' );
 					t0.L = '\uF144';
 					bs.d('<div class="modal"></div>').$( '<', 'body', 'height', bs.WIN.scroll('h'), 'up', V.close, 'mouseover', V.modal, 'mouseout', V.modal,
-					'>', bs.$tmpl( '#Tdetail', t0 )
+					'>', bs.$tmpl( this.detailTmpl, t0 )
 					);
 				}
 			}

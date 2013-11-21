@@ -2,11 +2,15 @@ bs.$js.html
 bs.$xml.html
 bs.ajax.html
 bs.css.html
-bs.data.html
 bs.dom.html
 bs.event.html
 bs.function.html
+bs.keyframe.html
+bs.router.html
+bs.tmpl.html
 testHika.html
 testHuns.html
 testRouka.html
 testSato.html
+testSewonist.html
+testRedcamel.html
