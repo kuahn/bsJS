@@ -43,26 +43,52 @@ bs( function(){
 	} );
 	bsTest( 'sync JS load',
 		function(){
+			// bs.$js.sync.js
+			// ---------------------
+			// var testA = "abcde";
+			// ---------------------
+			
 			bs.$js( null, 'bs.$js.sync.js' );
 			return testA;
 		}, 'abcde'
 	);
-	
-	bs.$js( function(){
-		bsTest( 'serial async JS load',
-			function(){
-				return testB;
-			}, 'abcde'
-		);
-	}, 'bs.$js.serial1.js', 'bs.$js.serial2.js', 'bs.$js.serial3.js' );
-	
 	bsTest( 'serial sync JS load',
 		function(){
+			// bs.$js.serialA1.js
+			// ---------------------
+			// var testC = "ab";
+
+			// bs.$js.serialA2.js
+			// ---------------------
+			// testC += "cd";
+
+			// bs.$js.serialA3.js
+			// ---------------------
+			// testC += "e";
+			
 			bs.$js( null, 'bs.$js.serialA1.js', 'bs.$js.serialA2.js', 'bs.$js.serialA3.js' );
 			return testC;
 		}, 'abcde'
 	);
+	bs.$js( function(){
+		bsTest( 'serial async JS load',
+			function(){
+				// bs.$js.serial1.js
+				// ---------------------
+				// var testB = "ab";
 	
+				// bs.$js.serial2.js
+				// ---------------------
+				// testB += "cd";
+	
+				// bs.$js.serial3.js
+				// ---------------------
+				// testB += "e";
+				
+				return testB;
+			}, 'abcde'
+		);
+	}, 'bs.$js.serial1.js', 'bs.$js.serial2.js', 'bs.$js.serial3.js' );
 } );
 </script>
 </body>
