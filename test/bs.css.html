@@ -26,25 +26,18 @@
 <script src="./printer.js"></script>
 <script>
 bs( function(){
-	/*
-		config
-	*/
-	bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
-
-	/*
-		pre process
-	*/
 	bs.c( '#stage' ).$( 'border', '1px solid #f00', 'margin-top', 30, 'width', '50:%', 'padding', 10 );
 	bs.css( '#stage' ).$( 'width', 100 );
 
-	/*
-		test case
-	*/
 	bsTest( printer, 'css',
 	"bs.c( '#stage' ).$( 'width' )", 100, bs.c( '#stage' ).$( 'width' ),
 	"bs.css( '#stage' ).$( 'padding' )", 10, bs.css( '#stage' ).$( 'padding' )
 	);
 
+	bs.dom( 'body' ).$( '>', '<div id="test0"></div>' );
+	bs.dom( '#test0' ).$( 'position', 'absolute', 'top', 300, 'left', 500, 'width', 10, 'height', 100, 'background', '#f00' );
+	bs.dom( '#test0' ).$( 'transform', 'rotateZ(90deg)' );
+	
 } );
 </script>
 </body>

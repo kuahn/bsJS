@@ -40,10 +40,29 @@ bs( function(){
 		bs.$js(function(){
 			_jsTestFn();
 		}, "./bs.$js.test.1.js");
-
 	} );
-
-
+	bsTest( 'sync JS load',
+		function(){
+			bs.$js( null, 'bs.$js.sync.js' );
+			return testA;
+		}, 'abcde'
+	);
+	
+	bs.$js( function(){
+		bsTest( 'serial async JS load',
+			function(){
+				return testB;
+			}, 'abcde'
+		);
+	}, 'bs.$js.serial1.js', 'bs.$js.serial2.js', 'bs.$js.serial3.js' );
+	
+	bsTest( 'serial sync JS load',
+		function(){
+			bs.$js( null, 'bs.$js.serialA1.js', 'bs.$js.serialA2.js', 'bs.$js.serialA3.js' );
+			return testC;
+		}, 'abcde'
+	);
+	
 } );
 </script>
 </body>
