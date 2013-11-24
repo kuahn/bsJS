@@ -26,20 +26,20 @@
 bs( function(){
 
 	bsTest.tear( 'init.', function(){
-/*
-	the result will..
-	1. bs.$js( cbfn, './bs.$js.test.1.js' ) == true :: true OK
-	2. bs.$js( cbfn, './bs.$js.test.2.js' ) == true :: true OK
-	3. bs.$js( cbfn, './bs.$js.test.3.js' ) == true :: true OK
-	4. bs.$js( cbfn, './bs.$js.test.4.js' ) == true :: true OK
-	5. bs.$js( cbfn, './bs.$js.test.5.js' ) == true :: true OK
-*/
+		/*
+		the result will..
+		1. bs.$js( cbfn, './bs.$js.test.1.js' ) == true :: true OK
+		2. bs.$js( cbfn, './bs.$js.test.2.js' ) == true :: true OK
+		3. bs.$js( cbfn, './bs.$js.test.3.js' ) == true :: true OK
+		4. bs.$js( cbfn, './bs.$js.test.4.js' ) == true :: true OK
+		5. bs.$js( cbfn, './bs.$js.test.5.js' ) == true :: true OK
+		*/
 		var _jsFlg;
 		_jsFlg = window._jsFlg = [];
 		_jsFlg.length = 5;
-		bs.$js(function(){
+		bs.$js( function(){
 			_jsTestFn();
-		}, "./bs.$js.test.1.js");
+		}, "./bs.$js.test.1.js" );
 	} );
 	bsTest( 'sync JS load',
 		function(){
@@ -70,25 +70,27 @@ bs( function(){
 			return testC;
 		}, 'abcde'
 	);
-	bs.$js( function(){
-		bsTest( 'serial async JS load',
-			function(){
-				// bs.$js.serial1.js
-				// ---------------------
-				// var testB = "ab";
-	
-				// bs.$js.serial2.js
-				// ---------------------
-				// testB += "cd";
-	
-				// bs.$js.serial3.js
-				// ---------------------
-				// testB += "e";
-				
-				return testB;
-			}, 'abcde'
-		);
-	}, 'bs.$js.serial1.js', 'bs.$js.serial2.js', 'bs.$js.serial3.js' );
+	bsTest.tear( 'serial async JS Ready', function(){
+		bs.$js( function(){
+			bsTest( 'serial async JS load',
+				function(){
+					// bs.$js.serial1.js
+					// ---------------------
+					// var testB = "ab";
+		
+					// bs.$js.serial2.js
+					// ---------------------
+					// testB += "cd";
+		
+					// bs.$js.serial3.js
+					// ---------------------
+					// testB += "e";
+					
+					return testB;
+				}, 'abcde'
+			);
+		}, 'bs.$js.serial1.js', 'bs.$js.serial2.js', 'bs.$js.serial3.js' );
+	} );
 } );
 </script>
 </body>

@@ -44,6 +44,7 @@ bs( function(){
 		},
 		Rresult:function( $uri ){
 			var t0;
+			console.log( $uri );
 			t0 = $uri.substr( '#result/'.length ).split('/'),
 			C._type = t0[0], C._id = decodeURIComponent(t0[1]), C._back = 'result';
 			if( t0 = M.$( type, C._id ) ) V.result( C._type, C._id, t0 );

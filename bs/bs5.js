@@ -137,10 +137,10 @@ function init(doc){
 		};
 	})();
 	(function(){
-		function deco( $v, $t, $f, $r ){
+		function deco( $v, $t, $f, $r, $isEnd ){
 			var t0 = $v;
 			switch( $t ){
-			case's':case'n': t0 = $f + t0; break;
+			case's':case'n': t0 = $isEnd ? t0 + $f : $f + t0; break;
 			case'f': t0 = $f( t0, i ); break;
 			case'r': if( typeof t0 == 'string' ) t0 = t0.replace( $f, $r );
 			}
@@ -160,7 +160,7 @@ function init(doc){
 				while( i-- ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1 );
 			}else{
 				t0 = {};
-				for( i in $obj ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1 );
+				for( i in $obj ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1, 1 );
 			}
 			return t0;
 		};
@@ -329,16 +329,18 @@ function init(doc){
 			if( $load ){
 				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $load();}
 				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $load() );}
-				if( $data.charAt( $data.length - 1 ) == '=' ) $data += 'bs.__callback.' + ( i = 'c' + (id++) ), c[i] = function(){delete c[i], $end.apply( null, arguments );};
+				if( $data.charAt( $data.length - 1 ) == '=' ){
+					$data += 'bs.__callback.' + ( i = 'c' + (id++) ), c[i] = function(){delete c[i], $end.apply( null, arguments );};
+					$load.callBack = 1;
+				}
 				t0.src = $data;
-				console.log( $data );
 			}else t0.text = $data;
 			head.appendChild( t0 );
 		}
 		bs.$js = function( $end ){
 			var i, j, arg, load;
 			arg = arguments, i = 1, j = arg.length;
-			if( $end )(load = function(){i < j ? js( arg[i++], load, $end ) : $end();})();
+			if( $end )(load = function(){i < j ? js( arg[i++], load, $end ) : load.callBack ? 0 : $end();})();
 			else while( i < j ) js( bs.$get( null, arg[i++] ) );
 		};
 	})(doc);
@@ -1264,7 +1266,7 @@ function init(doc){
 		}
 		function router(){
 			var uri, t0, i, j, k;
-			if( !( uri = decodeURIComponent(location.hash) ) ) uri = location.hash = '#';
+			if( !( uri = location.hash ) ) uri = location.hash = '#';
 			h[h.length] = uri;
 			if( h.length > count ) h.splice( 0, h.length - count );
 			t0 = s['#'], i = 0, j = t0.length;
@@ -1290,7 +1292,7 @@ function init(doc){
 				i = 0, j = arguments.length;
 				while( i < j ) t[arguments[i++]] = arguments[i++];
 			},
-			go:function( $str ){location.hash = encodeURIComponent($str);},
+			go:function( $str ){location.hash = $str;},
 			route:function(){arguments[0] === null ? bs.WIN.on( 'hash', '@ROUTER' ) : ( bs.WIN.on( 'hashchange', '@ROUTER', router ), router() );},
 			historyMax:function($len){count=$len;}, history:h
 		};
