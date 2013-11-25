@@ -44,7 +44,8 @@ bs( function(){
 * Structure of BS [[ko](https://github.com/projectBS/bsJS/wiki/Structure-of-BS)][[ja](https://github.com/projectBS/bsJS/wiki/Structure-of-BS-ja)]  
 
 ## License
-Dual licensed under the MIT or GPL Version 2 licenses.
+Dual licensed under the MIT or GPL Version 2 licenses.  
+It is supported by the [BSIDESOFT](http://www.bsidesoft.com)(http://www.bsidesoft.com).
 
 [facebook group](https://www.facebook.com/groups/bs5js/?hc_location=stream)  
 
