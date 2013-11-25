@@ -1602,11 +1602,10 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 		init(doc);
 		for( i = 0, j = init.len ; i < j ; i++ ) init[i]();
 	}
-	if( doc.readyState !== "loading" ) loaded();
 	if( doc.addEventListener ){
 		doc.addEventListener( "DOMContentLoaded", loaded, false );
 		W.addEventListener( "load", loaded, false );
-	}else{
+	}else if( doc.attachEvent ){
 		doc.attachEvent( "onreadystatechange", loaded );
 		W.attachEvent( "onload", loaded );		
 		(function(){
@@ -1619,6 +1618,6 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 				loaded();
 			} )();
 		})();
-	}
+	}else if( doc.readyState !== "loading" ) loaded();
 })( W.document );
 } )( this );
