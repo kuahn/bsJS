@@ -6,10 +6,13 @@ function invoker(){
 		if( v === undefined ) return invoker[k];
 		invoker[k] = v;
 	}
-}
+	return invoker;
+};
+
 invoker.command = function( $key ){
 	invoker[$key] = Array.prototype.slice.call( arguments, 1 );
-}
+};
+
 invoker.run = function( $key ){
 	var t0, arg;
 	t0 = invoker[$key],
@@ -25,6 +28,7 @@ invoker.run = function( $key ){
 		t0.cursor = 0;
 		invoker[t0[t0.cursor]].apply( t0, arg );
 	}
-}
+};
+
 // Node.js
 if ( typeof module !== 'undefined' && module.exports ) module.exports = invoker;
