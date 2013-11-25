@@ -137,10 +137,10 @@ function init(doc){
 		};
 	})();
 	(function(){
-		function deco( $v, $t, $f, $r ){
+		function deco( $v, $t, $f, $r, $isEnd ){
 			var t0 = $v;
 			switch( $t ){
-			case's':case'n': t0 = $f + t0; break;
+			case's':case'n': t0 = $isEnd ? t0 + $f : $f + t0; break;
 			case'f': t0 = $f( t0, i ); break;
 			case'r': if( typeof t0 == 'string' ) t0 = t0.replace( $f, $r );
 			}
@@ -160,7 +160,7 @@ function init(doc){
 				while( i-- ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1 );
 			}else{
 				t0 = {};
-				for( i in $obj ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1 );
+				for( i in $obj ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1, 1 );
 			}
 			return t0;
 		};
@@ -320,23 +320,28 @@ function init(doc){
 	bs.$open = function $open( $url ){ W.open( $url ); };
 	bs.$back = function $back(){ history.back(); };
 	bs.$reload = function $reload(){ location.reload(); };
-	bs.$js = (function(doc){
-		var _callback = 0;
-		bs.__callback = {};
-		return function js( $end, $url ){
+	(function(doc){
+		var id, c, head;
+		id = 0, bs.__callback = c = {}, head = doc.getElementsByTagName( 'head' )[0];
+		function js( $data, $load, $end ){
 			var t0, i;
 			t0 = doc.createElement( 'script' ), t0.type = 'text/javascript', t0.charset = 'utf-8';
-			if( $url.charAt( $url.length -1 ) == '=' ){
-				$url += 'bs.__callback.' + ( i = 'c' + (_callback++) ),
-				bs.__callback[i] = function(){
-					$end.apply( null, arguments );
-					delete bs.__callback[i];
-				};
-			}else if( $end ){
-				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $end();}
-				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $end() );}
-			}
-			t0.src = $url, doc.getElementsByTagName( 'head' )[0].appendChild( t0 );
+			if( $load ){
+				if( W['addEventListener'] ) t0.onload = function(){t0.onload = null, $load();}
+				else t0.onreadystatechange = function(){(t0.readyState == 'loaded' || t0.readyState == 'complete') && ( t0.onreadystatechange = null, $load() );}
+				if( $data.charAt( $data.length - 1 ) == '=' ){
+					$data += 'bs.__callback.' + ( i = 'c' + (id++) ), c[i] = function(){delete c[i], $end.apply( null, arguments );};
+					$load.callBack = 1;
+				}
+				t0.src = $data;
+			}else t0.text = $data;
+			head.appendChild( t0 );
+		}
+		bs.$js = function( $end ){
+			var i, j, arg, load;
+			arg = arguments, i = 1, j = arg.length;
+			if( $end )(load = function(){i < j ? js( arg[i++], load, $end ) : load.callBack ? 0 : $end();})();
+			else while( i < j ) js( bs.$get( null, arg[i++] ) );
 		};
 	})(doc);
 	(function(){
@@ -1395,6 +1400,7 @@ function init(doc){
 			ani[ani.length] = this, start();
 		};
 		tTemp = {length:0};
+
 		tween.prototype.ANIstyle = function( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
 			if( this.stop ) return 1;
