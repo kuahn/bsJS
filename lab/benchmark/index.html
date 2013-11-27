@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<title>bs benchmark</title>
+</head>
+<body>
+
+<script src="jquery-1.10.2.min.js"></script>
+<script src="jquery-2.0.3.min.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+	$.noConflict();
+</script>
+<script src="../../bs/bs5.js"></script>
+<script type="text/javascript" charset="utf-8">
+var benchmark = {}, domLen = 1000;
+benchmark.recs = {},
+benchmark.getSec = function(){
+	if (Date.now) benchmark.getSec = function(){return Date.now();};
+	else benchmark.getSec = function(){return +new Date;};
+	return benchmark.getSec();
+},
+benchmark.mark = function(markName){
+		benchmark.recs[markName] = benchmark.getSec();
+},
+benchmark.fin = function(startName, endName, callbackFn){
+	var _startTime, _endTime, _elapsedTime;
+	_startTime = benchmark.recs[startName],
+	_endTime = benchmark.recs[endName],
+	_elapsedTime = (_endTime - _startTime) / 1000;
+	// if exist callback function
+	if (callbackFn)
+		callbackFn(startName, endName, _startTime, _endTime, _elapsedTime);
+	else
+		console.log("elapsed time[" + startName + " to " + endName + "] : " + _elapsedTime + " seconds", "[BENCHMARK]");
+	return _elapsedTime;
+};
+
+/*
+	DOM 생성 테스트
+*/
+
+// jQuery 1.x
+$(function(){
+	benchmark.mark('jq1Start');
+	for (var i=0; i < domLen; i++) {
+		$('#jquery1').append('<div>jq1 '+i+'</div>');
+	};
+	benchmark.mark('jq1Fin');
+	benchmark.fin('jq1Start', 'jq1Fin');
+});
+
+// jQuery 2.x
+jQuery(function(){
+	benchmark.mark('jq2Start');
+	for (var i=0; i < domLen; i++) {
+		jQuery('#jquery2').append('<div>jq2 '+i+'</div>');
+	};
+	benchmark.mark('jq2Fin');
+	benchmark.fin('jq2Start', 'jq2Fin');
+});
+
+// bsJS
+bs(function(){
+	benchmark.mark('bs5Start');
+	for (var i=0; i < domLen; i++) {
+		bs.d('<div>bs5 '+i+'</div>').$("<", '#bs');
+	};
+	benchmark.mark('bs5Fin');
+	benchmark.fin('bs5Start', 'bs5Fin');
+});
+
+</script>
+	<div id='jquery1'></div>
+	<div id='jquery2'></div>
+	<div id='bs'></div>
+</body>
+</html>

@@ -14,4 +14,4 @@ testRouka.html
 testSato.html
 testSewonist.html
 testRedcamel.html
-testRedcamel_Rain.html
+testRedcamel_Rain2.html

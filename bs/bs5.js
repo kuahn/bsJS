@@ -3,6 +3,7 @@
  *
  * Copyright 2013.10 hikaMaeng, bsJS-Team.
  * Dual licensed under the MIT or GPL Version 2 licenses.
+ * It is supported by the BSIDESOFT(http://www.bsidesoft.com).
  * GitHub: https://github.com/hikaMaeng/bs5
  * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
  */
@@ -1601,11 +1602,10 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 		init(doc);
 		for( i = 0, j = init.len ; i < j ; i++ ) init[i]();
 	}
-	if( doc.readyState !== "loading" ) loaded();
 	if( doc.addEventListener ){
 		doc.addEventListener( "DOMContentLoaded", loaded, false );
 		W.addEventListener( "load", loaded, false );
-	}else{
+	}else if( doc.attachEvent ){
 		doc.attachEvent( "onreadystatechange", loaded );
 		W.attachEvent( "onload", loaded );		
 		(function(){
@@ -1618,6 +1618,6 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 				loaded();
 			} )();
 		})();
-	}
+	}else if( doc.readyState !== "loading" ) loaded();
 })( W.document );
 } )( this );
