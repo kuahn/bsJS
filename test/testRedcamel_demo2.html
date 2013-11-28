@@ -128,7 +128,7 @@
 
             for (var i = 0; i < len; i++) {
                 bs.ANI.tween(listRain[i].$(
-                        'left', ex(0, '~f', w), 'top', -1, 'opacity', .5,  // 초기위치를 설정,
+                        'left', ex(0, '~f', w), 'height',1,'top', -1, 'opacity', .5,  // 초기위치를 설정,
                         'this'
                 ),
                         'top', h - ex(100, '~f', 250), 'height', 50, 'opacity', 0,
@@ -136,10 +136,11 @@
                 )
                 // 물퍼짐 표현
                 bs.ANI.tween(listRainPoint[i].$(
-                        'left', ex(0, '~f', w), 'top', h - ex(100, '~f', 150), 'opacity', 0.02, // 초기위치를 설정,
+                        'width', 1, 'height', 1,
+                        'left', ex(0, '~f', w), 'top', h - ex(100, '~f', 150), 'opacity', 0.05, // 초기위치를 설정,
                         'this'
                 ),
-                        'width', 40, 'height', 40, 'border-radius', 50, 'opacity', 0, // 목포값 설정합니다.
+                        'width', 40, 'height', 40, 'opacity', 0, // 목포값 설정합니다.
                         'ease', 'sineOut', 'delay', ex(0, '~f', 3), 'time', 1, 'loop', 0
                 )
             }
