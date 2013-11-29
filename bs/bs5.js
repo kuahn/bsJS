@@ -1084,9 +1084,7 @@ function init(doc){
 						else if( !$k ) return;
 						else{
 							self[$k] = $v;
-							console.log('on'+$k);
 							dom['on'+$k] = function( $e ){
-								console.log('on'+$k+'2');
 								var type, start, dx, dy, t0, t1, t2, i, j, X, Y;
 								self.event = $e || ( $e = event ), self.type = $e.type, self.code = $e.keyCode, self.value = dom.value && bs.$trim( dom.value );
 								if( type = evType[$k] ){
@@ -1302,7 +1300,7 @@ function init(doc){
 		};
 	})();
 	bs.ANI = ( function(){
-		var isCSS3, ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
+		var isCSS3, ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, style, filter;
 		isCSS3 = bs.DETECT.transition;
 		style = bs.style;
 		filter = bs.filter;
@@ -1377,9 +1375,9 @@ function init(doc){
 			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e;
 			this.t = t0 = $arg[0].nodeType == 1 ? bs.dom( $arg[0] ) : $arg[0], this.isDom = isDom = t0.isDom,
 			this.delay = this.stop = this.pause = this.css3 = 0,
-			this.time = 1000, this.timeR = .001, this.loop = this.loopC = native = t = 1,
+			this.time = 1000, this.timeR = .001, this.loop = this.loopC = t = 1,
 			this.id = this.end = this.update = null, this.ease = ease.linear, e = 'linear',
-			this.length = i = t0.length || 1;
+			this.length = i = t0.length || 1, native = 0;
 			while(i--)
 				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
 				( this[i][0] = isDom ? t0[i].bsS : (t0[i] || t0) );
@@ -1403,61 +1401,55 @@ function init(doc){
 				}
 			}
 			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time;
-			if( isDom ){
-				if( native && isCSS3 ){
-					i = this.length,
-					this.t.$( 'transition', 'all ' + t + 's ' + ease.css[e] + (d?' '+d+'s':'') ),
-					this.ANI = CSS3style, this.css3 = 1;
-				}else this.ANI = ANIstyle;
-			}else this.ANI = ANIobj;
+			if( isDom )
+				if( native && isCSS3 ) this.t.$( 'transition', this.transition = 'all ' + t + 's ' + ease.css[e] + (d?' '+d+'s':'') ), this.ANI = CSS3style, this.css3 = 1;
+				else this.ANI = ANIstyle;
+			else this.ANI = ANIobj;
 			ani[ani.length] = this, start();
 		};
-		tTemp = {length:0};
 		function CSS3style( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
-			l = this.length, j = this[0].length;
+			l = this.length, j = this[0].length, term = $time - this.stime, e = this.ease, time = this.time, rate = term * this.timeR;
+			if( this.stop ) return this.t.$( 'transition', null ), this.css3 = 6, 0;
+			if( $pause ){
+				if( $pause == 1 && this.pause == 0 ) this.t.$( 'transition', null ), this.css3 = 5;
+				else if( $pause == 2 && this.pause ){
+					t0 = this.transition.split(' '), t0[1] = (this.etime - this.pause)*.001 + 's';
+					if( t0.length == 4 ) t0.length = 3;
+					this.t.$( 'transition', t0.join(' ') ), this.css3 = 1, t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
+				}
+				return;
+			}
+			if( this.pause || term < 0 ) return;
 			switch( this.css3 ){
-			case 1:
-				while( l-- ){
+			case 1:while( l-- ){
 					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 					while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
 						typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 				}
-				this.css3 = 2;
-				break;
-			case 2:
-				e = this.ease, time = this.time, rate = term * this.timeR; 
-				if( this.stop ){
-					this.t.$( 'transition', null );
-					return 1;
-				}
-				if( $pause )
-					if( $pause == 1 && this.pause == 0 ){
-						this.t.$( 'transition', null );
-						while( l-- ){
-							t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
-							while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
-								typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
-						}			
-						return this.pause = $time, 0;
-					}else if( $pause == 2 && this.pause ){
-						t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
-					}
-				if( this.pause ) return;
-				if( ( term = $time - this.stime ) < 0 ) return;
-				
-				if( term > this.time )
-					if( --this.loopC ){
-						return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
-					}else{
-						this.t.$( 'transition', null );
-						tweenPool[tweenPool.length++] = this;
+				this.css3 = 2; break;
+			case 2: if( term > this.time )
+					if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,this.t.$( 'transition', null ),this.css3 = 3,0;
+					else{
+						this.t.$( 'transition', null ),tweenPool[tweenPool.length++] = this;
 						if( this.end ) this.end( this.t );
 						return 1;
 					}
 				if( this.update ) this.update( rate, $time, this );
+				break;
+			case 3: while( l-- ){
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = t0[i++], i++, typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				this.css3 = 4; break;
+			case 4: this.t.$( 'transition', this.transition ), this.css3 = 1; break;
+			case 5:case 6: while( l-- ){//pause
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ), typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				if( this.css3 == 6 ) return 1;
+				this.pause = $time;
 			}
-				
 		}
 		function ANIstyle( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
@@ -1465,10 +1457,8 @@ function init(doc){
 			if( $pause )
 				if( $pause == 1 && this.pause == 0 ) return this.pause = $time, 0;
 				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
-			if( this.pause ) return;
-			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, 
-			l = this.length, j = this[0].length;
+			if( this.pause || ( term = $time - this.stime ) < 0 ) return;
+			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
@@ -1477,11 +1467,10 @@ function init(doc){
 						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
 							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 					}
-					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
+					tweenPool[tweenPool.length++] = this;
 					return 1;
 				}
-			
 			while( l-- ){
 				t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
