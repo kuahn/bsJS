@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>testRedcamel_demo2</title>
+    <meta name="keywords" content="bs5"/>
+    <meta name="description" content="bs5 Test suite"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi"/>
+    <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+    <img style="position: fixed; top: 0; right: 0; border: 0;"
+         src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<script src="../bs/bs5.js"></script>
+<script src="../bs/bsTest.js"></script>
+<script>
+    // 2013.11.28 - 00:10
+    // By Redcamel
+    // 개발목적 : 트윈 및 기초테스트2(BS로 표현못할거는 뭐 없다고 생각함 -0-...)
+    bs(function () {
+        ////////////////////////////////////////////
+        // 초기세팅
+        var ex = bs.$ex;
+        var btween = bs.ANI.tween
+        var imgPath = 'redcamel_test_demo2_asset/redcamel_imgs/';
+        bs.css("body").$('margin', 0, 'overflow', 'hidden')
+        bs.css("div").$('margin', 0, 'overflow', 'hidden')
+        bs.dom('<div></div>').$('<', 'body', 'id', 'stage', 'position', 'absolute', 'background-color', '#000000', 'z-index', -1, 'background-image', "url(" + imgPath + "bg.jpg)")
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'title', 'position', 'absolute', 'html', 'Demo2 - 개발중', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#fff')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'title2', 'position', 'absolute', 'html', 'RedcamelStudio', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#fff')
+        bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'position', 'absolute', 'font-size', 11, 'color', '#fff', '<', 'body', 'this')[0]);
+
+        ////////////////////////////////////////////
+        var listRain = {length: 0}
+        var listRainPoint = {length: 0}
+        var len = bs.DETECT.device == 'tablet' || bs.DETECT.device == 'mobile' ? 30 : 100 // 모바일이나 태블릿환경일때 갯수 분기
+        for (var i = 0; i < len; i++) {
+            //일단 생성
+            // 비 표현
+            listRain[listRain.length++] = bs.dom('<div></div>').$(
+                    '<', '#stage', 'position', 'absolute', // 기본 위치랑 절대포지션으로 세팅
+                    'width', 1, 'height', 1, 'opacity', 1, 'background-color', '#fff', // 크기와 모양을 표현
+                    'this' //반환값
+            )
+            listRainPoint[listRainPoint.length++] = bs.dom('<div></div>').$(
+                    '<', '#stage', 'position', 'absolute', // 기본 위치랑 절대포지션 세팅
+                    'width', 1, 'height', 1, 'border-radius', 50, // 크기,모양 표현
+                    'opacity', 0.2, 'background-color', '#fff', // 상태표현
+                    'transform', 'rotateX(120deg)', // 각도를 표현하고..
+                    'this'
+            )
+        }
+
+        ////////////////////////////////////////////
+        // 타겟Area설정
+        (function () {
+            bs.dom('<div></div>').$('<', '#stage', 'id', 'targetArrow', 'position', 'absolute') // 타겟포인트 div
+            bs.$img(setTarget, imgPath + 'targetArrow.png', imgPath + 'targetArrowRotationA.png'); // 이미지 부르고 콜백검
+            function setTarget($images) {
+                var i = $images.length// 이미지를 잡아서 targetArrow에 떄려박는다.
+                while (i--) bs.dom('<div></div>').$('<', '#targetArrow', 'id', 'targetArrow' + i, 'position', 'absolute', 'top', (198 - $images[i].width) / 2, 'left', (198 - $images[i].height) / 2, '>', $images[i])
+                btween(bs.dom('#targetArrow').$(
+                        'width', $images[1].width, 'height', $images[1].height, 'opacity', 0, 'this'
+                ),
+                        'opacity', 1, 'time', 0.5, 'loop', 1
+                )
+                bs.dom('<div></div>').$('<', '#targetArrow', 'id', 'localPoint', 'position', 'absolute', 'font-size', 11, 'text-align', 'center', 'color', '#fff', 'width', '100%', 'top', 155)
+                ////////////////////////////////////////////
+                // stage Evnet
+                var targetArrowRotation = 0
+                bs.dom('#stage').$('mousemove', function ($e) {
+                            targetArrowRotation++
+                            bs.dom('#targetArrow').$('left', $e.x - 100, 'top', $e.y - 100);
+                            bs.dom('#localPoint').$('html', 'X :' + $e.x + "/" + 'Y :' + $e.y);
+                            bs.dom('#targetArrow1').$('transform', 'rotateZ(' + targetArrowRotation + 'deg)')
+                        }
+                )
+            }
+        })();
+
+
+        // 프레임표현
+        var inited = false
+        var lightOn = true
+        bs.WIN.sizer(function (w, h) {
+               console.log(w)
+            if (inited == false) {
+                bs.ANI.tween(
+                        bs.dom('#title2').$('opacity', .0, 'this'),
+                        'opacity', 1, 'ease', 'sineIn', 'delay', 1, 'time', 2, 'loop', 1
+                )
+
+                bs.dom('<div><img src=' + imgPath + "frame_bottom.jpg width=100%" + '></div>').$('<', '#stage', 'id', 'btFrameCenter', 'position', 'absolute', 'top', h, 'width', '100%', 'height', '100')
+                bs.dom('<div><img src=' + imgPath + 'frame_left.png' + '></div>').$('<', '#stage', 'id', 'btFrame_left', 'position', 'absolute', 'top', h - 176)
+                bs.dom('<div><img src=' + imgPath + 'frame_right.png' + '></div>').$('<', '#stage', 'id', 'btFrame_right', 'position', 'absolute','left',w, 'top', h - 176)
+
+                btween(bs.dom('#btFrameCenter').$('opacity', 0, 'this'), 'top', h - 100, 'opacity', 1, 'ease', 'sineOut', 'time', 0.5, 'loop', 1)
+                btween(bs.dom('#btFrame_left').$('left', -312, 'this'), 'left', 0,  'delay', 1,'ease', 'backOut', 'time', 1, 'loop', 1)
+                btween(bs.dom('#btFrame_right').$('left',w,'this'), 'left', w-270,'delay', 1, 'ease', 'backOut', 'time', 1, 'loop', 1)
+
+                bs.dom('<div><img src=' + imgPath + 'frame_Light.png' + '></div>').$('<', '#stage', 'id', 'btFrame_Light', 'position', 'absolute', 'top', h - 289, 'left', 76, 'opacity', 0)
+                bs.dom('<div><img src=' + imgPath + 'frame_Light2.png' + '></div>').$('<', '#stage', 'id', 'btFrame_Light2', 'position', 'absolute', 'top', h - 281, 'left', w - 230, 'opacity', 0)
+                btween(bs.dom('#btFrame_Light').$('opacity', 0, 'this'), 'opacity', 1, 'ease', 'sineOut', 'delay', 2, 'time', 1, 'loop', 1,
+                        'end', loopLight // 라이트 온오프
+                )
+                btween(bs.dom('#btFrame_Light2').$('opacity', 0, 'this'), 'opacity', 1, 'ease', 'sineOut', 'delay', 2, 'time', 1, 'loop', 1)
+                function loopLight($target) {
+                    if (lightOn) {
+                        btween($target, 'opacity', 0, 'ease', 'sineOut', 'time', 1, 'loop', 1, 'end', loopLight)
+                        btween(bs.dom('#btFrame_Light2'), 'opacity', 0, 'ease', 'sineOut', 'time', 1, 'loop', 1)
+                        lightOn = false
+                    } else {
+                        btween($target, 'opacity', 1, 'ease', 'sineOut', 'time', 1, 'loop', 1, 'end', loopLight)
+                        btween(bs.dom('#btFrame_Light2'), 'opacity', 1, 'ease', 'sineOut', 'time', 1, 'loop', 1)
+                        lightOn = true
+                    }
+                }
+
+                inited = true
+                bs.dom('#btFrame_right').$('left', w , 'top', h - 176)
+            }else{
+                bs.dom('#btFrame_right').$('left', w - 270, 'top', h - 176)
+            }
+
+            for (var i = 0; i < len; i++) {
+                bs.ANI.tween(listRain[i].$(
+                        'left', ex(0, '~f', w), 'height',1,'top', -1, 'opacity', .5,  // 초기위치를 설정,
+                        'this'
+                ),
+                        'top', h - ex(100, '~f', 250), 'height', 50, 'opacity', 0,
+                        'ease', 'sineIn', 'delay', ex(0, '~f', 3), 'time', 2, 'loop', 0
+                )
+                // 물퍼짐 표현
+                bs.ANI.tween(listRainPoint[i].$(
+                        'width', 1, 'height', 1,
+                        'left', ex(0, '~f', w), 'top', h - ex(100, '~f', 150), 'opacity', 0.05, // 초기위치를 설정,
+                        'this'
+                ),
+                        'width', 40, 'height', 40, 'opacity', 0, // 목포값 설정합니다.
+                        'ease', 'sineOut', 'delay', ex(0, '~f', 3), 'time', 1, 'loop', 0
+                )
+            }
+
+
+            bs.dom('#stage').$('width', w, 'height', h)
+            bs.dom('#title').$('top', 0, 'left', 0)
+            bs.dom('#title2').$('left', w / 2 - 70, 'top', h / 2 - 100)
+            bs.dom('#btFrame_left').$('top', h - 176)
+
+            bs.dom('#btFrameCenter').$('top', h - 100)
+            bs.dom('#btFrame_Light').$('top', h - 289)
+            bs.dom('#btFrame_Light2').$('left', w - 230, 'top', h - 281)
+
+        })
+    });
+
+</script>
+</body>
+</html>
