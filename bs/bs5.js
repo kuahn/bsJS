@@ -74,7 +74,7 @@ function init(doc){
 			var r, t0, i, j, k;
 			t0 = typeof $sel; 
 			if( t0 == 'function' ) return $sel();
-			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( parents = bs.$analysis($sel), bs.$reverse(parents.childNodes) ) : sel( $sel );
+			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( parents = bs.$analyze($sel), bs.$reverse(parents.childNodes) ) : sel( $sel );
 			if( $sel.isDom ) return $sel;
 			r = $node ? {} : nodes;
 			if( $sel.nodeType == 1 ) return r[0] = $sel, r.length = 1, r;
@@ -165,7 +165,7 @@ function init(doc){
 			}
 			return t0;
 		};
-		bs.$analysis = function( $tag ){
+		bs.$analyze = function( $tag ){
 			var t0, t1, t2;
 			var t0 = {
 				div : doc.createElement( 'div' ),
