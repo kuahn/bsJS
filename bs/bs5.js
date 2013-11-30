@@ -45,7 +45,7 @@ if( !W['JSON'] ) W['JSON'] = {
 };
 function init(doc){
 	var bs = (function(doc){
-		var sel,sz,t0,div,nodes;
+		var sel,sz,t0,parents,nodes;
 		if( doc.querySelectorAll ) sel = function( $sel ){return doc.querySelectorAll( $sel );};
 		else if( sz = W['Sizzle'] ) sel = function( $sel ){return sz( $sel );};
 		else if( sz = doc.getElementById('sizzle') ){
@@ -69,12 +69,12 @@ function init(doc){
 				return doc.getElementsByTagName($sel);
 			};
 		}
-		div = doc.createElement( 'div' ), nodes = {};
+		nodes = {};
 		function bs( $sel, $node ){
 			var r, t0, i, j, k;
 			t0 = typeof $sel; 
 			if( t0 == 'function' ) return $sel();
-			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, bs.$reverse(div.childNodes) ) : sel( $sel );
+			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( parents = bs.$analysis($sel), bs.$reverse(parents.childNodes) ) : sel( $sel );
 			if( $sel.isDom ) return $sel;
 			r = $node ? {} : nodes;
 			if( $sel.nodeType == 1 ) return r[0] = $sel, r.length = 1, r;
@@ -164,6 +164,22 @@ function init(doc){
 				for( i in $obj ) t0[i] = deco( deco( $obj[i], type0, $start, reg0 ), type1, $end, reg1, 1 );
 			}
 			return t0;
+		};
+		bs.$analysis = function( $tag ){
+			var t0, t1, t2;
+			var t0 = {
+				div : doc.createElement( 'div' ),
+				op : doc.createElement( 'select' ),
+				tr : doc.createElement( 'table' ),
+				td : doc.createElement( 'table' ),
+				dt : doc.createElement( 'dl' ),
+				dd : doc.createElement( 'dl' ),
+				li : doc.createElement( 'ul' )
+			};
+			t1 = $tag.substring( 1, 3 );
+			t0[t1] == undefined ? t2 = 'div' : t2 = t1;
+			t0[t2].innerHTML = $tag;
+			return t0[t2];
 		};
 		bs.$reverse = function( $obj ){
 			var t0, i;
