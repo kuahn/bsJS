@@ -53,7 +53,7 @@ function init(doc){
 			t0.text = sz.text, sz = Sizzle,
 			sel = function( $sel ){return sz( $sel );};
 		}else{
-			sz = {};
+			sz = {},
 			sel = function( $sel ){
 				var t0, i;
 				if( ( t0 = $sel.charAt(0) ) == '#' ){
