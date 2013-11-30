@@ -68,7 +68,7 @@ function init(doc){
 				return doc.getElementsByTagName($sel);
 			};
 		}
-		div = doc.createElement( 'div' ), nodes = {};
+		nodes = {};
 		function bs( $sel, $node ){
 			var r, t0, i, j, k;
 			t0 = typeof $sel; 
