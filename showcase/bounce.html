@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<title>bs5 Test suite - Bounce</title>
+<title>Bounce</title>
 <meta name="keywords" content="bs5" />
 <meta name="description" content="bs5 Test suite" />
 <meta charset="utf-8"/>
@@ -12,15 +12,20 @@
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
 </head>
 <body>
+    <a href="https://github.com/projectBS/bsJS">
+    <img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<div id="stage"></div>
 <script src="../bs/bs5.js"></script>
 <script>
 bs(function(){
-bs.css('body').$('background', '#000', "position", "absolute", "overflow", "hidden", "margin", 0, "padding", 0);
+bs.css("body").$("background", "#000", "overflow", "hidden", "margin", 0, "padding", 0);
+bs.ANI.fps( bs.dom('<div></div>' ).$( 'id', 'fps', 'position','absolute', 'font-size', 11, 'color', '#fff', '<', 'body', 'this' )[0] );
 var game = {
     balls:[], 
     w:0, h:0,
     started:false,
-    numBalls:bs.DETECT.device == 'tablet' || bs.DETECT.device == 'mobile' ? 5 : 20,
+    numBalls:(bs.DETECT.device == "mobile") ? 5 : (bs.DETECT.device == "tablet") ? 15 : 20,
     init:function(w, h) {
         this.w = w;
         this.h = h;
@@ -47,7 +52,7 @@ var game = {
                     "top", y,
                     "margin-left", -r,
                     "margin-top", -r,
-                    "<", "body"
+                    "<", "#stage"
                 );
 
                 this.balls[i] = {
@@ -150,7 +155,6 @@ var game = {
         }
     }
 };
-
 bs.WIN.sizer(function(w, h) {
     game.init(w, h);
 });
