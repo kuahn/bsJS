@@ -138,7 +138,7 @@ bs.ROUTER =(function(){
 			$rp.end( 'not exist' );
 			return;
 		}
-		$rp.writeHead( 200, {'Content-Type':'text/html'} );
+		$rp.writeHead( 200, t0.header() );
 		$rp.end( t0.response() );
 	} );
 	server.on('connection', function(){} );
