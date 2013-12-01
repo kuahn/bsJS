@@ -110,23 +110,49 @@ bs.$ex = (function(){
 	bs.$stripTag = factory( /[<][^>]+[>]/g, '' );
 	bs.$trim = factory( /^\s*|\s*$/g, '' );
 })();
-(function(){
-	var server, url;
+bs.ROUTER =(function(){
+	var filename, path;
+	
+	var server, url, s, e, t, h, count;
+
 	url = require('url');
+	s = {'/':[]}, e = {'/':[]}, t = {}, h = [], count = 5;
+	function make( t ){
+		return function( $path, $func ){
+			var t0, i, j, k, v;
+			i = 0, j = arguments.length;
+			while( i < j ){
+				k = arguments[i++], v = arguments[i++];
+				if( !( t0 = t[k] ) ) t[k] = t0 = [];
+				t0[t0.length] = v;
+			}
+		};
+	}
 	server = require('http').createServer();
-	server.on('request', function( rq, rp ){
+	server.on('request', function router( $rq, $rp ){
 		var t0;
-		rp.writeHead( 200, {'Content-Type':'text/html'} );
 		try{
-			t0 = require( '../node'+url.parse( rq.url ).pathname+'/_.js' ).response();
+			t0 = require( path+url.parse( $rq.url ).pathname+'/'+filename );
 		}catch( $e ){
-			t0 = '';
+			$rp.writeHead( 404, {'Content-Type':'text/html'} ),
+			$rp.end( 'not exist' );
+			return;
 		}
-		rp.end( t0 );
+		$rp.writeHead( 200, {'Content-Type':'text/html'} );
+		$rp.end( t0.response() );
 	} );
 	server.on('connection', function(){} );
 	server.on('close', function(){} );
-	bs.$start = function( $port ){
-		server.listen( $port );
-	}
+	return {
+		start:make(s),end:make(e),
+		table:function(){
+			var i, j;
+			i = 0, j = arguments.length;
+			while( i < j ) t[arguments[i++]] = arguments[i++];
+		},
+		go:function( $str ){location.hash = $str;},
+		route:function( $port, $path, $filename ){
+			path = $path, filename = $filename, server.listen( $port );
+		}
+	};
 })();

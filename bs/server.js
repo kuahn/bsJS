@@ -1,2 +1,2 @@
 var bs = require('./bsnode.js');
-bs.$start(8080);
+bs.ROUTER.route( 8080, '../node', '_.js' );
