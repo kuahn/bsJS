@@ -16,11 +16,12 @@
     <img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
 <div id="stage"></div>
+<!-- https://github.com/projectBS/bsJS -->
 <script src="../bs/bs5.js"></script>
 <script>
 bs(function(){
 bs.css("body").$("background", "#000", "overflow", "hidden", "margin", 0, "padding", 0);
-bs.ANI.fps( bs.dom('<div></div>' ).$( 'id', 'fps', 'position','absolute', 'font-size', 11, 'color', '#fff', '<', 'body', 'this' )[0] );
+bs.ANI.fps( bs.dom("<div></div>" ).$( "id", "fps", "position","absolute", "font-size", 11, "color", "#fff", "<", "body", "this" )[0] );
 var game = {
     balls:[], 
     w:0, h:0,

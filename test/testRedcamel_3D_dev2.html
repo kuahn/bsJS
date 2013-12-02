@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>testRedcamel</title>
+    <meta name="keywords" content="bs5"/>
+    <meta name="description" content="bs5 Test suite"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi"/>
+    <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+    <img style="position: fixed; top: 0; right: 0; border: 0;"
+         src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<script src="../bs/bs5.js"></script>
+<script src="../bs/bsTest.js"></script>
+
+<script>
+    // 2013.12.2 - 16:00
+    // By Redcamel
+    // 개발목적 : 빌보드처리는 해봐야긋는데..
+    // 회전행렬제외....걍 쌩기초만 해봅세..
+    bs(function () {
+        var inited = false
+        bs.dom('<div></div>').$('<', 'body', 'id', 'title', 'position', 'absolute', 'html', '3D Basic Dev2 - W,S(앞으로 / 뒤로)', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#000','top',20)
+        bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'position', 'absolute', 'font-size', 11, 'color', '#000', '<', 'body', 'this')[0]);
+
+        bs.dom('<div></div>').$('<', 'body', 'id', 'stage', 'position', 'absolute')
+        var keyBuffer = {}
+        bs.WIN.sizer(function (w, h) {
+            bs.dom('#stage').$('width',w,'height',h,'left',w/2)
+            if (inited) return
+            var distanceZ = 0
+            var camera = {
+                position: {x: w/2, y: h / 2, z: 0},
+                ANI: function ($time) {
+                    if (keyBuffer[87]) this.position.z++;
+                    if (keyBuffer[83]) this.position.z--;
+                }
+            }
+
+            var len = bs.DETECT.device == 'tablet' || bs.DETECT.device == 'mobile' ? 30 : 50 // 모바일이나 태블릿환경일때 갯수 분기...아..짜피 모바일 테스트가 안되는구나;;
+            var planes = {
+                position: [],
+                img: 'redcamel_test_demo2_asset/006.jpg',
+                init: function () {
+                    for (var i = 0; i < len; i++) {
+                        this.position.push({x: bs.$ex(-w/2, '~', w/2), y: h / 2, z: Math.random() * 500 + 200})
+                        bs.dom("<div><img src=" + this.img + " width='100%' height='100%'></div>").$(
+                                '<', '#stage', 'position', 'absolute', 'id', 'plane' + i,
+                                'left', this.position[i].x,
+                                'top', this.position[i].y,
+                                'width', 100, 'height', 100, 'this'
+                        )
+                    }
+                },
+                ANI: function ($time) {
+                    for (var i = 0; i < len; i++) {
+                        var pos = this.position[i]
+                        distanceZ = pos.z - camera.position.z
+                        if(distanceZ<0){
+                            bs.dom('#plane' + i).$('display','none')
+                        }else{
+                            var perspectiveScale = 10000 / (distanceZ * distanceZ);
+                            bs.dom('#plane' + i).$(
+                                    'display','block',
+                                    'width', perspectiveScale * 100, 'height', perspectiveScale * 100,
+                                    'left', pos.x*perspectiveScale, 'top', pos.y -perspectiveScale * 50 , // 이범위 계산은 좀더 공부해야할듯..
+                                    'z-index', parseInt(perspectiveScale * 100) // 일단 지뎁스는 걍 z축으로-0-...회전드가면...아.....
+                            )
+                        }
+                    }
+
+                }
+            }
+            planes.init()
+            bs.ANI.ani(camera)
+            bs.ANI.ani(planes)
+            inited = true
+        });
+
+        // TODO 알아보기 -키다운에 걸려있는 저건뭐지 -_-
+        bs.WIN.on('keydown', 'kd', function ($e) {
+            keyBuffer[$e.code] = 1;
+        });
+        bs.WIN.on('keyup', 'ku', function ($e) {
+            keyBuffer[$e.code] = 0;
+        });
+    });
+
+
+</script>
+</body>
+</html>
