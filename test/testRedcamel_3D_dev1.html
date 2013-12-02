@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -28,79 +27,83 @@
     // 개발목적 : 3D구현을 우째해야하나고민...
     // 걍일단 되는대로 구현해봅세...
     bs(function () {
-        function red3d() {
-        };
-        // 일단...3D앞으로 만들어나갈것을..정의해봅세..
-        red3d.init = function ($body) {
-            var virewport = new Viewport()
-            var world = new World()
-            // 뷰포트설정
-            function Viewport() {
-                bs.dom('<div></div>').$(
-                        '<', 'body', 'id', 'viewport', 'position', 'relative',
-                        'width', '100%', 'height', '100%',
-                        'perspective', 1280)
-            }
-
-            // 월드설정
-            function World() {
-                bs.dom('<div></div>').$(
-                        '<', '#viewport', 'id', 'world', 'position', 'absolute',
-                        'top', ' 50%', 'left', '50%',
-                        'transform-style', 'preserve-3d',
-                        'perspective', 1280
-                )
-            }
-
-            // TODO 카메라도 나중에 따야겠다..
-        }
-
-
-        var inited = false
-        var cameraRotation = 0
+        var inited = false // 초기화됐는지 판별합니다.
+        var cameraRotation = 0 // 임시로 가메라 구현을 위해서 로테이션만 설정합니다.
         bs.WIN.sizer(function (w, h) {
             if (inited) return
-            red3d.init();
+            function red3d() {
+            };
+            // 일단...3D앞으로 만들어나갈것을..정의해봅세..
+            red3d.init = function ($body) {
 
-            var plane = {
-                imgs: [],
-                point3D: [],
-                rotation3D: [],
+                if (bs.DETECT.browser == 'ie') {
+                    alert('IE는 안됫!\nCSS말고 가상좌표계로 처리예정..크롬으로보세용~');
+                    return
+                }
+                ;
+
+                var virewport = new Viewport()
+                var world = new World()
+                // 뷰포트설정
+                function Viewport() {
+                    bs.dom('<div></div>').$(
+                            '<', 'body', 'id', 'viewport', 'position', 'relative',
+                            'width', '100%', 'height', '100%',
+                            'perspective', w
+                    )
+                }
+
+                // 월드설정
+                function World() {
+                    bs.dom('<div></div>').$(
+                            '<', '#viewport', 'id', 'world', 'position', 'absolute',
+                            'top', ' 50%', 'left', '50%',
+                            'transform-style', 'preserve-3d',
+                            'perspective', w
+                    )
+                }
+
+                // TODO 카메라도 나중에 따야겠다..
+            }
+            red3d.init(); // 3D환경초기화
+
+            var planes = {
+                imgs: [], // 텍스쳐로 쓸 이미지공간
+                point3D: [], // 각 오브젝트의 좌표
+                rotation3D: [], // 각 오브젝트의 회전갑
                 init: function () {
-
-                    for (var i = 0; i < 100; i++) {
+                    var len = bs.DETECT.device == 'tablet' || bs.DETECT.device == 'mobile' ? 30 : 100 // 모바일이나 태블릿환경일때 갯수 분기
+                    // 적당히 갯수로 뿌립니다.
+                    for (var i = 0; i < len; i++) {
                         this.imgs.push('redcamel_test_demo2_asset/006.jpg')
                         bs.dom("<div><img src=" + this.imgs[0] + " width='100%' height='100%'></div>").$(
                                 '<', '#world', 'position', 'absolute', 'id', 'plane' + i,
                                 'width', 100, 'height', 100, // 나중엔 자동으로 받을수있게..해야하것고...
                                 'transform-origin', '100 100 0'
                         )
-                        this.point3D.push([bs.$ex(-w / 2, '~f', w / 2), bs.$ex(-h / 2, '~f', h / 2), bs.$ex(-h, '~f', h)])
+                        this.point3D.push([bs.$ex(-w / 2, '~f', w / 2), bs.$ex(-h / 2, '~f', h / 2), bs.$ex(-w / 2, '~f', w / 2)])
                         this.rotation3D.push([bs.$ex(0, '~', 360), bs.$ex(0, '~', 360), bs.$ex(0, '~', 360)])
                     }
                 },
                 ANI: function ($time) {
                     cameraRotation++
-                    bs.dom('#world').$('transform', "rotateY(" + cameraRotation + "deg)")
+                    bs.dom('#world').$('transform', "rotateY(" + cameraRotation + "deg)") // 임시류 카메라 돌리는것 처럼구현...(걍 월드를 돌림)
                     for (var i = 0; i < this.imgs.length; i++) {
                         var point3d = this.point3D[i]
                         var rotation3D = this.rotation3D[i]
                         rotation3D[2]++
-                        var str = "translate3d(" + (point3d[0] - 50) + "px," + (point3d[1] - 50) + "px," + point3d[2] + "px)" +
+                        var str = "translate3d(" + (point3d[0] - 50) + "px," + (point3d[1] - 50) + "px," + point3d[2] + "px)" + // 각오브젝트의 센터를 중심으로 회전할수있도록 보정
                                 "rotateX(" + rotation3D[0] + "deg)" +
                                 "rotateY(" + rotation3D[1] + "deg)" +
                                 "rotateZ(" + rotation3D[2] + "deg)"
 
-
-                        bs.dom('#plane' + i).$(
-                                'transform', str
-                        )
+                        bs.dom('#plane' + i).$('transform', str) // 트렌스폼때려요~~~
                     }
                 }
             }
-            plane.init()
-            bs.ANI.ani(plane);
-            inited=true
+            planes.init()
+            bs.ANI.ani(planes);
+            inited = true
         });
 
     });
