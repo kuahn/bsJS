@@ -502,7 +502,7 @@ function init(doc){
 				i = /safari\/([\d.]+)/.exec( agent );
 				if( i ) bVersion = parseFloat( i[1] );
 				naver() || chrome() || firefox() || opera();
-			}else if( agent.indexOf( i = 'iphone' ) > -1 || agent.indexOf( i = 'ipad' ) > -1 ){
+			}else if( agent.indexOf( i = 'ipad' ) > -1 || agent.indexOf( i = 'iphone' ) > -1 ){
 				device = i == 'ipad' ? 'tablet' : 'mobile';
 				browser = os = i;
 				i = /os ([\d_]+)/.exec( agent );
