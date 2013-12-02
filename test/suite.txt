@@ -8,6 +8,7 @@ bs.function.html
 bs.keyframe.html
 bs.router.html
 bs.tmpl.html
+bs.vali.html
 testHika.html
 testHuns.html
 testRouka.html
