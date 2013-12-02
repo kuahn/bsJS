@@ -22,6 +22,7 @@
 bs( function(){
 	bs.css( '#stage' ).$( 'position', 'absolute', 'width', '100%', 'height', 400, 'background-color', '#eee' );
 	bs.css( '.test' ).$( 'position', 'absolute', 'width', 20, 'height', 20, 'background', '#a80' );
+	
 	bs.ANI.tween( bs.dom( '<div></div>' ).$( 'class', 'test', 'left', 100, 'top', 100, '<', '#stage', 'this' ), 
 		'left', 300, 'top', 200, 'time', 3
 	);

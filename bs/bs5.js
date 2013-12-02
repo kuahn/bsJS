@@ -3,7 +3,6 @@
  *
  * Copyright 2013.10 hikaMaeng, bsJS-Team.
  * Dual licensed under the MIT or GPL Version 2 licenses.
- * It is supported by the BSIDESOFT(http://www.bsidesoft.com).
  * GitHub: https://github.com/hikaMaeng/bs5
  * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
  */
@@ -54,7 +53,7 @@ function init(doc){
 			t0.text = sz.text, sz = Sizzle,
 			sel = function( $sel ){return sz( $sel );};
 		}else{
-			sz = {};
+			sz = {},
 			sel = function( $sel ){
 				var t0, i;
 				if( ( t0 = $sel.charAt(0) ) == '#' ){
@@ -503,7 +502,7 @@ function init(doc){
 				i = /safari\/([\d.]+)/.exec( agent );
 				if( i ) bVersion = parseFloat( i[1] );
 				naver() || chrome() || firefox() || opera();
-			}else if( agent.indexOf( i = 'iphone' ) > -1 || agent.indexOf( i = 'ipad' ) > -1 ){
+			}else if( agent.indexOf( i = 'ipad' ) > -1 || agent.indexOf( i = 'iphone' ) > -1 ){
 				device = i == 'ipad' ? 'tablet' : 'mobile';
 				browser = os = i;
 				i = /os ([\d_]+)/.exec( agent );
@@ -1076,11 +1075,13 @@ function init(doc){
 					}
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
+						
 						self = this, dom = self.dom;
 						if( typeof ev$[$k] == 'string' ) $k = ev$[$k];
 						if( $v === null ) dom['on'+$k] = null, delete self[$k];
 						else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
 						else if( $k == 'rollout' ) self.$( 'mouseout', ev$.rollout );
+						else if( !$k ) return;
 						else{
 							self[$k] = $v;
 							dom['on'+$k] = function( $e ){
@@ -1299,7 +1300,8 @@ function init(doc){
 		};
 	})();
 	bs.ANI = ( function(){
-		var ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
+		var isCSS3, ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, style, filter;
+		isCSS3 = bs.DETECT.transition;
 		style = bs.style;
 		filter = bs.filter;
 		bs.style = bs.filter = null;
@@ -1353,27 +1355,29 @@ function init(doc){
 				circleIn:function(a,c,b){return -b*(Math.sqrt(1-a*a)-1)+c},
 				circleOut:function(a,c,b){a-=1;return b*Math.sqrt(1-a*a)+c},
 				circleInOut:function(a,c,b){a*=2;if(1>a)return 0.5*-b*(Math.sqrt(1-a*a)-1)+c;a-=2;return 0.5*b*(Math.sqrt(1-a*a)+1)+c},
-				_li:i+'0.250,0.250,0.750,0.750)',
-				_baI:i+'0.600,-0.280,0.735,0.045)',_baO:i+'0.175,0.885,0.320,1.275)',_baIO:i+'0.680,-0.550,0.265,1.550)',
-				_boI:i+'0.600,-0.280,0.735,0.045)',_boO:i+'0.175,0.885,0.320,1.275)',_boIO:i+'0.680,-0.550,0.265,1.550)',
-				_siI:i+'0.470,0.000,0.745,0.715)',_siO:i+'0.390,0.575,0.565,1.000)',_siIO:i+'0.445,0.050,0.550,0.950)',
-				_ciI:i+'0.600,0.040,0.980,0.335)',_ciO:i+'0.075,0.820,0.165,1.000)',_ciIO:i+'0.785,0.135,0.150,0.860)'
+				css:{
+				linear:i+'0.250,0.250,0.750,0.750)',
+				backIn:i+'0.600,-0.280,0.735,0.045)',backOut:i+'0.175,0.885,0.320,1.275)',backInOut:i+'0.680,-0.550,0.265,1.550)',
+				bounceIn:i+'0.600,-0.280,0.735,0.045)',bounceOut:i+'0.175,0.885,0.320,1.275)',bounceInOut:i+'0.680,-0.550,0.265,1.550)',
+				sineIn:i+'0.470,0.000,0.745,0.715)',sineOut:i+'0.390,0.575,0.565,1.000)',sineInOut:i+'0.445,0.050,0.550,0.950)',
+				circleIn:i+'0.600,0.040,0.980,0.335)',circleOut:i+'0.075,0.820,0.165,1.000)',circleInOut:i+'0.785,0.135,0.150,0.860)'
+				}
 			};
 		})();
 		tweenPool = {length:0};
 		function tween(){}
 		(function(){
 			var t0, i;
-			t0 = 'id,time,ease,delay,loop,end,update'.split(','), i = t0.length;
+			t0 = 'id,time,ease,delay,loop,end,update,native'.split(','), i = t0.length;
 			while( i-- ) tween[t0[i]] = 1;
 		})();
 		tween.prototype.init = function( $arg ){
-			var t0, l, i, j, k, v, isDom, v0, o, p;
+			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e;
 			this.t = t0 = $arg[0].nodeType == 1 ? bs.dom( $arg[0] ) : $arg[0], this.isDom = isDom = t0.isDom,
-			this.delay = this.stop = this.pause = 0,
-			this.time = 1000, this.timeR = .001, this.loop = this.loopC = 1,
-			this.id = this.end = this.update = null, this.ease = ease.linear,
-			this.length = i = t0.length || 1;
+			this.delay = this.stop = this.pause = this.css3 = 0,
+			this.time = 1000, this.timeR = .001, this.loop = this.loopC = t = 1,
+			this.id = this.end = this.update = null, this.ease = ease.linear, e = 'linear',
+			this.length = i = t0.length || 1, native = 0;
 			while(i--)
 				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
 				( this[i][0] = isDom ? t0[i].bsS : (t0[i] || t0) );
@@ -1381,14 +1385,14 @@ function init(doc){
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
 				if( tween[k] ){
-					if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
-					else if( k == 'ease' ) this.ease = ease[v];
-					else if( k == 'delay' ) this.delay = parseInt(v*1000);
+					if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time, t = v;
+					else if( k == 'ease' ) this.ease = ease[v], e = v;
+					else if( k == 'delay' ) this.delay = parseInt(v*1000), d = v;
 					else if( k == 'loop' ) this.loop = this.loopC = v;
 					else if( k == 'end' || k == 'update' ) this[k] = v;
 					else if( k == 'id' ) this.id = v;
+					else if( k == 'native' ) n = v;
 				}else{
-					
 					l = this.length;
 					while( l-- )
 						if( isDom ){
@@ -1396,22 +1400,65 @@ function init(doc){
 						}else v0 = this[l][0][k], this[l].push( k, v0, v - v0 );
 				}
 			}
-			this.ANI = isDom ? this.ANIstyle : this.ANIobj,
-			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time,
+			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time;
+			if( isDom )
+				if( native && isCSS3 ) this.t.$( 'transition', this.transition = 'all ' + t + 's ' + ease.css[e] + (d?' '+d+'s':'') ), this.ANI = CSS3style, this.css3 = 1;
+				else this.ANI = ANIstyle;
+			else this.ANI = ANIobj;
 			ani[ani.length] = this, start();
 		};
-		tTemp = {length:0};
-
-		tween.prototype.ANIstyle = function( $time, $pause ){
+		function CSS3style( $time, $pause ){
+			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
+			l = this.length, j = this[0].length, term = $time - this.stime, e = this.ease, time = this.time, rate = term * this.timeR;
+			if( this.stop ) return this.t.$( 'transition', null ), this.css3 = 6, 0;
+			if( $pause ){
+				if( $pause == 1 && this.pause == 0 ) this.t.$( 'transition', null ), this.css3 = 5;
+				else if( $pause == 2 && this.pause ){
+					t0 = this.transition.split(' '), t0[1] = (this.etime - this.pause)*.001 + 's';
+					if( t0.length == 4 ) t0.length = 3;
+					this.t.$( 'transition', t0.join(' ') ), this.css3 = 1, t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
+				}
+				return;
+			}
+			if( this.pause || term < 0 ) return;
+			switch( this.css3 ){
+			case 1:while( l-- ){
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
+						typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				this.css3 = 2; break;
+			case 2: if( term > this.time )
+					if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,this.t.$( 'transition', null ),this.css3 = 3,0;
+					else{
+						this.t.$( 'transition', null ),tweenPool[tweenPool.length++] = this;
+						if( this.end ) this.end( this.t );
+						return 1;
+					}
+				if( this.update ) this.update( rate, $time, this );
+				break;
+			case 3: while( l-- ){
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = t0[i++], i++, typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				this.css3 = 4; break;
+			case 4: this.t.$( 'transition', this.transition ), this.css3 = 1; break;
+			case 5:case 6: while( l-- ){//pause
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ), typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				if( this.css3 == 6 ) return 1;
+				this.pause = $time;
+			}
+		}
+		function ANIstyle( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
 			if( this.stop ) return 1;
 			if( $pause )
 				if( $pause == 1 && this.pause == 0 ) return this.pause = $time, 0;
 				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
-			if( this.pause ) return;
-			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, 
-			l = this.length, j = this[0].length;
+			if( this.pause || ( term = $time - this.stime ) < 0 ) return;
+			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
@@ -1420,19 +1467,18 @@ function init(doc){
 						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
 							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 					}
-					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
+					tweenPool[tweenPool.length++] = this;
 					return 1;
 				}
-			
 			while( l-- ){
 				t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
 					typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 			}
 			if( this.update ) this.update( rate, $time, this );
-		};
-		tween.prototype.ANIobj = function( $time, $pause ){
+		}
+		function ANIobj( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e;
 			if( this.stop ) return 1;
 			if( $pause )
@@ -1458,7 +1504,7 @@ function init(doc){
 				while( i < j ) t1[t0[i++]] = e(rate,t0[i++],t0[i++],term,time);
 			}
 			if( this.update ) this.update( rate, $time, this );
-		};
+		}
 		return ANI = {
 			ani:function( $ani ){if( $ani.ANI ) ani[ani.length] = $ani,start(), len++;},
 			tween:function(){
