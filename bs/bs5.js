@@ -440,6 +440,82 @@ function init(doc){
 		}
 		return t2 ? decodeURIComponent( t2 ) : null;
 	};
+	(function(){
+		var rules, set, rule, group;
+		group = {};
+		rules = {
+		};
+		set = {};
+		function parse( $data ){
+			var t0, t1, t2, t3, i, j, k;
+			t0 = {}, t1 = $data.split('\n'), i = t1.length;
+			while( i-- ){
+				t1[i] = t1[i].split('=');
+				t2 = bs.$trim( t1[i][1].split( ',' ) ), j = t2.length;
+				while( j-- ) t2[j] = parseRule( t2[j] );
+				t3 = bs.$trim( t1[i][0].split( ',' ) ), j = t3.length;
+				while( j-- ) t0[t3[j]] = t2;
+			}
+			return rule = t0;
+		}
+		function parseRule( k ){
+			var t;
+			if( rules[k] ) return rules[k];
+			else if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
+				k = new RegExp( k.substring( 1, k.length - 1 ) );
+				return function( $val ){return k.test( $val );};
+			}else return function( $val ){ return $val === k; };
+		}
+		function val( $val ){
+			if( $val.indexOf( '|' ) > -1 ){
+				$val = bs.$trim($val.split('|'));
+				return bs.$trim( bs.d( $val[0] ).$( $val[1] ) );
+			}else return bs.$trim( $val );
+		}
+		(function(){
+			var t0, i;
+			t0 = 'group,set,rule'.split(','), i = t0.length;
+			while( i-- ) test[t0[i]] = 1;
+		})();
+		function test( $rule ){
+			var t0, t1, t2, i, j, k, l, v, m, n;
+			i = 1, j = arguments.length;
+			if( test[$rule] ){
+				if( $rule == 'group' ) group[arguments[1]] = Array.prototype.slice.call( arguments, 2 );
+				else if( $rule == 'set' ) while( i < j ){
+					k = arguments[i++], v = arguments[i++]
+					if( v.substr(0,2) == '#T' ) set[k] = parse( bs.d( v ).$('@text') );
+					else if( v.substr(v.length-5) == '.html' ) set[k] = parse( bs.$get( null, v ) );
+					else set[k] = parse( v );
+				}else if( $rule == 'rule' ) while( i < j ) rules[arguments[i++]] = parseRule(arguments[i++]);
+				return;
+			}else if( !$rule ){
+				if( !(t0 = rule) ) throw 'no prevRule';
+			}else if( set[$rule] ) t0 = set[$rule];
+			else if( $rule.substr(0,2) == '#T' ) t0 = parse( bs.d( $rule ).$('@text') );
+			else if( $rule.substr($rule.length-5) == '.html' ) t0 = parse( bs.$get( null, $rule ) );
+			else t0 = parse( $rule );
+
+			while( i < j ){
+				k = arguments[i++];
+				if( k.charAt(0) == '@' ){
+					if( !(t1 = group[k.substr(1)]) ) throw 'no group';
+					m = 0, n = t1.length;
+					while( m < n ){
+						if( !( t2 = t0[t1[m++]] ) ) throw 'no rule';
+						l = t2.length, v = val( t1[m++] );
+						while( l-- ) if( !t2[l]( v ) ) return;
+					}
+				}else{
+					if( !( t2 = t0[k] ) ) throw 'no rule';
+					l = t2.length, v = val( arguments[i++] );
+					while( l-- ) if( !t2[l]( v ) ) return;
+				}
+			}
+			return 1;
+		}
+		bs.$test = test;
+	})();
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
