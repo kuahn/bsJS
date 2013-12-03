@@ -19,7 +19,7 @@
 bs( function(){
 
 	var game = {
-		keybuffer:{}, x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, tcheck:0, div:{length:0},
+		x:0, y:0, vx:0, vy:0, v:1, rv:.5, w:0, h:0, tcheck:0, div:{length:0},
 		term:bs.DETECT.device =='tablet' || bs.DETECT.device=='mobile' ? 100 : 10,
 		init:function(){
 			var i;
@@ -37,19 +37,17 @@ bs( function(){
 				'left', 0, 'top', 0, 'width', 10, 'height', 10, 'border-radius',5,
 				'<', '#stage'
 			);
-			bs.WIN.on( 'keydown', 'kd', function( $e ){game.keybuffer[$e.code] = 1;} );
-			bs.WIN.on( 'keyup', 'ku', function( $e ){game.keybuffer[$e.code] = 0;} );
 		},
 		end:function( $target ){
 			game.div[game.div.length++] = $target.$('visibility', 'hidden', 'this');
 		},
 		ANI:function( $time ){
 			//accelation
-			if( this.keybuffer[38] ) this.vy -= this.v; //up
-			else if( game.keybuffer[40] ) this.vy += this.v; //down
+			if( bs.KEY.up ) this.vy -= this.v; //up
+			else if( bs.KEY.down ) this.vy += this.v; //down
 		
-			if( this.keybuffer[37] ) this.vx -= this.v; //left
-			else if( game.keybuffer[39] ) this.vx += this.v; //right
+			if( bs.KEY.left ) this.vx -= this.v; //left
+			else if( bs.KEY.right ) this.vx += this.v; //right
 		
 			//boundery
 			this.x += this.vx, this.y += this.vy;
