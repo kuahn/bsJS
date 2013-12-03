@@ -24,24 +24,47 @@ bs( function(){
 	bsTest.tear( 'test init', function(){
 		bs.d( '<input id="id" type="text" value="hika00"/>' ).$('<','#stage' );
 		bs.d( '<input id="pw" type="text" value="hika00"/>' ).$('<','#stage' );
-		bs.$test( 'rule', 'Falpha', '/^[a-z]/', 'alpha', '/^[a-z]+$/', 'alphanum', '/^[a-z0-9]+$/', 'len', function( $val, $arg ){
-			return $val.length == parseInt( $arg[0] );
-		});
-		bs.$test( 'group', 'g1', 'userid', '#id|@value', 'pw', '#pw|@value' );
-		bs.$test( 'set', 's1', 'userid, pw = Falpha, alphanum' );
+
+		// Define RULEs
+		bs.$test( 'rule',
+			'Falpha', '/^[a-z]/',
+			'alpha', '/^[a-z]+$/',
+			'alphanum', '/^[a-z0-9]+$/',
+			'len', function( $val, $arg ){
+				return $val.length == parseInt( $arg[0] );
+			}
+		);
+
+		// Define GROUPs
+		bs.$test( 'group', 'group1',
+			'userid', '#id|@value',
+			'pw', '#pw|@value'
+		);
+
+		// Define SETs
+		bs.$test( 'set',
+			'set1', 'userid, pw = Falpha, alphanum'
+		);
 	} );
-	bsTest( 'test',
+
+	bsTest( 'test - SET & GROUP',
 		function(){
-			return bs.$test( 's1', '@g1' );
-		}, 1,
+			return bs.$test( 'set1', '@group1' );
+		}, 1
+	);
+	bsTest( 'test - Runtime SET',
 		function(){
 			return bs.$test( 'userid, pw = Falpha, alphanum, len|6', 'userid', '#id|@value', 'pw', '#pw|@value' );
-		}, 1,
+		}, 1
+	);
+	bsTest( 'test - ext. file SET',
 		function(){
 			return bs.$test( 'bs.vali.set.html', 'userid', '#id|@value', 'pw', '#pw|@value' );
-		}, 1,
+		}, 1
+	);
+	bsTest( 'test - direct access to RULE',
 		function(){
-			return bs.$test( '@len|6', '#id|', '#pw|' );
+			return bs.$test( '@len|6', '#id|@value', '#pw|@value' );
 		}, 1
 	);
 } );

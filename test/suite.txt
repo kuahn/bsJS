@@ -1,14 +1,15 @@
 bs.$js.html
 bs.$xml.html
+bs.$test.html
 bs.ajax.html
 bs.css.html
 bs.dom.html
 bs.event.html
 bs.function.html
+bs.keyevent.html
 bs.keyframe.html
 bs.router.html
 bs.tmpl.html
-bs.vali.html
 testHika.html
 testHuns.html
 testRouka.html
@@ -19,4 +20,3 @@ testRedcamel_Rain2.html
 testRedcamel_demo2.html
 testRedcamel_3D_dev1.html
 testRedcamel_3D_dev2.html
-bs.keyevent.html
