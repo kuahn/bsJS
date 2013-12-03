@@ -71,7 +71,7 @@ function init(doc){
 		div = doc.createElement( 'div' ), nodes = {};
 		function bs( $sel, $node ){
 			var r, t0, i, j, k;
-			t0 = typeof $sel; 
+			t0 = typeof $sel;
 			if( t0 == 'function' ) return $sel();
 			if( t0 == 'string' ) return $sel.charAt(0) == '<' ? ( div.innerHTML = $sel, bs.$reverse(div.childNodes) ) : sel( $sel );
 			if( $sel.isDom ) return $sel;
@@ -107,7 +107,7 @@ function init(doc){
 		bs.factory.creator = function( $key ){
 			function F(){
 				var t0, t1;
-				return typeof ( t0 = arguments[0] ) == 'string' ? 
+				return typeof ( t0 = arguments[0] ) == 'string' ?
 						( t1 = t0.charAt(0) ) == '@' ? ( F[t0=t0.substr(1)] = new cls[$key](t0) ) :
 						t1 == '<' ? new cls[$key](t0) : F[t0] || ( F[t0] = new cls[$key](t0) ) :
 					new cls[$key](t0);
@@ -203,7 +203,7 @@ function init(doc){
 			else if( $str.substr($str.length-5) == '.html' ) $str = bs.$get( null, $str );
 			return arg = arguments, bs.$trim( $str.replace( reg, r ) );
 		};
-		function factory( r, v ){	
+		function factory( r, v ){
 			function f( $v ){
 				var t0, i;
 				if( typeof $v == 'string' ) return $v.replace( r, v );
@@ -445,7 +445,7 @@ function init(doc){
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
 			b, bStyle, div, keyframe,
 			v, a, c;
-			
+
 		agent = navigator.userAgent.toLowerCase(),
 		platform = navigator.platform.toLowerCase(),
 		app = navigator.appVersion.toLowerCase(),
@@ -549,7 +549,7 @@ function init(doc){
 						osVersion = '8';
 					}
 					ie() || chrome() || firefox() || safari() || opera();
-				}else if( platform.indexOf( 'mac' ) > -1 ){      
+				}else if( platform.indexOf( 'mac' ) > -1 ){
 					os = 'mac';
 					i = /os x ([\d._]+)/.exec(agent)[1].replace( '_', '.' ).split('.');
 					osVersion = parseFloat( i[0] + '.' + i[1] );
@@ -560,20 +560,20 @@ function init(doc){
 				}
 			}
 		})();
-	
+
 		b = doc.body;
 		bStyle = b.style;
 		div = doc.createElement( 'div' );
 		div.innerHTML = '<div style="opacity:.55;position:fixed;top:100px;visibility:hidden;-webkit-overflow-scrolling:touch">a</div>';
 		div = div.getElementsByTagName( 'div' )[0];
-	
+
 		c = doc.createElement( 'canvas' );
 		c = 'getContext' in c ? c : null;
 		a = doc.createElement( 'audio' );
 		a = 'canPlayType' in a ? a : null;
 		v = doc.createElement( 'video' );
 		v = 'canPlayType' in v ? v : null;
-		
+
 		switch( browser ){
 		case'ie': cssPrefix = '-ms-', stylePrefix = 'ms'; transform3D = bVersion > 9 ? 1 : 0;
 			if( bVersion == 6 ){
@@ -596,7 +596,7 @@ function init(doc){
 			//dom
 			'root':b.scrollHeight ? b : doc.documentElement,
 			'scroll':doc.documentElement && typeof doc.documentElement.scrollLeft == 'number' ? 'scroll' : 'page',
-			'selector':doc.querySelectorAll ? 1 : 0, 'insertBefore':div.insertBefore ? 1 : 0, 'png':browser == 'ie' && bVersion < 8 ? 0 : 1, 
+			'selector':doc.querySelectorAll ? 1 : 0, 'insertBefore':div.insertBefore ? 1 : 0, 'png':browser == 'ie' && bVersion < 8 ? 0 : 1,
 			'opacity':div.style.opacity == '0.55' ? 1 : 0, 'text':div.innerText ? 'innerText' : div.textContent ? 'textContent' : 'innerHTML',
 			'cstyle':doc.defaultView && doc.defaultView.getComputedStyle ? 1 : 0,
 			//event
@@ -658,7 +658,7 @@ function init(doc){
 						v = k( this, v );
 						continue;
 					}
-					if( v || v === 0 ){ 
+					if( v || v === 0 ){
 						if( this[k] === undefined ){ //add
 							if( ( t0 = typeof v ) == 'number' ) this[k] = v, u[k] = nopx[k] ? '' : 'px';
 							else if( t0 == 'string' ){
@@ -715,7 +715,7 @@ function init(doc){
 			style.float = 'styleFloat' in b ? 'styleFloat' : 'cssFloat' in b ? 'cssFloat' : 'float',
 			style['url('] = function($v){return $v;},
 			bs.style = style;
-			
+
 			if( !( 'opacity' in b ) ){
 				style.opacity = function(s){
 					var v = arguments[1];
@@ -766,7 +766,7 @@ function init(doc){
 							"url('"+$key[1]+".svg') format('svg');",
 						$key = '@font-face',
 						this.type = 5;
-						try{ 
+						try{
 							this.r = add( $key, v );
 						}catch($e){
 							t0 = doc.createElement( 'style' );
@@ -828,7 +828,7 @@ function init(doc){
 				}
 			}
 			bs.$css = function( $v ){
-				if( $v.substr( $v.length - 4 ) == '.css' ) bs.$get( parse, $v ); 
+				if( $v.substr( $v.length - 4 ) == '.css' ) bs.$get( parse, $v );
 				else parse( $v );
 			};
 		})();
@@ -999,7 +999,7 @@ function init(doc){
 				d['class-'] = function( $dom, $v ){
 					var t0, i;
 					if( !( t0 = bs.$trim( $dom.className ) ) ) return t0;
-					t0 = t0.split( ' ' ); 
+					t0 = t0.split( ' ' );
 					if( ( i = t0.indexOf( $v ) ) > -1 ) t0.splice( i, 1 );
 					return $dom.className = t0.join(' ');
 				};
@@ -1075,7 +1075,7 @@ function init(doc){
 					}
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
-						
+
 						self = this, dom = self.dom;
 						if( typeof ev$[$k] == 'string' ) $k = ev$[$k];
 						if( $v === null ) dom['on'+$k] = null, delete self[$k];
@@ -1119,7 +1119,7 @@ function init(doc){
 			})();
 			return d;
 		})( bs, style, doc ) );
-		bs.WIN = (function(){
+    	bs.WIN = (function(){
 			var win;
 			function ev( e, k, v, t ){
 				var t0, i, j, target;
@@ -1251,6 +1251,18 @@ function init(doc){
 			};
 			return win;
 		})();
+        // AutoKeySystem 검증필요?
+        bs.KEY = (function () {
+            var keymap = {'65': 'a', '66': 'b', '67': 'c', '68': 'd', '69': 'e', '70': 'f', '71': 'g', '72': 'h', '73': 'i', '74': 'j', '75': 'k', '76': 'l', '77': 'm', '78': 'n', '79': 'o', '80': 'p', '81': 'q', '82': 'r', '83': 's', '84': 't', '85': 'u', '86': 'v', '87': 'w', '88': 'x', '89': 'y', '90': 'z', '8': 'back', '9': 'tab', '13': 'enter', '16': 'shift', '17': 'control', '18': 'alt', '19': 'pause', '20': 'caps', '27': 'esc', '32': 'space', '33': 'pageup', '34': 'pagedown', '35': 'end', '36': 'home', '37': 'left', '38': 'up', '39': 'right', '40': 'down', '45': 'insert', '46': 'delete', '144': 'numlock', '145': 'scrolllock', '48': '0', '49': '1', '50': '2', '51': '3', '52': '4', '53': '5', '54': '6', '55': '7', '56': '8', '57': '9'};
+            var buffer = {a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, g: 0, h: 0, i: 0, j: 0, k: 0, l: 0, m: 0, n: 0, o: 0, p: 0, q: 0, r: 0, s: 0, t: 0, u: 0, v: 0, w: 0, x: 0, y: 0, z: 0, back: 0, tab: 0, enter: 0, shift: 0, control: 0, alt: 0, pause: 0, caps: 0, esc: 0, space: 0, pageup: 0, pagedown: 0, end: 0, home: 0, left: 0, up: 0, right: 0, down: 0, insert: 0, delete: 0, numlock: 0, scrolllock: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+            bs.WIN.on("keydown", 'bsKD', function ($e) {
+                bs.KEY[keymap[$e.code]] = 1;
+            });
+            bs.WIN.on("keyup", 'bsKU', function ($e) {
+                bs.KEY[keymap[$e.code]] = 0;
+            });
+            return buffer
+        })();
 	})( W.document );
 	bs.ROUTER =(function(){
 		var s, e, t, h, count;
@@ -1341,7 +1353,7 @@ function init(doc){
 		ease = (function(){
 			var PI, HPI, i;
 			PI = Math.PI, HPI = PI * .5, i = 'cubic-bezier(';
-			return {	
+			return {
 				linear:function(a,c,b){return b*a+c},//rate,start,term
 				backIn:function(a,c,b){return b*a*a*(2.70158*a-1.70158)+c},
 				backOut:function(a,c,b){a-=1;return b*(a*a*(2.70158*a+1.70158)+1)+c},
@@ -1379,7 +1391,7 @@ function init(doc){
 			this.id = this.end = this.update = null, this.ease = ease.linear, e = 'linear',
 			this.length = i = t0.length || 1, native = 0;
 			while(i--)
-				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
+				( this[i] ? (this[i].length=0) : (this[i]=[]) ),
 				( this[i][0] = isDom ? t0[i].bsS : (t0[i] || t0) );
 			i = 1, j = $arg.length;
 			while( i < j ){
@@ -1486,7 +1498,7 @@ function init(doc){
 				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
 			if( this.pause ) return;
 			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, 
+			e = this.ease, time = this.time, rate = term * this.timeR,
 			l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
@@ -1653,7 +1665,7 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 		W.addEventListener( "load", loaded, false );
 	}else if( doc.attachEvent ){
 		doc.attachEvent( "onreadystatechange", loaded );
-		W.attachEvent( "onload", loaded );		
+		W.attachEvent( "onload", loaded );
 		(function(){
 			var t0, check;
 			try{t0 = W.frameElement == null;}catch(e){}
