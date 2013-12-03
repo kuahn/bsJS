@@ -1338,10 +1338,10 @@ function init(doc){
 		})();
 		bs.KEY = (function () {
 			var buffer, keycode;
-			keycode = bs.keycode, delete bs.keycode, buffer = {}
-			bs.WIN.on("keydown", '@bsKD', function($e){buffer[keycode[$e.code]] = 1;});
-			bs.WIN.on("keyup", '@bsKU', function($e){buffer[keycode[$e.code]] = 0;});
-			return buffer;
+			return keycode = bs.keycode, delete bs.keycode, 
+				bs.WIN.on("keydown", '@bsKD', function($e){buffer[keycode[$e.code]] = 1;}),
+				bs.WIN.on("keyup", '@bsKU', function($e){buffer[keycode[$e.code]] = 0;}),
+				buffer = {};
 		})();
 	})( W.document );
 	bs.ROUTER =(function(){
