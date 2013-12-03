@@ -35,40 +35,83 @@ benchmark.fin = function(startName, endName, callbackFn){
 	return _elapsedTime;
 };
 
+window.onload = function(){
+	setTimeout(jq1CreateDom, 10);
+};
+
 /*
 	DOM 생성 테스트
 */
-
 // jQuery 1.x
-$(function(){
-	benchmark.mark('jq1Start');
+function jq1CreateDom(){
+	benchmark.mark('jq1CreateDomStart');
 	for (var i=0; i < domLen; i++) {
-		$('#jquery1').append('<div>jq1 '+i+'</div>');
+		$('#jquery1').append('<div class="jq1">jq1 '+i+'</div>');
 	};
-	benchmark.mark('jq1Fin');
-	benchmark.fin('jq1Start', 'jq1Fin');
-});
-
+	benchmark.mark('jq1CreateDomFin');
+	benchmark.fin('jq1CreateDomStart', 'jq1CreateDomFin');
+	setTimeout(jq2CreateDom, 10);
+};
 // jQuery 2.x
-jQuery(function(){
-	benchmark.mark('jq2Start');
+function jq2CreateDom(){
+	benchmark.mark('jq2CreateDomStart');
 	for (var i=0; i < domLen; i++) {
-		jQuery('#jquery2').append('<div>jq2 '+i+'</div>');
+		jQuery('#jquery2').append('<div class="jq2">jq2 '+i+'</div>');
 	};
-	benchmark.mark('jq2Fin');
-	benchmark.fin('jq2Start', 'jq2Fin');
-});
-
+	benchmark.mark('jq2CreateDomFin');
+	benchmark.fin('jq2CreateDomStart', 'jq2CreateDomFin');
+	setTimeout(bs5CreateDom, 10);
+};
 // bsJS
-bs(function(){
-	benchmark.mark('bs5Start');
+function bs5CreateDom(){
+	benchmark.mark('bs5CreateDomStart');
 	for (var i=0; i < domLen; i++) {
-		bs.d('<div>bs5 '+i+'</div>').$("<", '#bs');
+		bs.d('<div class="bs5">bs5 '+i+'</div>').$("<", '#bs');
 	};
-	benchmark.mark('bs5Fin');
-	benchmark.fin('bs5Start', 'bs5Fin');
-});
+	benchmark.mark('bs5CreateDomFin');
+	benchmark.fin('bs5CreateDomStart', 'bs5CreateDomFin');
+	setTimeout(jq1ChangeCssDom, 10);
+};
 
+/*
+	DOM CSS 변경 테스트
+*/
+// jQuery 1.x
+function jq1ChangeCssDom(){
+	benchmark.mark('jq1ChangeCssDomStart');
+	$('.jq1').css({
+		'border':'1px solid orange',
+		'background':'#ccc',
+		'color':'#555'
+	});
+	benchmark.mark('jq1ChangeCssDomFin');
+	benchmark.fin('jq1ChangeCssDomStart', 'jq1ChangeCssDomFin');
+	setTimeout(jq2ChangeCssDom, 10);
+};
+// jQuery 2.x
+function jq2ChangeCssDom(){
+	benchmark.mark('jq1ChangeCssDomStart');
+	jQuery('.jq2').css({
+		'border':'1px solid red',
+		'background':'#ccc',
+		'color':'#555'
+	});
+	benchmark.mark('jq1ChangeCssDomFin');
+	benchmark.fin('jq1ChangeCssDomStart', 'jq1ChangeCssDomFin');
+	setTimeout(bs5ChangeCssDom, 10);
+};
+// bsJS
+function bs5ChangeCssDom(){
+	benchmark.mark('bs5ChangeCssDomStart');
+	bs.d('.bs5').$(
+		'border', '1px solid blue',
+		'background', '#ccc',
+		'color', '#555'
+	);
+	benchmark.mark('bs5ChangeCssDomFin');
+	benchmark.fin('bs5ChangeCssDomStart', 'bs5ChangeCssDomFin');
+	//setTimeout(next, 10);
+};
 </script>
 	<div id='jquery1'></div>
 	<div id='jquery2'></div>
