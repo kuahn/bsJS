@@ -470,6 +470,7 @@ function init(doc){
 			}else return function( $val ){ return $val === k; };
 		}
 		function val( $val ){
+			if( typeof $val == 'function' ) return $val();
 			if( $val.indexOf( '|' ) > -1 ){
 				$val = bs.$trim($val.split('|'));
 				return bs.$trim( bs.d( $val[0] ).$( $val[1] || '@value' ) );
