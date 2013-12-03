@@ -27,12 +27,14 @@
     // 개발목적 : 빌보드처리는 해봐야긋는데..
     // 회전행렬제외....걍 쌩기초만 해봅세..
     bs(function () {
-        var inited = false
-        bs.dom('<div></div>').$('<', 'body', 'id', 'title', 'position', 'absolute', 'html', '3D Basic Dev2 - W,S(앞으로 / 뒤로)', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#000','top',20)
-        bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'position', 'absolute', 'font-size', 11, 'color', '#000', '<', 'body', 'this')[0]);
+        bs.css("body").$('margin', 0, 'overflow', 'hidden')
+        bs.css("div").$('margin', 0,'position', 'absolute')
 
-        bs.dom('<div></div>').$('<', 'body', 'id', 'stage', 'position', 'absolute')
-        var keyBuffer = {}
+        var inited = false
+        bs.dom('<div></div>').$('<', 'body', 'id', 'title', 'html', '3D Basic Dev2 - W,S(앞으로 / 뒤로)', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#000','top',20)
+        bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'font-size', 11, 'color', '#000', '<', 'body', 'this')[0]);
+
+        bs.dom('<div></div>').$('<', 'body', 'id', 'stage')
         bs.WIN.sizer(function (w, h) {
             bs.dom('#stage').$('width',w,'height',h,'left',w/2)
             if (inited) return
@@ -40,8 +42,8 @@
             var camera = {
                 position: {x: w/2, y: h / 2, z: 0},
                 ANI: function ($time) {
-                    if (keyBuffer[87]) this.position.z++;
-                    if (keyBuffer[83]) this.position.z--;
+                    if (bs.KEY['w']) this.position.z++;
+                    if (bs.KEY['s']) this.position.z--;
                 }
             }
 
@@ -53,7 +55,7 @@
                     for (var i = 0; i < len; i++) {
                         this.position.push({x: bs.$ex(-w/2, '~', w/2), y: h / 2, z: Math.random() * 500 + 200})
                         bs.dom("<div><img src=" + this.img + " width='100%' height='100%'></div>").$(
-                                '<', '#stage', 'position', 'absolute', 'id', 'plane' + i,
+                                '<', '#stage','id', 'plane' + i,
                                 'left', this.position[i].x,
                                 'top', this.position[i].y,
                                 'width', 100, 'height', 100, 'this'
@@ -85,13 +87,6 @@
             inited = true
         });
 
-        // TODO 알아보기 -키다운에 걸려있는 저건뭐지 -_-
-        bs.WIN.on('keydown', 'kd', function ($e) {
-            keyBuffer[$e.code] = 1;
-        });
-        bs.WIN.on('keyup', 'ku', function ($e) {
-            keyBuffer[$e.code] = 0;
-        });
     });
 
 
