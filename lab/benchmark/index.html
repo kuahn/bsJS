@@ -12,7 +12,7 @@
 </script>
 <script src="../../bs/bs5.js"></script>
 <script type="text/javascript" charset="utf-8">
-var benchmark = {}, domLen = 1000;
+var benchmark = {}, domLen = 5000;
 benchmark.recs = {},
 benchmark.getSec = function(){
 	if (Date.now) benchmark.getSec = function(){return Date.now();};
@@ -36,7 +36,7 @@ benchmark.fin = function(startName, endName, callbackFn){
 };
 
 window.onload = function(){
-	setTimeout(jq1CreateDom, 10);
+	setTimeout(jq1CreateDom, 100);
 };
 
 /*
