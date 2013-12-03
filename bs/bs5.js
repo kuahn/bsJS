@@ -1327,6 +1327,18 @@ function init(doc){
 			};
 			return win;
 		})();
+        // AutoKeySystem 검증필요?
+        bs.KEY = (function () {
+            var keymap = {'65': 'a', '66': 'b', '67': 'c', '68': 'd', '69': 'e', '70': 'f', '71': 'g', '72': 'h', '73': 'i', '74': 'j', '75': 'k', '76': 'l', '77': 'm', '78': 'n', '79': 'o', '80': 'p', '81': 'q', '82': 'r', '83': 's', '84': 't', '85': 'u', '86': 'v', '87': 'w', '88': 'x', '89': 'y', '90': 'z', '8': 'back', '9': 'tab', '13': 'enter', '16': 'shift', '17': 'control', '18': 'alt', '19': 'pause', '20': 'caps', '27': 'esc', '32': 'space', '33': 'pageup', '34': 'pagedown', '35': 'end', '36': 'home', '37': 'left', '38': 'up', '39': 'right', '40': 'down', '45': 'insert', '46': 'delete', '144': 'numlock', '145': 'scrolllock', '48': '0', '49': '1', '50': '2', '51': '3', '52': '4', '53': '5', '54': '6', '55': '7', '56': '8', '57': '9'};
+            var buffer = {a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, g: 0, h: 0, i: 0, j: 0, k: 0, l: 0, m: 0, n: 0, o: 0, p: 0, q: 0, r: 0, s: 0, t: 0, u: 0, v: 0, w: 0, x: 0, y: 0, z: 0, back: 0, tab: 0, enter: 0, shift: 0, control: 0, alt: 0, pause: 0, caps: 0, esc: 0, space: 0, pageup: 0, pagedown: 0, end: 0, home: 0, left: 0, up: 0, right: 0, down: 0, insert: 0, delete: 0, numlock: 0, scrolllock: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
+            bs.WIN.on("keydown", 'bsKD', function ($e) {
+                bs.KEY[keymap[$e.code]] = 1;
+            });
+            bs.WIN.on("keyup", 'bsKU', function ($e) {
+                bs.KEY[keymap[$e.code]] = 0;
+            });
+            return buffer
+        })();
 	})( W.document );
 	bs.ROUTER =(function(){
 		var s, e, t, h, count;
