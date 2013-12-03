@@ -452,14 +452,17 @@ function init(doc){
 			while( i-- ){
 				t1[i] = t1[i].split('=');
 				t2 = bs.$trim( t1[i][1].split( ',' ) ), j = t2.length;
-				while( j-- ) t2[j] = parseRule( t2[j] );
+				while( j-- ){
+					t3 = t2[j].split('|'),
+					t2[j] = {0:parseRule( t3[0] ), 1:t3.slice( 1 )};
+				}
 				t3 = bs.$trim( t1[i][0].split( ',' ) ), j = t3.length;
 				while( j-- ) t0[t3[j]] = t2;
 			}
 			return rule = t0;
 		}
 		function parseRule( k ){
-			var t;
+			if( typeof k == 'function' ) return k;
 			if( rules[k] ) return rules[k];
 			else if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
 				k = new RegExp( k.substring( 1, k.length - 1 ) );
@@ -469,7 +472,7 @@ function init(doc){
 		function val( $val ){
 			if( $val.indexOf( '|' ) > -1 ){
 				$val = bs.$trim($val.split('|'));
-				return bs.$trim( bs.d( $val[0] ).$( $val[1] ) );
+				return bs.$trim( bs.d( $val[0] ).$( $val[1] || '@value' ) );
 			}else return bs.$trim( $val );
 		}
 		(function(){
@@ -491,25 +494,31 @@ function init(doc){
 				return;
 			}else if( !$rule ){
 				if( !(t0 = rule) ) throw 'no prevRule';
+			}else if( $rule.charAt(0) == '@' ){ //rule
+				t0 = $rule.substr(1).split('|');
+				if( !( t1 = rules[t0[0]] ) ) throw 'no rule';
+				t0 = t0.slice(1);
+				while( i < j ) if( !t1( val( arguments[i++] ), t0 ) ) return;
+				return 1;
 			}else if( set[$rule] ) t0 = set[$rule];
 			else if( $rule.substr(0,2) == '#T' ) t0 = parse( bs.d( $rule ).$('@text') );
 			else if( $rule.substr($rule.length-5) == '.html' ) t0 = parse( bs.$get( null, $rule ) );
 			else t0 = parse( $rule );
-
+			//ruleset
 			while( i < j ){
 				k = arguments[i++];
-				if( k.charAt(0) == '@' ){
+				if( k.charAt(0) == '@' ){//group
 					if( !(t1 = group[k.substr(1)]) ) throw 'no group';
 					m = 0, n = t1.length;
 					while( m < n ){
 						if( !( t2 = t0[t1[m++]] ) ) throw 'no rule';
 						l = t2.length, v = val( t1[m++] );
-						while( l-- ) if( !t2[l]( v ) ) return;
+						while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
 					}
 				}else{
 					if( !( t2 = t0[k] ) ) throw 'no rule';
 					l = t2.length, v = val( arguments[i++] );
-					while( l-- ) if( !t2[l]( v ) ) return;
+					while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
 				}
 			}
 			return 1;

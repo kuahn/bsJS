@@ -24,7 +24,9 @@ bs( function(){
 	bsTest.tear( 'test init', function(){
 		bs.d( '<input id="id" type="text" value="hika00"/>' ).$('<','#stage' );
 		bs.d( '<input id="pw" type="text" value="hika00"/>' ).$('<','#stage' );
-		bs.$test( 'rule', 'Falpha', '/^[a-z]/', 'alpha', '/^[a-z]+$/', 'alphanum', '/^[a-z0-9]+$/' );
+		bs.$test( 'rule', 'Falpha', '/^[a-z]/', 'alpha', '/^[a-z]+$/', 'alphanum', '/^[a-z0-9]+$/', 'len', function( $val, $arg ){
+			return $val.length == parseInt( $arg[0] );
+		});
 		bs.$test( 'group', 'g1', 'userid', '#id|@value', 'pw', '#pw|@value' );
 		bs.$test( 'set', 's1', 'userid, pw = Falpha, alphanum' );
 	} );
@@ -33,7 +35,13 @@ bs( function(){
 			return bs.$test( 's1', '@g1' );
 		}, 1,
 		function(){
+			return bs.$test( 'userid, pw = Falpha, alphanum, len|6', 'userid', '#id|@value', 'pw', '#pw|@value' );
+		}, 1,
+		function(){
 			return bs.$test( 'bs.vali.set.html', 'userid', '#id|@value', 'pw', '#pw|@value' );
+		}, 1,
+		function(){
+			return bs.$test( '@len|6', '#id|', '#pw|' );
 		}, 1
 	);
 } );
