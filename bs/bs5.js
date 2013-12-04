@@ -444,6 +444,54 @@ function init(doc){
 		var rules, set, rule, group;
 		group = {};
 		rules = {
+			ip:parseRule('/^((([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))\.){3}(([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))$/'),
+			url:parseRule('/^https?:\/\/[-\w.]+(:[0-9]+)?(\/([\w\/_.]*)?)?$/'),
+			email:parseRule('/^(\w+\.)*\w+@(\w+\.)+[A-Za-z]+$/'),
+			korean:parseRule('/^[ㄱ-힣]+$/'),
+			alpha:parseRule('/^[a-z]+$/'),
+			ALPHA:parseRule('/^[A-Z]+$/'),
+			num:parseRule('/^[0-9]+$/'),
+			alphanum:parseRule('/^[a-z0-9]+$/'),
+			'1alpha':parseRule('/^[a-z]/'),
+			'1ALPHA':parseRule('/^[A-Z]/'),
+			float:function( $v ){return parseFloat( $v )+'' === $v;},
+			int:function( $v ){return parseInt( $v, 10 )+'' === $v;},
+			length:function( $v, $a ){return $v.length === +a[0];},
+			range:function( $v, $a ){
+				var v = parseFloat( $v );
+				return +$a[0] <= v && v <= +$a[1];
+			},
+			indexOf:function( $v, $a ){
+				var i, j;
+				i = $a.length;
+				while( i-- ) if( $v.indexOf( $a[i] ) == -1 ) j = 1;
+				return j ? 0 : 1;
+			},
+			ssn:(function(){
+				var r, key;
+				r = /\s|-/g, key = [2,3,4,5,6,7,8,9,2,3,4,5];
+				return function( $v ){
+					var t0, v, i;
+					v = $v.replace( r, '' );
+					if( v.length != 13 ) return;
+					for( t0 = i = 0 ; i < 12 ; i++ ) t0 += key[i] * v.charAt(i);
+					return parseInt( v.charAt(12) ) == ( ( 11 - ( t0 % 11 ) ) % 10);
+				};
+			})(),
+			biz:(function(){
+				var r, key;
+				r = /\s|-/g, key = [1,3,7,1,3,7,1,3,5,1];
+				return function( $v ){
+					var t0, t1, v, i;
+					v = $v.replace( r, '' );
+					if( v.length != 10 ) return;
+					for( t0 = i = 0 ; i < 8 ; i++ ) t0 += key[i] * v.charAt(i);
+					t1 = "0" + ( key[8] * v.charAt(8) );
+					t1 = t1.substr( t1.length - 2 );
+					t0 += parseInt( t1.charAt(0) ) + parseInt( t1.charAt(1) );
+					return parseInt( v.charAt(9) ) == ( 10 - ( t0 % 10)) % 10;
+				};
+			})()
 		};
 		set = {};
 		function parse( $data ){
@@ -463,11 +511,11 @@ function init(doc){
 		}
 		function parseRule( k ){
 			if( typeof k == 'function' ) return k;
-			if( rules[k] ) return rules[k];
-			else if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
+			if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
 				k = new RegExp( k.substring( 1, k.length - 1 ) );
 				return function( $val ){return k.test( $val );};
-			}else return function( $val ){ return $val === k; };
+			}else if( rules[k] ) return rules[k];
+			else return function( $val ){ return $val === k; };
 		}
 		function val( $val ){
 			if( typeof $val == 'function' ) return $val();
