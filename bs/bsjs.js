@@ -1707,7 +1707,7 @@ function init(doc){
 				var delay = [];
 				return function( $f ){
 					var i;
-					if( (i = deley.indexOf( $f ) ) == -1 ){
+					if( (i = delay.indexOf( $f ) ) == -1 ){
 						delay[delay.length] = $f;
 						$f.bsDelay = setTimeout( $f, ( arguments[1] || 1 ) * 1000 );
 					}else{
