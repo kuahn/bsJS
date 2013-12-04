@@ -445,9 +445,9 @@ function init(doc){
 		var rules, set, rule, group;
 		group = {};
 		rules = {
-			ip:parseRule('/^((([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))\.){3}(([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))$/'),
-			url:parseRule('/^https?:\/\/[-\w.]+(:[0-9]+)?(\/([\w\/_.]*)?)?$/'),
-			email:parseRule('/^(\w+\.)*\w+@(\w+\.)+[A-Za-z]+$/'),
+			ip:parseRule('/^((([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))\\.){3}(([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))$/'),
+			url:parseRule('/^https?:\\/\\/[-\\w.]+(:[0-9]+)?(\\/([\\w\\/_.]*)?)?$/'),
+			email:parseRule('/^(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+$/'),
 			korean:parseRule('/^[ㄱ-힣]+$/'),
 			japanese:parseRule('/^[ぁ-んァ-ヶー一-龠]+$/'),
 			alpha:parseRule('/^[a-z]+$/'),
@@ -515,6 +515,7 @@ function init(doc){
 			if( typeof k == 'function' ) return k;
 			if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
 				k = new RegExp( k.substring( 1, k.length - 1 ) );
+				console.log(k);
 				return function( $val ){return k.test( $val );};
 			}else if( rules[k] ) return rules[k];
 			else return function( $val ){ return $val === k; };
