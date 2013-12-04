@@ -437,7 +437,7 @@ function init(doc){
 				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}
-			doc.cookie = t1, t2 = val + '';
+			doc.cookie = t1, t2 = '' + val;
 		}
 		return t2 ? decodeURIComponent( t2 ) : null;
 	};
@@ -456,9 +456,9 @@ function init(doc){
 			alphanum:parseRule('/^[a-z0-9]+$/'),
 			'1alpha':parseRule('/^[a-z]/'),
 			'1ALPHA':parseRule('/^[A-Z]/'),
-			float:function( $v ){return parseFloat( $v )+'' === $v;},
-			int:function( $v ){return parseInt( $v, 10 )+'' === $v;},
-			length:function( $v, $a ){return $v.length === +a[0];},
+			float:function( $v ){return '' + parseFloat( $v ) === $v;},
+			int:function( $v ){return '' + parseInt( $v, 10 ) === $v;},
+			length:function( $v, $a ){return $v.length === +$a[0];},
 			range:function( $v, $a ){
 				var v = parseFloat( $v );
 				return +$a[0] <= v && v <= +$a[1];
