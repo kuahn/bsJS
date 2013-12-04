@@ -1,10 +1,11 @@
 /*
- * bs5 - OpenSource JavaScript library
- *
- * Copyright 2013.10 hikaMaeng, bsJS-Team.
+ * bsJS - OpenSource JavaScript library
+ * version 0.1.0 / 2013.12.4 by projectBS committee
+ * 
+ * Copyright 2013.10 projectBS committee.
  * Dual licensed under the MIT or GPL Version 2 licenses.
- * GitHub: https://github.com/hikaMaeng/bs5
- * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
+ * GitHub: https://github.com/projectBS/bsJS
+ * Facebook group: https://www.facebook.com/groups/bs5js/
  */
 ( function( W, N ){
 'use strict';
