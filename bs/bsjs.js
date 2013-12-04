@@ -515,7 +515,6 @@ function init(doc){
 			if( typeof k == 'function' ) return k;
 			if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
 				k = new RegExp( k.substring( 1, k.length - 1 ) );
-				console.log(k);
 				return function( $val ){return k.test( $val );};
 			}else if( rules[k] ) return rules[k];
 			else return function( $val ){ return $val === k; };
