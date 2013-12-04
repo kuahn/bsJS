@@ -67,8 +67,14 @@ bs( function(){
 			return bs.$test( '@len|6', '#id|@value', '#pw|@value' );
 		}, 1,
 		function(){
-			return bs.$test( '@japanese', '会いたい')
-		}, 1
+			return bs.$test( '@japanese', 'あいうえお')
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', 'ｱｲｳｴｵ')
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', 'abcd')
+		}, 0
 	);
 } );
 </script>
