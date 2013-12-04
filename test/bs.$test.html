@@ -67,7 +67,73 @@ bs( function(){
 			return bs.$test( '@len|6', '#id|@value', '#pw|@value' );
 		}, 1
 	);
+	bsTest( 'test - subset of bsJS RULEs',
+		function(){
+			return bs.$test( '@ip', '#ip_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@url', '#url_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@email', '#email_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@korean', '#korean_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', '#japanese_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@alpha', '#alpha_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@ALPHA', '#ALPHA_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@num', '#num_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@alphanum', '#alphanum_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@1alpha', '#_1alpha_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@1ALPHA', '#_1ALPHA_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@float', '#float_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@int', '#int_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@length|30', '#length_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@range|1|100', '#range_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@indexOf|ABC', '#indexOf_OK|' );
+		}, 1
+	);
 } );
 </script>
+ip<input id='ip_OK' type='text' value='255.255.255.255'><br/>
+url<input id='url_OK' type='text' value='http://google.com'><br/>
+email<input id='email_OK' type='text' value='gmail@gmail.com'><br/>
+korean<input id='korean_OK' type='text' value='가나다라마바사'><br/>
+japanese<input id='japanese_OK' type='text' value='あいうえお日本語ニホンゴ'><br/>
+alpha<input id='alpha_OK' type='text' value='abcdxyz'><br/>
+ALPHA<input id='ALPHA_OK' type='text' value='ABCDXYZ'><br/>
+num<input id='num_OK' type='text' value='0123456789'><br/>
+alphanum<input id='alphanum_OK' type='text' value='0123456789abcdxyz'><br/>
+1alpha<input id='_1alpha_OK' type='text' value='abcdxyz0123456789'><br/>
+1ALPHA<input id='_1ALPHA_OK' type='text' value='ABCDXYZ0123456789'><br/>
+float<input id='float_OK' type='text' value='0.123456789'><br/>
+int<input id='int_OK' type='text' value='1234567890'><br/>
+length<input id='length_OK' type='text' value='123456789012345678901234567890'><br/>
+range<input id='range_OK' type='text' value='99'><br/>
+indexOf<input id='indexOf_OK' type='text' value='123ABC456'><br/>
 </body>
 </html>
