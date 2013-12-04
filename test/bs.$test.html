@@ -84,6 +84,15 @@ bs( function(){
 			return bs.$test( '@japanese', '#japanese_OK|' );
 		}, 1,
 		function(){
+			return bs.$test( '@japanese', '#japaneseKigo_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', '#japaneseSuuji_OK|' );
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', '#japaneseHan_OK|' );
+		}, 1,
+		function(){
 			return bs.$test( '@alpha', '#alpha_OK|' );
 		}, 1,
 		function(){
@@ -123,7 +132,10 @@ ip<input id='ip_OK' type='text' value='255.255.255.255'><br/>
 url<input id='url_OK' type='text' value='http://google.com'><br/>
 email<input id='email_OK' type='text' value='gmail@gmail.com'><br/>
 korean<input id='korean_OK' type='text' value='가나다라마바사'><br/>
-japanese<input id='japanese_OK' type='text' value='あいうえお日本語ニホンゴ'><br/>
+japanese全角<input id='japanese_OK' type='text' value='あいうえお日本語ニホンゴ１２３'><br/>
+japanese全角記号<input id='japaneseKigo_OK' type='text' value='～「」＋－！＠＃＄％＾＆＊（）：'><br/>
+japanese全角数字<input id='japaneseSuuji_OK' type='text' value='１２３４５６７８９０'><br/>
+japanese半角<input id='japaneseHan_OK' type='text' value='ｱｲｳｴｵ'><br/>
 alpha<input id='alpha_OK' type='text' value='abcdxyz'><br/>
 ALPHA<input id='ALPHA_OK' type='text' value='ABCDXYZ'><br/>
 num<input id='num_OK' type='text' value='0123456789'><br/>
