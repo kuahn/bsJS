@@ -449,7 +449,7 @@ function init(doc){
 			url:parseRule('/^https?:\\/\\/[-\\w.]+(:[0-9]+)?(\\/([\\w\\/_.]*)?)?$/'),
 			email:parseRule('/^(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+$/'),
 			korean:parseRule('/^[ㄱ-힣]+$/'),
-			japanese:parseRule('/^[ぁ-んァ-ヶー一-龠ｱ-ﾝﾞﾟｧ-ｫｬ-ｮｰ｡｢｣､]+$/'),
+			japanese:parseRule('/^[ぁ-んァ-ヶ０-９ー一-龠！-ﾟ「」]+$/'),
 			alpha:parseRule('/^[a-z]+$/'),
 			ALPHA:parseRule('/^[A-Z]+$/'),
 			num:parseRule('/^[0-9]+$/'),
