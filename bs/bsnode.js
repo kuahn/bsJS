@@ -176,7 +176,7 @@ bs.$ex = (function(){
 						$rp.end();
 						return;
 					}
-					$rp.writeHead( 200, mimeTypes[fileExt.toLowerCase()] ),
+					$rp.writeHead( 200, mimeTypes[fileExt.toLowerCase()] || 'Unknown' ),
 					fs.createReadStream( sysPath ).pipe($rp);
 					return;
 				});
