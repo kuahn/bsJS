@@ -1,0 +1,28 @@
+{
+  "name": "bsnode",
+  "version": "0.0.1",
+  "description": "0.0.1",
+  "main": "web.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node web.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/projectBS/bsJS"
+  },
+  "keywords": [
+    "node.js",
+    "JavaScript"
+  ],
+  "author": "projectBS committee",
+  "license": "MIT or GPL Version 2",
+  "bugs": {
+    "url": "https://www.facebook.com/groups/bs5js/?hc_location=stream"
+  },
+  "dependencies": {
+    "uid2": "0.0.3"
+  }
+}
