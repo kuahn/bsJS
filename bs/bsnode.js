@@ -112,7 +112,7 @@ bs.$ex = (function(){
 })();
 (function(){
 	var url, query;
-	url = require('url'), query = require('query'),
+	url = require('url'), query = require('querystring'),
 	bs.$url = function( $url ){return url.parse( $url );},
 	bs.$escape = function( $val ){return query.escape( $val );},
 	bs.$unescape = function( $val ){return query.unescape( $val );},
@@ -152,33 +152,33 @@ bs.$ex = (function(){
 	bs.route = function( $data ){
 		var port, root, index, config, table, rules, rule, 
 			t0, i, j, k, l;
-		root = $data.root, index = $data.index || 'index.js', config = $data.config ? root+'/'+$data.config : 0, 
+		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0, 
 		table = $data.table, rules = [], rule = $data.rules;
-		for( k in table ) table[i] = root+'/'+table[i];
+		for( k in table ) table[k] = root+'/'+table[k];
 		for( k in rule ) rules[rules.length] = k;
 		rules.sort( sort );
 
 		port = server.createServer( function( $rq, $rp ){
-			var fullPath, path, file, header, response,
-				t0, i;
+			var fullPath, path, file, log,
+				t0, t1, i;
 			fullPath = path = bs.$url( $rq.url ).pathname;
-			if( path.substr( path.length - 3 ) == '.js' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
+			if( path.substr( path.length - 3 ) == '.bs' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
-			else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.js';
+			else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
 			
-			if( file.substr( file.length - 2 ) != 'js' ){
+			if( file.substr( file.length - 2 ) != 'bs' ){
 				//static page
 				return;
 			}
 			
 			rq = $rq, rp = $rp,
-			clientCookie = t0 = $rq.header.cookie ? bs.$cgiParse( t0 ) : null;
+			clientCookie = t0 = $rq.cookie ? bs.$cgiParse( t0 ) : null,
 			head.length = cookie.length = response.length = 0,
 			data = {};
 			
 			try{
-				if( config ) require( config ).request( bs );
-				if( t0 = table[fullPath] ) require( t0 ).request( bs );
+				if( config ) log = config, require( config ).bs( bs );
+				if( t0 = table[fullPath] ) log = t0, require( t0 ).bs( bs );
 				else{
 					i = rules.length;
 					while( i-- ) if( path.indexOf( rules[i] ) > -1 ){
@@ -190,10 +190,10 @@ bs.$ex = (function(){
 					while( i < j ){
 						k = t0[i++],
 						require(
-							k == 'global' ? root + '/' + t0[i++] :
+							log = k == 'global' ? root + '/' + t0[i++] :
 							k == 'local' ? root + path + t0[i++] :
-							k == 'head' ? ( file = file.split('.'), root + path + t0[i++] + file[0] + '.' + file[1] ) :
-							k == 'tail' ? ( file = file.split('.'), root + path + file[0] + t0[i++] + '.' + file[1] ) :
+							k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
+							k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
 							k == 'url' ? root + path + file : 0
 						).bs( bs );
 					}
@@ -201,7 +201,7 @@ bs.$ex = (function(){
 				flush();
 			}catch( $e ){
 				$rp.writeHead( 404, {'Content-Type':'text/html'} ),
-				$rp.end( 'not exist' );
+				$rp.end( 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 			}
 		}).listen( $data.port || 80 );	
 	};

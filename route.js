@@ -1,23 +1,21 @@
 exports.route = {
 	port:8001,
 	root:'../node',
-	index:'index.js',
-	config:'config.js',
+	index:'index.bs',
+	config:'config.bs',
 	
 	table:{
-		'/special':'special.js'
+		'/special':'special.bs'
 	},
 	
 	rules:{
 		'/':[
-			'global','globalHead.js',
-			'local','subConfig.js',
-			'local','subHead.js',
-			'tail', 'H',
+			'global','globalHead.bs',
+			'local','subConfig.bs',
+			'head', 'H',
 			'tail', 'T',
 			'url',
-			'local','subFoot.js',
-			'global','globalFoot.js'
+			'global','globalFoot.bs'
 		]
 	}
 };
