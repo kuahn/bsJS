@@ -1,5 +1,4 @@
-//function bs(){}
-exports = {
+module.exports = {
 	// image
 	'jpeg' :'image/jpeg',
 	'jpg'  :'image/jpeg',

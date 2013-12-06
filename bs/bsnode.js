@@ -1,6 +1,7 @@
 //function bs(){}
 var bs = exports,
 mimeTypes = require('./bsnode.mime.types');
+
 bs.$ex = (function(){
 	var ra, rc, random, rand, randf;
 	ra = {}, rc = 0;
@@ -176,7 +177,7 @@ bs.$ex = (function(){
 						$rp.end();
 						return;
 					}
-					$rp.writeHead( 200, mimeTypes[fileExt.toLowerCase()] || 'Unknown' ),
+					$rp.writeHead( 200, {'Content-Type':mimeTypes[fileExt.toLowerCase()] || 'unknown type'} ),
 					fs.createReadStream( sysPath ).pipe($rp);
 					return;
 				});
