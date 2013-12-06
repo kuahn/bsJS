@@ -110,50 +110,99 @@ bs.$ex = (function(){
 	bs.$stripTag = factory( /[<][^>]+[>]/g, '' );
 	bs.$trim = factory( /^\s*|\s*$/g, '' );
 })();
-bs.ROUTER =(function(){
-	var filename, path;
-	
-	var server, url, s, e, t, h, count;
+(function(){
+	var url, query;
+	url = require('url'), query = require('query'),
+	bs.$url = function( $url ){return url.parse( $url );},
+	bs.$escape = function( $val ){return query.escape( $val );},
+	bs.$unescape = function( $val ){return query.unescape( $val );},
+	bs.$cgiParse = function( $val ){return query.parse( $val );},
+	bs.$cgiStringify = function( $val ){return query.stringify( $val );};
+})();
+(function(){
+	var server, head, response, cookie, data,
+		sort, flush,
+		rq, rp, clientCookie;
+	server = require('http'), head = [], response = [], cookie = [],
 
-	url = require('url');
-	s = {'/':[]}, e = {'/':[]}, t = {}, h = [], count = 5;
-	function make( t ){
-		return function( $path, $func ){
-			var t0, i, j, k, v;
-			i = 0, j = arguments.length;
-			while( i < j ){
-				k = arguments[i++], v = arguments[i++];
-				if( !( t0 = t[k] ) ) t[k] = t0 = [];
-				t0[t0.length] = v;
+	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
+	bs.$response = function(){
+		var i, j;
+		i = 0, j = arguments.length;
+		while( i < j ) response[response.length] = arguments[i++];
+	},
+	bs.$request = function( $k ){return $k ? rq[$k] : request;},
+	bs.$cookie = function( $k, $v, $path, $expire, $domain ){
+		if( $v === undefined ) return clientCookie[$k];
+		cookie[$k] = bs.$escape($v);
+	},
+	bs.$data = function( $k, $v ){return $v === undefined ? data[$k] : data[$k] = $v;},
+	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
+	flush = function(){
+		var t0, i;
+		t0 = response.join('');
+		head.push(
+			['Server', 'projectBS on node.js'],
+			['Content-Type', 'text/html; charset=utf-8'],
+			['Content-Length', Buffer.byteLength( t0, 'utf8' )]
+		);
+		if( i = cookie.length ) while( i-- ) head[head.length] = ['Set-Cookie',cookie[i]];
+		rp.writeHead( 200, head ), rp.end( t0 );
+	},
+	bs.route = function( $data ){
+		var port, root, index, config, table, rules, rule, 
+			t0, i, j, k, l;
+		root = $data.root, index = $data.index || 'index.js', config = $data.config ? root+'/'+$data.config : 0, 
+		table = $data.table, rules = [], rule = $data.rules;
+		for( k in table ) table[i] = root+'/'+table[i];
+		for( k in rule ) rules[rules.length] = k;
+		rules.sort( sort );
+
+		port = server.createServer( function( $rq, $rp ){
+			var fullPath, path, file, header, response,
+				t0, i;
+			fullPath = path = bs.$url( $rq.url ).pathname;
+			if( path.substr( path.length - 3 ) == '.js' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
+			else if( path.substr( path.length - 1 ) == '/' ) file = index;
+			else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.js';
+			
+			if( file.substr( file.length - 2 ) != 'js' ){
+				//static page
+				return;
 			}
-		};
-	}
-	server = require('http').createServer();
-	server.on('request', function router( $rq, $rp ){
-		var t0;
-		console.log(path+url.parse( $rq.url ).pathname+filename);
-		try{
-			t0 = require( path+url.parse( $rq.url ).pathname+filename );
-		}catch( $e ){
-			$rp.writeHead( 404, {'Content-Type':'text/html'} ),
-			$rp.end( 'not exist' );
-			return;
-		}
-		$rp.writeHead( 200, t0.header() );
-		$rp.end( t0.response() );
-	} );
-	server.on('connection', function(){} );
-	server.on('close', function(){} );
-	return {
-		start:make(s),end:make(e),
-		table:function(){
-			var i, j;
-			i = 0, j = arguments.length;
-			while( i < j ) t[arguments[i++]] = arguments[i++];
-		},
-		go:function( $str ){location.hash = $str;},
-		route:function( $port, $path, $filename ){
-			path = $path, filename = $filename, server.listen( $port );
-		}
+			
+			rq = $rq, rp = $rp,
+			clientCookie = t0 = $rq.header.cookie ? bs.$cgiParse( t0 ) : null;
+			head.length = cookie.length = response.length = 0,
+			data = {};
+			
+			try{
+				if( config ) require( config ).request( bs );
+				if( t0 = table[fullPath] ) require( t0 ).request( bs );
+				else{
+					i = rules.length;
+					while( i-- ) if( path.indexOf( rules[i] ) > -1 ){
+						t0 = rule[rules[i]];
+						break;
+					}
+					if( !t0 ) throw 1;
+					i = 0, j = t0.length; 
+					while( i < j ){
+						k = t0[i++],
+						require(
+							k == 'global' ? root + '/' + t0[i++] :
+							k == 'local' ? root + path + t0[i++] :
+							k == 'head' ? ( file = file.split('.'), root + path + t0[i++] + file[0] + '.' + file[1] ) :
+							k == 'tail' ? ( file = file.split('.'), root + path + file[0] + t0[i++] + '.' + file[1] ) :
+							k == 'url' ? root + path + file : 0
+						).bs( bs );
+					}
+				}
+				flush();
+			}catch( $e ){
+				$rp.writeHead( 404, {'Content-Type':'text/html'} ),
+				$rp.end( 'not exist' );
+			}
+		}).listen( $data.port || 80 );	
 	};
 })();

@@ -1,5 +1,4 @@
-var bs = require('./bs/bsnode');
-bs.ROUTER.route( 8001, '../node', '_.js' );
+require('./bs/bsnode').route( require('./route').route );
 /*
 var http = require("http");
 http.createServer(function(request, response) {
