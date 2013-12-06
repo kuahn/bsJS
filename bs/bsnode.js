@@ -131,8 +131,9 @@ bs.ROUTER =(function(){
 	server = require('http').createServer();
 	server.on('request', function router( $rq, $rp ){
 		var t0;
+		console.log(path+url.parse( $rq.url ).pathname+filename);
 		try{
-			t0 = require( path+url.parse( $rq.url ).pathname+'/'+filename );
+			t0 = require( path+url.parse( $rq.url ).pathname+filename );
 		}catch( $e ){
 			$rp.writeHead( 404, {'Content-Type':'text/html'} ),
 			$rp.end( 'not exist' );

@@ -13,9 +13,7 @@
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
 </head>
 <body>
-<a href="https://github.com/projectBS/bsJS">
-	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
-</a>
+<div id="stage"></div>
 <div id="result"></div>
 <div id="test"></div>
 <script src="../bs/bsjs.js"></script>
@@ -23,26 +21,29 @@
 <script src="./printer.js"></script>
 <script>
 bs( function(){
-	/*
-		config
-	*/
-	bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
-
-	/*
-		pre process
-	*/
-
-	/*
-		test case
-	*/
-	bs.$get( function( rs ){
-		var r = JSON.parse( rs );
-		bsTest( printer, 'ajax',
-			"bs.$get( cb , url ) url.a", 1, r.a,
-			"bs.$get( cb , url ) url.c", 3, r.c
-		);
-	},  'ajax.json' );
-
+	bsTest.tear( 'test init', function(){
+		bs.d( '<input id="id" type="text" value="hika00"/>' ).$('<','#stage' );
+		bs.d( '<input id="pw" type="text" value="hika00"/>' ).$('<','#stage' );
+		bs.$test( 'rule', 'Falpha', '/^[a-z]/', 'alpha', '/^[a-z]+$/', 'alphanum', '/^[a-z0-9]+$/', 'len', function( $val, $arg ){
+			return $val.length == parseInt( $arg[0] );
+		});
+		bs.$test( 'group', 'g1', 'userid', '#id|@value', 'pw', '#pw|@value' );
+		bs.$test( 'set', 's1', 'userid, pw = Falpha, alphanum' );
+	} );
+	bsTest( 'test',
+		function(){
+			return bs.$test( 's1', '@g1' );
+		}, 1,
+		function(){
+			return bs.$test( 'userid, pw = Falpha, alphanum, len|6', 'userid', '#id|@value', 'pw', '#pw|@value' );
+		}, 1,
+		function(){
+			return bs.$test( 'bs.vali.set.html', 'userid', '#id|@value', 'pw', '#pw|@value' );
+		}, 1,
+		function(){
+			return bs.$test( '@len|6', '#id|', '#pw|' );
+		}, 1
+	);
 } );
 </script>
 </body>

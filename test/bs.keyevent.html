@@ -18,7 +18,11 @@
     <img style="position: fixed; top: 0; right: 0; border: 0;"
          src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
 </a>
+<<<<<<< HEAD
 <script src="../bs/bs5.js"></script>
+=======
+<script src="../bs/bsjs.js"></script>
+>>>>>>> origin/gh-pages
 <script src="../bs/bsTest.js"></script>
 <script>
     // 2013.12.03 - 12:00
@@ -28,7 +32,11 @@
         redcamelTestBase();
         function redcamelTestBase() {
             bs.css("body").$('margin', 0, 'overflow', 'hidden')
+<<<<<<< HEAD
             bs.css("div").$('margin', 0, 'overflow', 'hidden','position', 'absolute')
+=======
+            bs.css("div").$('margin', 0, 'position', 'absolute')
+>>>>>>> origin/gh-pages
             bs.css(".circle").$('margin', 0, 'overflow', 'hidden', 'position', 'absolute')
             bs.dom('<div></div>').$('<', 'body', 'id', 'stage', 'background-color', '#000')
             bs.dom('<div></div>').$('<', '#stage', 'id', 'title', 'html', 'AutoKeyTest(A,D,W,S,control,alt)', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#fff')
@@ -39,12 +47,21 @@
             })
         }
 
+<<<<<<< HEAD
         bs.dom('<div></div>').$('<', '#stage', 'id', 'keyA', 'position', 'absolute', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'html', 'A', 'font-size', 30, 'text-align', 'center')
         bs.dom('<div></div>').$('<', '#stage', 'id', 'keyD', 'position', 'absolute', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 110, 'html', 'D', 'font-size', 30, 'text-align', 'center')
         bs.dom('<div></div>').$('<', '#stage', 'id', 'keyW', 'position', 'absolute', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 220, 'html', 'W', 'font-size', 30, 'text-align', 'center')
         bs.dom('<div></div>').$('<', '#stage', 'id', 'keyS', 'position', 'absolute', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 330, 'html', 'S', 'font-size', 30, 'text-align', 'center')
         bs.dom('<div></div>').$('<', '#stage', 'id', 'keyCtr', 'position', 'absolute', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 200, 'left', 0, 'html', 'CTR', 'font-size', 30, 'text-align', 'center')
         bs.dom('<div></div>').$('<', '#stage', 'id', 'keyAlt', 'position', 'absolute', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 200, 'left', 110, 'html', 'ALT', 'font-size', 30, 'text-align', 'center')
+=======
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyA', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'html', 'A', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyD', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 110, 'html', 'D', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyW', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 220, 'html', 'W', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyS', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 330, 'html', 'S', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyCtr', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 200, 'left', 0, 'html', 'CTR', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyAlt', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 200, 'left', 110, 'html', 'ALT', 'font-size', 30, 'text-align', 'center')
+>>>>>>> origin/gh-pages
 
         // 키다운 이벤트필요없이...그냥 bs.Key["문자"] 호출하면 true/false반환
         var autoKeyTest = {

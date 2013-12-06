@@ -1,10 +1,11 @@
 /*
- * bs5 - OpenSource JavaScript library
- *
- * Copyright 2013.10 hikaMaeng, bsJS-Team.
+ * bsJS - OpenSource JavaScript library
+ * version 0.1.0 / 2013.12.4 by projectBS committee
+ * 
+ * Copyright 2013.10 projectBS committee.
  * Dual licensed under the MIT or GPL Version 2 licenses.
- * GitHub: https://github.com/hikaMaeng/bs5
- * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
+ * GitHub: https://github.com/projectBS/bsJS
+ * Facebook group: https://www.facebook.com/groups/bs5js/
  */
 ( function( W, N ){
 'use strict';
@@ -436,10 +437,145 @@ function init(doc){
 				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}
-			doc.cookie = t1, t2 = val + '';
+			doc.cookie = t1, t2 = '' + val;
 		}
 		return t2 ? decodeURIComponent( t2 ) : null;
 	};
+	(function(){
+		var rules, set, rule, group;
+		group = {};
+		rules = {
+			ip:parseRule('/^((([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))\\.){3}(([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))$/'),
+			url:parseRule('/^https?:\\/\\/[-\\w.]+(:[0-9]+)?(\\/([\\w\\/_.]*)?)?$/'),
+			email:parseRule('/^(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+$/'),
+			korean:parseRule('/^[ㄱ-힣]+$/'),
+			japanese:parseRule('/^[ぁ-んァ-ヶー一-龠！-ﾟ・～「」“”‘’｛｝〜−]+$/'),
+			alpha:parseRule('/^[a-z]+$/'),
+			ALPHA:parseRule('/^[A-Z]+$/'),
+			num:parseRule('/^[0-9]+$/'),
+			alphanum:parseRule('/^[a-z0-9]+$/'),
+			'1alpha':parseRule('/^[a-z]/'),
+			'1ALPHA':parseRule('/^[A-Z]/'),
+			float:function( $v ){return '' + parseFloat( $v ) === $v;},
+			int:function( $v ){return '' + parseInt( $v, 10 ) === $v;},
+			length:function( $v, $a ){return $v.length === +$a[0];},
+			range:function( $v, $a ){
+				var v = parseFloat( $v );
+				return +$a[0] <= v && v <= +$a[1];
+			},
+			indexOf:function( $v, $a ){
+				var i, j;
+				i = $a.length;
+				while( i-- ) if( $v.indexOf( $a[i] ) == -1 ) j = 1;
+				return j ? 0 : 1;
+			},
+			ssn:(function(){
+				var r, key;
+				r = /\s|-/g, key = [2,3,4,5,6,7,8,9,2,3,4,5];
+				return function( $v ){
+					var t0, v, i;
+					v = $v.replace( r, '' );
+					if( v.length != 13 ) return;
+					for( t0 = i = 0 ; i < 12 ; i++ ) t0 += key[i] * v.charAt(i);
+					return parseInt( v.charAt(12) ) == ( ( 11 - ( t0 % 11 ) ) % 10);
+				};
+			})(),
+			biz:(function(){
+				var r, key;
+				r = /\s|-/g, key = [1,3,7,1,3,7,1,3,5,1];
+				return function( $v ){
+					var t0, t1, v, i;
+					v = $v.replace( r, '' );
+					if( v.length != 10 ) return;
+					for( t0 = i = 0 ; i < 8 ; i++ ) t0 += key[i] * v.charAt(i);
+					t1 = "0" + ( key[8] * v.charAt(8) );
+					t1 = t1.substr( t1.length - 2 );
+					t0 += parseInt( t1.charAt(0) ) + parseInt( t1.charAt(1) );
+					return parseInt( v.charAt(9) ) == ( 10 - ( t0 % 10)) % 10;
+				};
+			})()
+		};
+		set = {};
+		function parse( $data ){
+			var t0, t1, t2, t3, i, j, k;
+			t0 = {}, t1 = $data.split('\n'), i = t1.length;
+			while( i-- ){
+				t1[i] = t1[i].split('=');
+				t2 = bs.$trim( t1[i][1].split( ',' ) ), j = t2.length;
+				while( j-- ){
+					t3 = t2[j].split('|'),
+					t2[j] = {0:parseRule( t3[0] ), 1:t3.slice( 1 )};
+				}
+				t3 = bs.$trim( t1[i][0].split( ',' ) ), j = t3.length;
+				while( j-- ) t0[t3[j]] = t2;
+			}
+			return rule = t0;
+		}
+		function parseRule( k ){
+			if( typeof k == 'function' ) return k;
+			if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
+				k = new RegExp( k.substring( 1, k.length - 1 ) );
+				return function( $val ){return k.test( $val );};
+			}else if( rules[k] ) return rules[k];
+			else return function( $val ){ return $val === k; };
+		}
+		function val( $val ){
+			if( typeof $val == 'function' ) return $val();
+			if( $val.indexOf( '|' ) > -1 ){
+				$val = bs.$trim($val.split('|'));
+				return bs.$trim( bs.d( $val[0] ).$( $val[1] || '@value' ) );
+			}else return bs.$trim( $val );
+		}
+		(function(){
+			var t0, i;
+			t0 = 'group,set,rule'.split(','), i = t0.length;
+			while( i-- ) test[t0[i]] = 1;
+		})();
+		function test( $rule ){
+			var t0, t1, t2, i, j, k, l, v, m, n;
+			i = 1, j = arguments.length;
+			if( test[$rule] ){
+				if( $rule == 'group' ) group[arguments[1]] = Array.prototype.slice.call( arguments, 2 );
+				else if( $rule == 'set' ) while( i < j ){
+					k = arguments[i++], v = arguments[i++]
+					if( v.substr(0,2) == '#T' ) set[k] = parse( bs.d( v ).$('@text') );
+					else if( v.substr(v.length-5) == '.html' ) set[k] = parse( bs.$get( null, v ) );
+					else set[k] = parse( v );
+				}else if( $rule == 'rule' ) while( i < j ) rules[arguments[i++]] = parseRule(arguments[i++]);
+				return;
+			}else if( !$rule ){
+				if( !(t0 = rule) ) throw 'no prevRule';
+			}else if( $rule.charAt(0) == '@' ){ //rule
+				t0 = $rule.substr(1).split('|');
+				if( !( t1 = rules[t0[0]] ) ) throw 'no rule';
+				t0 = t0.slice(1);
+				while( i < j ) if( !t1( val( arguments[i++] ), t0 ) ) return;
+				return 1;
+			}else if( set[$rule] ) t0 = set[$rule];
+			else if( $rule.substr(0,2) == '#T' ) t0 = parse( bs.d( $rule ).$('@text') );
+			else if( $rule.substr($rule.length-5) == '.html' ) t0 = parse( bs.$get( null, $rule ) );
+			else t0 = parse( $rule );
+			//ruleset
+			while( i < j ){
+				k = arguments[i++];
+				if( k.charAt(0) == '@' ){//group
+					if( !(t1 = group[k.substr(1)]) ) throw 'no group';
+					m = 0, n = t1.length;
+					while( m < n ){
+						if( !( t2 = t0[t1[m++]] ) ) throw 'no rule';
+						l = t2.length, v = val( t1[m++] );
+						while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
+					}
+				}else{
+					if( !( t2 = t0[k] ) ) throw 'no rule';
+					l = t2.length, v = val( arguments[i++] );
+					while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
+				}
+			}
+			return 1;
+		}
+		bs.$test = test;
+	})();
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
@@ -1045,12 +1181,12 @@ function init(doc){
 					}else{
 						pageX = 'pageX', pageY = 'pageY';
 					}
-					keycode = (function(){
-						var t0, t1, i, j;
+					bs.keycode = keycode = (function(){
+						var t0, t1, i, j, k, v;
 						t0 = 'a,65,b,66,c,67,d,68,e,69,f,70,g,71,h,72,i,73,j,74,k,75,l,76,m,77,n,78,o,79,p,80,q,81,r,82,s,83,t,84,u,85,v,86,w,87,x,88,y,88,z,90,back,8,tab,9,enter,13,shift,16,control,17,alt,18,pause,19,caps,20,esc,27,space,32,pageup,33,pagedown,34,end,35,home,36,left,37,up,38,right,39,down,40,insert,45,delete,46,numlock,144,scrolllock,145,0,48,1,49,2,50,3,51,4,52,5,53,6,54,7,55,8,56,9,57'.split(','),
 						t1 = {},
 						i = 0, j = t0.length;
-						while( i < j ) t1[t0[i++]] = parseInt(t0[i++]);
+						while( i < j )k = t0[i++], v = parseInt(t0[i++]), t1[k] = v, t1[v] = k;
 						return t1;
 					})();
 					function ev( $dom ){
@@ -1251,6 +1387,7 @@ function init(doc){
 			};
 			return win;
 		})();
+<<<<<<< HEAD:bs/bs5.js
         // AutoKeySystem 검증필요?
         bs.KEY = (function () {
             var keymap = {'65': 'a', '66': 'b', '67': 'c', '68': 'd', '69': 'e', '70': 'f', '71': 'g', '72': 'h', '73': 'i', '74': 'j', '75': 'k', '76': 'l', '77': 'm', '78': 'n', '79': 'o', '80': 'p', '81': 'q', '82': 'r', '83': 's', '84': 't', '85': 'u', '86': 'v', '87': 'w', '88': 'x', '89': 'y', '90': 'z', '8': 'back', '9': 'tab', '13': 'enter', '16': 'shift', '17': 'control', '18': 'alt', '19': 'pause', '20': 'caps', '27': 'esc', '32': 'space', '33': 'pageup', '34': 'pagedown', '35': 'end', '36': 'home', '37': 'left', '38': 'up', '39': 'right', '40': 'down', '45': 'insert', '46': 'delete', '144': 'numlock', '145': 'scrolllock', '48': '0', '49': '1', '50': '2', '51': '3', '52': '4', '53': '5', '54': '6', '55': '7', '56': '8', '57': '9'};
@@ -1263,6 +1400,15 @@ function init(doc){
             });
             return buffer
         })();
+=======
+		bs.KEY = (function () {
+			var buffer, keycode;
+			return keycode = bs.keycode, delete bs.keycode, 
+				bs.WIN.on("keydown", '@bsKD', function($e){buffer[keycode[$e.code]] = 1;}),
+				bs.WIN.on("keyup", '@bsKU', function($e){buffer[keycode[$e.code]] = 0;}),
+				buffer = {};
+		})();
+>>>>>>> origin/gh-pages:bs/bsjs.js
 	})( W.document );
 	bs.ROUTER =(function(){
 		var s, e, t, h, count;
@@ -1577,7 +1723,7 @@ function init(doc){
 				var delay = [];
 				return function( $f ){
 					var i;
-					if( (i = deley.indexOf( $f ) ) == -1 ){
+					if( (i = delay.indexOf( $f ) ) == -1 ){
 						delay[delay.length] = $f;
 						$f.bsDelay = setTimeout( $f, ( arguments[1] || 1 ) * 1000 );
 					}else{
