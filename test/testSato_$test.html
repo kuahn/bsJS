@@ -67,7 +67,19 @@ bs( function(){
 			return bs.$test( '@len|6', '#id|@value', '#pw|@value' );
 		}, 1,
 		function(){
-			return bs.$test( '@japanese', '会いたい')
+			return bs.$test( '@japanese', 'あいうえお日本語ニホンゴ' );
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', '！“”＃＄％＆‘’（）＊＋，−．／：；＜＝＞？＠［＼］＾＿｀｛｜｝〜「」・' );
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', '１２３４５６７８９０' );
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょ');
+		}, 1,
+		function(){
+			return bs.$test( '@japanese', 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポァィゥェォャュョヴ');
 		}, 1
 	);
 } );
