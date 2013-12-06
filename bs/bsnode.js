@@ -1,5 +1,6 @@
 //function bs(){}
-var bs = exports;
+var bs = exports,
+mimeTypes = require('./bsnode.mime.types');
 bs.$ex = (function(){
 	var ra, rc, random, rand, randf;
 	ra = {}, rc = 0;
@@ -159,15 +160,26 @@ bs.$ex = (function(){
 		rules.sort( sort );
 
 		port = server.createServer( function( $rq, $rp ){
-			var fullPath, path, file, log,
+			var fullPath, path, fs, file, log, fileExt, sysPath,
 				t0, t1, i;
-			fullPath = path = bs.$url( $rq.url ).pathname;
+			fullPath = path = bs.$url( $rq.url ).pathname, fs = require('fs'), fileExt = path.split('.').pop();
 			if( path.substr( path.length - 3 ) == '.bs' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
 			else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
 			
-			if( file.substr( file.length - 2 ) != 'bs' ){
-				//static page
+			if( fileExt != 'bs' ){
+				//static file
+				sysPath = __dirname +'/'+ root+fullPath;
+				fs.exists( sysPath, function( $exist ){
+					if( !$exist ){
+						$rp.writeHead( 404 ),
+						$rp.end();
+						return;
+					}
+					$rp.writeHead( 200, mimeTypes[fileExt.toLowerCase()] ),
+					fs.createReadStream( sysPath ).pipe($rp);
+					return;
+				});
 				return;
 			}
 			
@@ -200,9 +212,10 @@ bs.$ex = (function(){
 				}
 				flush();
 			}catch( $e ){
+				console.log($e);
 				$rp.writeHead( 404, {'Content-Type':'text/html'} ),
 				$rp.end( 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 			}
-		}).listen( $data.port || 80 );	
+		}).listen( $data.port || 80 );
 	};
 })();
