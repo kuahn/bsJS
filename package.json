@@ -21,8 +21,5 @@
   "license": "MIT or GPL Version 2",
   "bugs": {
     "url": "https://www.facebook.com/groups/bs5js/?hc_location=stream"
-  },
-  "dependencies": {
-    "uid2": "0.0.3"
   }
 }

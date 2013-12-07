@@ -1,5 +1,5 @@
-//function bs(){}
 var bs = exports,
+	fs = require('fs'),
 	mimeTypes = require('./bsnode.mime.types');
 
 bs.$ex = (function(){
@@ -152,18 +152,18 @@ bs.$ex = (function(){
 		rp.writeHead( 200, head ), rp.end( t0 );
 	},
 	bs.route = function( $data ){
-		var port, root, index, config, table, rules, rule, 
+		var port, root, index, config, table, rules, rule,
 			t0, i, j, k, l;
-		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0, 
+		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
 		table = $data.table, rules = [], rule = $data.rules;
 		for( k in table ) table[k] = root+'/'+table[k];
 		for( k in rule ) rules[rules.length] = k;
 		rules.sort( sort );
 
 		port = server.createServer( function( $rq, $rp ){
-			var fullPath, path, fs, file, log, fileExt, sysPath,
+			var fullPath, path, file, log, fileExt, sysPath,
 				t0, t1, i;
-			fullPath = path = bs.$url( $rq.url ).pathname, fs = require('fs'), fileExt = fullPath.split('.').pop();
+			fullPath = path = bs.$url( $rq.url ).pathname, fileExt = fullPath.split('.').pop().toLowerCase();
 			
 			if (fileExt == 'bs') i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
@@ -175,7 +175,7 @@ bs.$ex = (function(){
 						$rp.end();
 						return;
 					}
-					$rp.writeHead( 200, {'Content-Type':mimeTypes[fileExt.toLowerCase()] || 'unknown type'} ),
+					$rp.writeHead( 200, {'Content-Type':mimeTypes[fileExt] || 'Unknown type'} ),
 					fs.createReadStream( sysPath ).pipe($rp);
 					return;
 				});
