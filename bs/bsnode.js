@@ -9,21 +9,16 @@
  */
 var bs = exports;
 bs.$ex = (function(){
-	var ra, rc, random, rand, randf;
+	var ra, rc, random;
 	ra = {}, rc = 0,
-	random = function random(){
-		rc++, rc %= 1000;
-		return ra[rc] || ( ra[rc] = Math.random() );
-	},
-	rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; },
-	randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
+	random = function(){return rc = ( rc + 1 ) % 1000, ra[rc] || ( ra[rc] = Math.random() );};
 	return function ex(){
 		var t0, i, j;
 		t0 = arguments[0], i = 1, j = arguments.length;
 		while( i < j ){
 			switch( arguments[i++] ){
-			case'~': t0 = rand( t0, arguments[i++] ); break;
-			case'~f': t0 = randf( t0, arguments[i++] );
+			case'~': return parseInt( random() * ( arguments[i++] - t0 + 1 ) ) + t0;
+			case'~f': return random() * ( arguments[i++] - t0 ) + t0;
 			}
 		}
 		return t0;
@@ -129,10 +124,7 @@ bs.$ex = (function(){
 	bs.$crypt = function( $type, $val ){
 		var t0;
 		switch( $type ){
-		case'sha256':
-			t0 = crypto.createHash('sha256'),
-			t0.update( $val );
-			return t0.digest('hex');
+		case'sha256': return t0 = crypto.createHash('sha256'), t0.update( $val ), t0.digest('hex');
 		}
 	}
 	bs.$get = function( $end, $url ){
@@ -217,7 +209,7 @@ bs.$ex = (function(){
 	e404 = function( $v ){rp.writeHead( 404 ), rp.end( $v || '' );},
 	//route
 	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
-	bs.route = function( $data ){
+	bs.$route = function( $data ){
 		var port, root, index, config, table, rules, rule,
 			t0, i, j, k, l;
 		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
