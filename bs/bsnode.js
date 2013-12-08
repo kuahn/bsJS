@@ -152,7 +152,7 @@ bs.$ex = (function(){
 		t1 = 0;
 		if( $v == null ) t1 = t0.getMiliseconds() - 3600, t0.setTime( t0.getTime() - 86400000 );
 		t2 = [
-			$k + '=' + ( $v || '' ),
+			$k + '=' + ( bs.$escape($v) || '' ),
 			'Max-Age=' + t1,
 			'Path=' + ( $path ? $path : '/'),
 			'Expires=' + t0.toUTCString(),
