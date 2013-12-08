@@ -3,4 +3,5 @@ exports.bs = function( bs ){
 		'<div>config : ', bs.$data( 'config' ), '</div>',
 		'<div>subConfig : ', bs.$data( 'subConfig' ), '</div>'
 	);
+	console.log(bs.$session('pekuid'));
 };

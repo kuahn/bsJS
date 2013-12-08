@@ -1,5 +1,15 @@
+/*
+ * bsNode - OpenSource Node.js web framework
+ * version 0.1.0 / 2013.12.4 by projectBS committee
+ * 
+ * Copyright 2013.10 projectBS committee.
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * GitHub: https://github.com/projectBS/bsJS
+ * Facebook group: https://www.facebook.com/groups/bs5js/
+ */
 var bs = exports,
 	fs = require('fs'),
+	crypto = require('crypto'),
 	mimeTypes = require('./bsnode.mime.types');
 
 bs.$ex = (function(){
@@ -122,10 +132,11 @@ bs.$ex = (function(){
 	bs.$cgiStringify = function( $val ){return query.stringify( $val );};
 })();
 (function(){
-	var server, head, response, cookie, data,
-		sort, flush,
+	var server, head, response, cookie, data, session, skey, bsuuid,
+		sort, flush, getUuid, ckParser,
 		rq, rp, clientCookie;
 	server = require('http'), head = [], response = [], cookie = [],
+	session = {}, skey = 'bsnode.sid', bsuuid = 1,
 
 	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
 	bs.$response = function(){
@@ -135,21 +146,54 @@ bs.$ex = (function(){
 	},
 	bs.$request = function( $k ){return $k ? rq[$k] : request;},
 	bs.$cookie = function( $k, $v, $path, $expire, $domain ){
+		var t0, t1, t2;
 		if( $v === undefined ) return clientCookie[$k];
-		cookie[$k] = bs.$escape($v);
+		t0 = new Date,
+		t1 = 0;
+		if( $v == null ) t1 = t0.getMiliseconds() - 3600, t0.setTime( t0.getTime() - 86400000 );
+		t2 = [
+			$k + '=' + ( $v || '' ),
+			'Max-Age=' + t1,
+			'Path=' + ( $path ? $path : '/'),
+			'Expires=' + t0.toUTCString(),
+			'HttpOnly'
+		];
+		if( $domain ) t2.push( 'Domain=' + $domain );
+		cookie[$k] = t2.join('; ');
+	},
+	bs.$session = function( $k, $v ){
+		var uuid = bs.$cookie( skey );
+		if( !session[uuid] ) session[uuid] = {};
+		if( $v === undefined ) return session[uuid][$k];
+		session[uuid][$k] = $v;
 	},
 	bs.$data = function( $k, $v ){return $v === undefined ? data[$k] : data[$k] = $v;},
 	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
 	flush = function(){
-		var t0, i;
-		t0 = response.join('');
+		var t0, k;
+		t0 = response.join(''),
 		head.push(
 			['Server', 'projectBS on node.js'],
 			['Content-Type', 'text/html; charset=utf-8'],
 			['Content-Length', Buffer.byteLength( t0, 'utf8' )]
 		);
-		if( i = cookie.length ) while( i-- ) head[head.length] = ['Set-Cookie',cookie[i]];
+		for (k in cookie){
+			head.push( ['Set-Cookie', cookie[k] ] );
+		};
 		rp.writeHead( 200, head ), rp.end( t0 );
+	},
+	getUuid = function(){
+		var sha;
+		sha = crypto.createHash('sha256'),
+		sha.update( ["bsNode", Math.random(), bsuuid++].join('') );
+		return sha.digest('hex');
+	},
+	ckParser = function( $ck ){
+		var t0, cks, ckv, i;
+		t0 = {},
+		cks = $ck.split( ';' );
+		for( i = cks.length; i--; ) ckv = cks[i].split( '=' ), t0[bs.$trim( ckv[0] )] = bs.$trim( ckv[1] );
+		return t0;
 	},
 	bs.route = function( $data ){
 		var port, root, index, config, table, rules, rule,
@@ -165,7 +209,7 @@ bs.$ex = (function(){
 				t0, t1, i;
 			fullPath = path = bs.$url( $rq.url ).pathname, fileExt = fullPath.split('.').pop().toLowerCase();
 			
-			if (fileExt == 'bs') i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
+			if(fileExt == 'bs') i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
 			else if( fileExt.indexOf('/') == -1 ) {
 				sysPath = __dirname +'/'+ root+fullPath;
@@ -183,9 +227,11 @@ bs.$ex = (function(){
 			}else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
 			
 			rq = $rq, rp = $rp,
-			clientCookie = t0 = $rq.cookie ? bs.$cgiParse( t0 ) : null,
+			clientCookie = ( t0 = $rq.headers.cookie ) ? ckParser( t0 ) : {},
 			head.length = cookie.length = response.length = 0,
 			data = {};
+			
+			if( !bs.$cookie( skey ) ) bs.$cookie( skey, getUuid() );
 			
 			try{
 				if( config ) log = config, require( config ).bs( bs );
