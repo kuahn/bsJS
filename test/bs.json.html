@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>bs5 Test suite</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<div id="result"></div>
+<div id="test"></div>
+<script>
+window.JSON = null;
+</script>
+<script src="../bs/bsjs.js"></script>
+<script src="../bs/bsTest.js"></script>
+<script>
+function printer(r){
+    document.getElementById('test').innerHTML += r;
+}
+
+bsTest.result = function(r){ document.getElementById('result').innerHTML = r; }
+
+
+bs( function(){
+
+	var t0, t1, t2;
+
+	// number test
+	t0 = {
+		a: 0,
+		b: 1,
+		c: 0.1,
+		d: .1,
+		e: -1,
+		f: -0.1,
+		g: -.1
+	};
+	
+    bsTest( printer, 'stringify number', 
+		'number', JSON.stringify(t0), '{"a":0,"b":1,"c":0.1,"d":0.1,"e":-1,"f":-0.1,"g":-0.1}');
+
+    // boolean test
+    t0 = {
+    	a: true,
+    	b: false
+    };
+
+    bsTest( printer, 'stringify boolean', 
+		'boolean', JSON.stringify(t0), '{"a":true,"b":false}');
+
+    // function test
+    t0 = {
+    	a: "a",
+    	b: function() {var i = 0;}
+    };
+
+    bsTest( printer, 'stringify function', 
+		'function', JSON.stringify(t0), '{"a":"a"}');
+
+    // string test
+    t0 = {
+    	a: 'a',
+    	b: 'abc',
+    	c: 'a b c',
+    	d: ' abc',
+    	e: 'abc '
+    };
+
+	bsTest( printer, 'stringify string', 
+		'string', JSON.stringify(t0), '{"a":"a","b":"abc","c":"a b c","d":" abc","e":"abc "}');
+
+	// null test
+    t0 = {
+    	a: null
+    };
+
+	bsTest( printer, 'stringify null', 
+		'null', JSON.stringify(t0), '{"a":null}');
+
+	// undefined
+    t0 = {
+    	a: 1,
+    	b: undefined
+    };
+
+	bsTest( printer, 'stringify undefined', 
+		'undefined', JSON.stringify(t0), '{"a":1}');
+
+	// object test
+    t0 = {
+    	a: {
+    		a0: '123'
+    	}
+    };
+
+	bsTest( printer, 'stringify objcet', 
+		'object', JSON.stringify(t0), '{"a":{"a0":"123"}}');
+
+
+});
+
+</script>
+</body>
+</html>
