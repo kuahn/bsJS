@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>bs5 Test suite</title>
+    <meta name="keywords" content="bs5"/>
+    <meta name="description" content="bs5 Test suite"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi"/>
+    <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+    <img style="position: fixed; top: 0; right: 0; border: 0;"
+         src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<script src="../bs/bsjs.js"></script>
+<script src="../bs/bsTest.js"></script>
+<script>
+    // 2013.12.03 - 12:00
+    // By Redcamel
+    // 개발목적 : 오토키 구현
+    bs(function () {
+        redcamelTestBase();
+        function redcamelTestBase() {
+            bs.css("body").$('margin', 0, 'overflow', 'hidden')
+            bs.css("div").$('margin', 0, 'position', 'absolute')
+            bs.css(".circle").$('margin', 0, 'overflow', 'hidden', 'position', 'absolute')
+            bs.dom('<div></div>').$('<', 'body', 'id', 'stage', 'background-color', '#000')
+            bs.dom('<div></div>').$('<', '#stage', 'id', 'title', 'html', 'AutoKeyTest(A,D,W,S,control,alt)', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#fff')
+            bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'font-size', 11, 'color', '#fff', '<', 'body', 'this')[0]);
+            bs.WIN.sizer(function (w, h) {
+                bs.dom('#stage').$('width', w, 'height', h)
+                bs.dom('#title').$('top', 20, 'left', 0)
+            })
+        }
+
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyA', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'html', 'A', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyD', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 110, 'html', 'D', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyW', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 220, 'html', 'W', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyS', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 100, 'left', 330, 'html', 'S', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyCtr', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 200, 'left', 0, 'html', 'CTR', 'font-size', 30, 'text-align', 'center')
+        bs.dom('<div></div>').$('<', '#stage', 'id', 'keyAlt', 'background-color', '#222', 'borderRadius', 50, 'width', 100, 'height', 100, 'top', 200, 'left', 110, 'html', 'ALT', 'font-size', 30, 'text-align', 'center')
+
+        // 키다운 이벤트필요없이...그냥 bs.Key["문자"] 호출하면 true/false반환
+        var autoKeyTest = {
+            ANI: function ($time) {
+                if (bs.KEY["a"]) {
+                    bs.dom('#keyA').$("background-color", '#fff')
+                } else {
+                    bs.dom('#keyA').$("background-color", '#222')
+                }
+                if (bs.KEY["d"]) {
+                    bs.dom('#keyD').$("background-color", '#fff')
+                } else {
+                    bs.dom('#keyD').$("background-color", '#222')
+                }
+                if (bs.KEY["w"]) {
+                    bs.dom('#keyW').$("background-color", '#fff')
+                } else {
+                    bs.dom('#keyW').$("background-color", '#222')
+                }
+                if (bs.KEY["s"]) {
+                    bs.dom('#keyS').$("background-color", '#fff')
+                } else {
+                    bs.dom('#keyS').$("background-color", '#222')
+                }
+                if (bs.KEY["control"]) {
+                    bs.dom('#keyCtr').$("background-color", '#fff')
+                } else {
+                    bs.dom('#keyCtr').$("background-color", '#222')
+                }
+                if (bs.KEY["alt"]) {
+                    bs.dom('#keyAlt').$("background-color", '#fff')
+                } else {
+                    bs.dom('#keyAlt').$("background-color", '#222')
+                }
+            }
+        };
+
+        bs.ANI.ani(autoKeyTest)
+    });
+</script>
+</body>
+</html>

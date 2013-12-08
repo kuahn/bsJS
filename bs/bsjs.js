@@ -1,10 +1,11 @@
 /*
- * bs5 - OpenSource JavaScript library
- *
- * Copyright 2013.10 hikaMaeng, bsJS-Team.
+ * bsJS - OpenSource JavaScript library
+ * version 0.1.0 / 2013.12.4 by projectBS committee
+ * 
+ * Copyright 2013.10 projectBS committee.
  * Dual licensed under the MIT or GPL Version 2 licenses.
- * GitHub: https://github.com/hikaMaeng/bs5
- * Facebook group: https://www.facebook.com/groups/bs5js/?hc_location=stream
+ * GitHub: https://github.com/projectBS/bsJS
+ * Facebook group: https://www.facebook.com/groups/bs5js/
  */
 ( function( W, N ){
 'use strict';
@@ -53,7 +54,7 @@ function init(doc){
 			t0.text = sz.text, sz = Sizzle,
 			sel = function( $sel ){return sz( $sel );};
 		}else{
-			sz = {};
+			sz = {},
 			sel = function( $sel ){
 				var t0, i;
 				if( ( t0 = $sel.charAt(0) ) == '#' ){
@@ -116,21 +117,15 @@ function init(doc){
 		}
 	})(bs);
 	bs.$ex = (function(){
-		var ra, rc, random, rand, randf;
-		ra = {}, rc = 0;
-		random = function random(){
-			rc++, rc %= 1000;
-			return ra[rc] || ( ra[rc] = Math.random() );
-		};
-		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; };
-		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
+		var rc, random;
+		rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
 		return function ex(){
 			var t0, i, j;
 			t0 = arguments[0], i = 1, j = arguments.length;
 			while( i < j ){
 				switch( arguments[i++] ){
-				case'~': t0 = rand( t0, arguments[i++] ); break;
-				case'~f': t0 = randf( t0, arguments[i++] );
+				case'~': return parseInt( random() * ( arguments[i++] - t0 + 1 ) ) + t0;
+				case'~f': return random() * ( arguments[i++] - t0 ) + t0;
 				}
 			}
 			return t0;
@@ -436,10 +431,145 @@ function init(doc){
 				t0.setTime( t0.getTime() + arguments[2] * 86400000 ),
 				t1 += ';expires=' + t0.toUTCString();
 			}
-			doc.cookie = t1, t2 = val + '';
+			doc.cookie = t1, t2 = '' + val;
 		}
 		return t2 ? decodeURIComponent( t2 ) : null;
 	};
+	(function(){
+		var rules, set, rule, group;
+		group = {};
+		rules = {
+			ip:parseRule('/^((([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))\\.){3}(([0-9]{1,2})|(1[0-9]{2})|(2[0-4][0-9])|(25[0-5]))$/'),
+			url:parseRule('/^https?:\\/\\/[-\\w.]+(:[0-9]+)?(\\/([\\w\\/_.]*)?)?$/'),
+			email:parseRule('/^(\\w+\\.)*\\w+@(\\w+\\.)+[A-Za-z]+$/'),
+			korean:parseRule('/^[ㄱ-힣]+$/'),
+			japanese:parseRule('/^[ぁ-んァ-ヶー一-龠！-ﾟ・～「」“”‘’｛｝〜−]+$/'),
+			alpha:parseRule('/^[a-z]+$/'),
+			ALPHA:parseRule('/^[A-Z]+$/'),
+			num:parseRule('/^[0-9]+$/'),
+			alphanum:parseRule('/^[a-z0-9]+$/'),
+			'1alpha':parseRule('/^[a-z]/'),
+			'1ALPHA':parseRule('/^[A-Z]/'),
+			float:function( $v ){return '' + parseFloat( $v ) === $v;},
+			int:function( $v ){return '' + parseInt( $v, 10 ) === $v;},
+			length:function( $v, $a ){return $v.length === +$a[0];},
+			range:function( $v, $a ){
+				var v = parseFloat( $v );
+				return +$a[0] <= v && v <= +$a[1];
+			},
+			indexOf:function( $v, $a ){
+				var i, j;
+				i = $a.length;
+				while( i-- ) if( $v.indexOf( $a[i] ) == -1 ) j = 1;
+				return j ? 0 : 1;
+			},
+			ssn:(function(){
+				var r, key;
+				r = /\s|-/g, key = [2,3,4,5,6,7,8,9,2,3,4,5];
+				return function( $v ){
+					var t0, v, i;
+					v = $v.replace( r, '' );
+					if( v.length != 13 ) return;
+					for( t0 = i = 0 ; i < 12 ; i++ ) t0 += key[i] * v.charAt(i);
+					return parseInt( v.charAt(12) ) == ( ( 11 - ( t0 % 11 ) ) % 10);
+				};
+			})(),
+			biz:(function(){
+				var r, key;
+				r = /\s|-/g, key = [1,3,7,1,3,7,1,3,5,1];
+				return function( $v ){
+					var t0, t1, v, i;
+					v = $v.replace( r, '' );
+					if( v.length != 10 ) return;
+					for( t0 = i = 0 ; i < 8 ; i++ ) t0 += key[i] * v.charAt(i);
+					t1 = "0" + ( key[8] * v.charAt(8) );
+					t1 = t1.substr( t1.length - 2 );
+					t0 += parseInt( t1.charAt(0) ) + parseInt( t1.charAt(1) );
+					return parseInt( v.charAt(9) ) == ( 10 - ( t0 % 10)) % 10;
+				};
+			})()
+		};
+		set = {};
+		function parse( $data ){
+			var t0, t1, t2, t3, i, j, k;
+			t0 = {}, t1 = $data.split('\n'), i = t1.length;
+			while( i-- ){
+				t1[i] = t1[i].split('=');
+				t2 = bs.$trim( t1[i][1].split( ',' ) ), j = t2.length;
+				while( j-- ){
+					t3 = t2[j].split('|'),
+					t2[j] = {0:parseRule( t3[0] ), 1:t3.slice( 1 )};
+				}
+				t3 = bs.$trim( t1[i][0].split( ',' ) ), j = t3.length;
+				while( j-- ) t0[t3[j]] = t2;
+			}
+			return rule = t0;
+		}
+		function parseRule( k ){
+			if( typeof k == 'function' ) return k;
+			if( k.charAt(0) == '/' && k.charAt(k.length - 1) == '/' ){
+				k = new RegExp( k.substring( 1, k.length - 1 ) );
+				return function( $val ){return k.test( $val );};
+			}else if( rules[k] ) return rules[k];
+			else return function( $val ){ return $val === k; };
+		}
+		function val( $val ){
+			if( typeof $val == 'function' ) return $val();
+			if( $val.indexOf( '|' ) > -1 ){
+				$val = bs.$trim($val.split('|'));
+				return bs.$trim( bs.d( $val[0] ).$( $val[1] || '@value' ) );
+			}else return bs.$trim( $val );
+		}
+		(function(){
+			var t0, i;
+			t0 = 'group,set,rule'.split(','), i = t0.length;
+			while( i-- ) test[t0[i]] = 1;
+		})();
+		function test( $rule ){
+			var t0, t1, t2, i, j, k, l, v, m, n;
+			i = 1, j = arguments.length;
+			if( test[$rule] ){
+				if( $rule == 'group' ) group[arguments[1]] = Array.prototype.slice.call( arguments, 2 );
+				else if( $rule == 'set' ) while( i < j ){
+					k = arguments[i++], v = arguments[i++]
+					if( v.substr(0,2) == '#T' ) set[k] = parse( bs.d( v ).$('@text') );
+					else if( v.substr(v.length-5) == '.html' ) set[k] = parse( bs.$get( null, v ) );
+					else set[k] = parse( v );
+				}else if( $rule == 'rule' ) while( i < j ) rules[arguments[i++]] = parseRule(arguments[i++]);
+				return;
+			}else if( !$rule ){
+				if( !(t0 = rule) ) throw 'no prevRule';
+			}else if( $rule.charAt(0) == '@' ){ //rule
+				t0 = $rule.substr(1).split('|');
+				if( !( t1 = rules[t0[0]] ) ) throw 'no rule';
+				t0 = t0.slice(1);
+				while( i < j ) if( !t1( val( arguments[i++] ), t0 ) ) return;
+				return 1;
+			}else if( set[$rule] ) t0 = set[$rule];
+			else if( $rule.substr(0,2) == '#T' ) t0 = parse( bs.d( $rule ).$('@text') );
+			else if( $rule.substr($rule.length-5) == '.html' ) t0 = parse( bs.$get( null, $rule ) );
+			else t0 = parse( $rule );
+			//ruleset
+			while( i < j ){
+				k = arguments[i++];
+				if( k.charAt(0) == '@' ){//group
+					if( !(t1 = group[k.substr(1)]) ) throw 'no group';
+					m = 0, n = t1.length;
+					while( m < n ){
+						if( !( t2 = t0[t1[m++]] ) ) throw 'no rule';
+						l = t2.length, v = val( t1[m++] );
+						while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
+					}
+				}else{
+					if( !( t2 = t0[k] ) ) throw 'no rule';
+					l = t2.length, v = val( arguments[i++] );
+					while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
+				}
+			}
+			return 1;
+		}
+		bs.$test = test;
+	})();
 	( function( doc ){
 		var platform, app, agent, device,
 			flash, browser, bVersion, os, osVersion, cssPrefix, stylePrefix, transform3D,
@@ -502,7 +632,7 @@ function init(doc){
 				i = /safari\/([\d.]+)/.exec( agent );
 				if( i ) bVersion = parseFloat( i[1] );
 				naver() || chrome() || firefox() || opera();
-			}else if( agent.indexOf( i = 'iphone' ) > -1 || agent.indexOf( i = 'ipad' ) > -1 ){
+			}else if( agent.indexOf( i = 'ipad' ) > -1 || agent.indexOf( i = 'iphone' ) > -1 ){
 				device = i == 'ipad' ? 'tablet' : 'mobile';
 				browser = os = i;
 				i = /os ([\d_]+)/.exec( agent );
@@ -1045,12 +1175,12 @@ function init(doc){
 					}else{
 						pageX = 'pageX', pageY = 'pageY';
 					}
-					keycode = (function(){
-						var t0, t1, i, j;
+					bs.keycode = keycode = (function(){
+						var t0, t1, i, j, k, v;
 						t0 = 'a,65,b,66,c,67,d,68,e,69,f,70,g,71,h,72,i,73,j,74,k,75,l,76,m,77,n,78,o,79,p,80,q,81,r,82,s,83,t,84,u,85,v,86,w,87,x,88,y,88,z,90,back,8,tab,9,enter,13,shift,16,control,17,alt,18,pause,19,caps,20,esc,27,space,32,pageup,33,pagedown,34,end,35,home,36,left,37,up,38,right,39,down,40,insert,45,delete,46,numlock,144,scrolllock,145,0,48,1,49,2,50,3,51,4,52,5,53,6,54,7,55,8,56,9,57'.split(','),
 						t1 = {},
 						i = 0, j = t0.length;
-						while( i < j ) t1[t0[i++]] = parseInt(t0[i++]);
+						while( i < j )k = t0[i++], v = parseInt(t0[i++]), t1[k] = v, t1[v] = k;
 						return t1;
 					})();
 					function ev( $dom ){
@@ -1075,11 +1205,13 @@ function init(doc){
 					}
 					ev.prototype.$ = function( $k, $v ){
 						var self, dom, type;
+						
 						self = this, dom = self.dom;
 						if( typeof ev$[$k] == 'string' ) $k = ev$[$k];
 						if( $v === null ) dom['on'+$k] = null, delete self[$k];
 						else if( $k == 'rollover' ) self.$( 'mouseover', ev$.rollover );
 						else if( $k == 'rollout' ) self.$( 'mouseout', ev$.rollout );
+						else if( !$k ) return;
 						else{
 							self[$k] = $v;
 							dom['on'+$k] = function( $e ){
@@ -1249,6 +1381,13 @@ function init(doc){
 			};
 			return win;
 		})();
+		bs.KEY = (function () {
+			var buffer, keycode;
+			return keycode = bs.keycode, delete bs.keycode, 
+				bs.WIN.on("keydown", '@bsKD', function($e){buffer[keycode[$e.code]] = 1;}),
+				bs.WIN.on("keyup", '@bsKU', function($e){buffer[keycode[$e.code]] = 0;}),
+				buffer = {};
+		})();
 	})( W.document );
 	bs.ROUTER =(function(){
 		var s, e, t, h, count;
@@ -1298,7 +1437,8 @@ function init(doc){
 		};
 	})();
 	bs.ANI = ( function(){
-		var ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, tTemp, style, filter;
+		var isCSS3, ANI, ani, len, timer, time, isLive, start, end, loop, isPause, ease, tweenPool, style, filter;
+		isCSS3 = bs.DETECT.transition;
 		style = bs.style;
 		filter = bs.filter;
 		bs.style = bs.filter = null;
@@ -1352,27 +1492,29 @@ function init(doc){
 				circleIn:function(a,c,b){return -b*(Math.sqrt(1-a*a)-1)+c},
 				circleOut:function(a,c,b){a-=1;return b*Math.sqrt(1-a*a)+c},
 				circleInOut:function(a,c,b){a*=2;if(1>a)return 0.5*-b*(Math.sqrt(1-a*a)-1)+c;a-=2;return 0.5*b*(Math.sqrt(1-a*a)+1)+c},
-				_li:i+'0.250,0.250,0.750,0.750)',
-				_baI:i+'0.600,-0.280,0.735,0.045)',_baO:i+'0.175,0.885,0.320,1.275)',_baIO:i+'0.680,-0.550,0.265,1.550)',
-				_boI:i+'0.600,-0.280,0.735,0.045)',_boO:i+'0.175,0.885,0.320,1.275)',_boIO:i+'0.680,-0.550,0.265,1.550)',
-				_siI:i+'0.470,0.000,0.745,0.715)',_siO:i+'0.390,0.575,0.565,1.000)',_siIO:i+'0.445,0.050,0.550,0.950)',
-				_ciI:i+'0.600,0.040,0.980,0.335)',_ciO:i+'0.075,0.820,0.165,1.000)',_ciIO:i+'0.785,0.135,0.150,0.860)'
+				css:{
+				linear:i+'0.250,0.250,0.750,0.750)',
+				backIn:i+'0.600,-0.280,0.735,0.045)',backOut:i+'0.175,0.885,0.320,1.275)',backInOut:i+'0.680,-0.550,0.265,1.550)',
+				bounceIn:i+'0.600,-0.280,0.735,0.045)',bounceOut:i+'0.175,0.885,0.320,1.275)',bounceInOut:i+'0.680,-0.550,0.265,1.550)',
+				sineIn:i+'0.470,0.000,0.745,0.715)',sineOut:i+'0.390,0.575,0.565,1.000)',sineInOut:i+'0.445,0.050,0.550,0.950)',
+				circleIn:i+'0.600,0.040,0.980,0.335)',circleOut:i+'0.075,0.820,0.165,1.000)',circleInOut:i+'0.785,0.135,0.150,0.860)'
+				}
 			};
 		})();
 		tweenPool = {length:0};
 		function tween(){}
 		(function(){
 			var t0, i;
-			t0 = 'id,time,ease,delay,loop,end,update'.split(','), i = t0.length;
+			t0 = 'id,time,ease,delay,loop,end,update,native'.split(','), i = t0.length;
 			while( i-- ) tween[t0[i]] = 1;
 		})();
 		tween.prototype.init = function( $arg ){
-			var t0, l, i, j, k, v, isDom, v0, o, p;
+			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e;
 			this.t = t0 = $arg[0].nodeType == 1 ? bs.dom( $arg[0] ) : $arg[0], this.isDom = isDom = t0.isDom,
-			this.delay = this.stop = this.pause = 0,
-			this.time = 1000, this.timeR = .001, this.loop = this.loopC = 1,
-			this.id = this.end = this.update = null, this.ease = ease.linear,
-			this.length = i = t0.length || 1;
+			this.delay = this.stop = this.pause = this.css3 = 0,
+			this.time = 1000, this.timeR = .001, this.loop = this.loopC = t = 1,
+			this.id = this.end = this.update = null, this.ease = ease.linear, e = 'linear',
+			this.length = i = t0.length || 1, native = 0;
 			while(i--)
 				( this[i] ? (this[i].length=0) : (this[i]=[]) ), 
 				( this[i][0] = isDom ? t0[i].bsS : (t0[i] || t0) );
@@ -1380,14 +1522,14 @@ function init(doc){
 			while( i < j ){
 				k = $arg[i++], v = $arg[i++];
 				if( tween[k] ){
-					if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time;
-					else if( k == 'ease' ) this.ease = ease[v];
-					else if( k == 'delay' ) this.delay = parseInt(v*1000);
+					if( k == 'time' ) this.time = parseInt(v*1000), this.timeR = 1/this.time, t = v;
+					else if( k == 'ease' ) this.ease = ease[v], e = v;
+					else if( k == 'delay' ) this.delay = parseInt(v*1000), d = v;
 					else if( k == 'loop' ) this.loop = this.loopC = v;
 					else if( k == 'end' || k == 'update' ) this[k] = v;
 					else if( k == 'id' ) this.id = v;
+					else if( k == 'native' ) native = v;
 				}else{
-					
 					l = this.length;
 					while( l-- )
 						if( isDom ){
@@ -1395,22 +1537,65 @@ function init(doc){
 						}else v0 = this[l][0][k], this[l].push( k, v0, v - v0 );
 				}
 			}
-			this.ANI = isDom ? this.ANIstyle : this.ANIobj,
-			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time,
+			this.stime = Date.now() + this.delay, this.etime = this.stime + this.time;
+			if( isDom )
+				if( native && isCSS3 ) this.t.$( 'transition', this.transition = 'all ' + t + 's ' + ease.css[e] + (d?' '+d+'s':'') ), this.ANI = CSS3style, this.css3 = 1;
+				else this.ANI = ANIstyle;
+			else this.ANI = ANIobj;
 			ani[ani.length] = this, start();
 		};
-		tTemp = {length:0};
-
-		tween.prototype.ANIstyle = function( $time, $pause ){
+		function CSS3style( $time, $pause ){
+			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
+			l = this.length, j = this[0].length, term = $time - this.stime, e = this.ease, time = this.time, rate = term * this.timeR;
+			if( this.stop ) return this.t.$( 'transition', null ), this.css3 = 6, 0;
+			if( $pause ){
+				if( $pause == 1 && this.pause == 0 ) this.t.$( 'transition', null ), this.css3 = 5;
+				else if( $pause == 2 && this.pause ){
+					t0 = this.transition.split(' '), t0[1] = (this.etime - this.pause)*.001 + 's';
+					if( t0.length == 4 ) t0.length = 3;
+					this.t.$( 'transition', t0.join(' ') ), this.css3 = 1, t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
+				}
+				return;
+			}
+			if( this.pause || term < 0 ) return;
+			switch( this.css3 ){
+			case 1:while( l-- ){
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
+						typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				this.css3 = 2; break;
+			case 2: if( term > this.time )
+					if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,this.t.$( 'transition', null ),this.css3 = 3,0;
+					else{
+						this.t.$( 'transition', null ),tweenPool[tweenPool.length++] = this;
+						if( this.end ) this.end( this.t );
+						return 1;
+					}
+				if( this.update ) this.update( rate, $time, this );
+				break;
+			case 3: while( l-- ){
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = t0[i++], i++, typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				this.css3 = 4; break;
+			case 4: this.t.$( 'transition', this.transition ), this.css3 = 1; break;
+			case 5:case 6: while( l-- ){//pause
+					t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
+					while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ), typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
+				}
+				if( this.css3 == 6 ) return 1;
+				this.pause = $time;
+			}
+		}
+		function ANIstyle( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e, s, u;
 			if( this.stop ) return 1;
 			if( $pause )
 				if( $pause == 1 && this.pause == 0 ) return this.pause = $time, 0;
 				else if( $pause == 2 && this.pause ) t0 = $time - this.pause, this.stime += t0, this.etime += t0, this.pause = 0;
-			if( this.pause ) return;
-			if( ( term = $time - this.stime ) < 0 ) return;
-			e = this.ease, time = this.time, rate = term * this.timeR, 
-			l = this.length, j = this[0].length;
+			if( this.pause || ( term = $time - this.stime ) < 0 ) return;
+			e = this.ease, time = this.time, rate = term * this.timeR, l = this.length, j = this[0].length;
 			if( term > this.time )
 				if( --this.loopC ) return this.stime=$time+this.delay,this.etime=this.stime+this.time,0;
 				else{
@@ -1419,19 +1604,18 @@ function init(doc){
 						while( i < j ) k = t0[i++], v = t0[i++] + t0[i++],
 							typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 					}
-					tweenPool[tweenPool.length++] = this;
 					if( this.end ) this.end( this.t );
+					tweenPool[tweenPool.length++] = this;
 					return 1;
 				}
-			
 			while( l-- ){
 				t0 = this[l], t1 = this[l][0], s = t1.s, u = t1.u, i = 1;
 				while( i < j ) k = t0[i++], v = e( rate, t0[i++], t0[i++], term, time ),
 					typeof k == 'function' ? k( t1, v ) : s[k] = v + u[k], t1[k] = v;
 			}
 			if( this.update ) this.update( rate, $time, this );
-		};
-		tween.prototype.ANIobj = function( $time, $pause ){
+		}
+		function ANIobj( $time, $pause ){
 			var t0, t1, term, time, rate, i, j, l, k, v, e;
 			if( this.stop ) return 1;
 			if( $pause )
@@ -1457,7 +1641,7 @@ function init(doc){
 				while( i < j ) t1[t0[i++]] = e(rate,t0[i++],t0[i++],term,time);
 			}
 			if( this.update ) this.update( rate, $time, this );
-		};
+		}
 		return ANI = {
 			ani:function( $ani ){if( $ani.ANI ) ani[ani.length] = $ani,start(), len++;},
 			tween:function(){
@@ -1518,7 +1702,7 @@ function init(doc){
 				var delay = [];
 				return function( $f ){
 					var i;
-					if( (i = deley.indexOf( $f ) ) == -1 ){
+					if( (i = delay.indexOf( $f ) ) == -1 ){
 						delay[delay.length] = $f;
 						$f.bsDelay = setTimeout( $f, ( arguments[1] || 1 ) * 1000 );
 					}else{
@@ -1601,11 +1785,10 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 		init(doc);
 		for( i = 0, j = init.len ; i < j ; i++ ) init[i]();
 	}
-	if( doc.readyState !== "loading" ) loaded();
 	if( doc.addEventListener ){
 		doc.addEventListener( "DOMContentLoaded", loaded, false );
 		W.addEventListener( "load", loaded, false );
-	}else{
+	}else if( doc.attachEvent ){
 		doc.attachEvent( "onreadystatechange", loaded );
 		W.attachEvent( "onload", loaded );		
 		(function(){
@@ -1618,6 +1801,6 @@ W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 				loaded();
 			} )();
 		})();
-	}
+	}else if( doc.readyState !== "loading" ) loaded();
 })( W.document );
 } )( this );
