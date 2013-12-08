@@ -9,9 +9,8 @@
  */
 var bs = exports;
 bs.$ex = (function(){
-	var ra, rc, random;
-	ra = {}, rc = 0,
-	random = function(){return rc = ( rc + 1 ) % 1000, ra[rc] || ( ra[rc] = Math.random() );};
+	var rc, random;
+	rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
 	return function ex(){
 		var t0, i, j;
 		t0 = arguments[0], i = 1, j = arguments.length;

@@ -117,21 +117,15 @@ function init(doc){
 		}
 	})(bs);
 	bs.$ex = (function(){
-		var ra, rc, random, rand, randf;
-		ra = {}, rc = 0;
-		random = function random(){
-			rc++, rc %= 1000;
-			return ra[rc] || ( ra[rc] = Math.random() );
-		};
-		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; };
-		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
+		var rc, random;
+		rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
 		return function ex(){
 			var t0, i, j;
 			t0 = arguments[0], i = 1, j = arguments.length;
 			while( i < j ){
 				switch( arguments[i++] ){
-				case'~': t0 = rand( t0, arguments[i++] ); break;
-				case'~f': t0 = randf( t0, arguments[i++] );
+				case'~': return parseInt( random() * ( arguments[i++] - t0 + 1 ) ) + t0;
+				case'~f': return random() * ( arguments[i++] - t0 ) + t0;
 				}
 			}
 			return t0;
@@ -1515,7 +1509,7 @@ function init(doc){
 			while( i-- ) tween[t0[i]] = 1;
 		})();
 		tween.prototype.init = function( $arg ){
-			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e, n;
+			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e;
 			this.t = t0 = $arg[0].nodeType == 1 ? bs.dom( $arg[0] ) : $arg[0], this.isDom = isDom = t0.isDom,
 			this.delay = this.stop = this.pause = this.css3 = 0,
 			this.time = 1000, this.timeR = .001, this.loop = this.loopC = t = 1,
@@ -1534,7 +1528,7 @@ function init(doc){
 					else if( k == 'loop' ) this.loop = this.loopC = v;
 					else if( k == 'end' || k == 'update' ) this[k] = v;
 					else if( k == 'id' ) this.id = v;
-					else if( k == 'native' ) n = v;
+					else if( k == 'native' ) native = v;
 				}else{
 					l = this.length;
 					while( l-- )
