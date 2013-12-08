@@ -187,16 +187,13 @@ bs.$ex = (function(){
 					}
 					if( !t0 ) throw 1;
 					i = 0, j = t0.length; 
-					while( i < j ){
-						k = t0[i++],
-						require(
-							log = k == 'global' ? root + '/' + t0[i++] :
-							k == 'local' ? root + path + t0[i++] :
-							k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
-							k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
-							k == 'url' ? root + path + file : 0
-						).bs( bs );
-					}
+					while( i < j ) k = t0[i++], require(
+						log = k == 'global' ? root + '/' + t0[i++] :
+						k == 'local' ? root + path + t0[i++] :
+						k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
+						k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
+						k == 'url' ? root + path + file : 0
+					).bs( bs );
 				}
 				flush();
 			}catch( $e ){
