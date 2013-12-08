@@ -10,12 +10,12 @@ exports.route = {
 	
 	rules:{
 		'/':[
-			'global','globalHead.bs',
-			'local','subConfig.bs',
+			'absolute','globalHead.bs',
+			'relative','subConfig.bs',
 			'head', 'H',
 			'tail', 'T',
 			'url',
-			'global','globalFoot.bs'
+			'absolute','globalFoot.bs'
 		]
 	}
 };

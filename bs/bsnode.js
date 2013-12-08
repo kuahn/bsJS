@@ -135,6 +135,69 @@ bs.$ex = (function(){
 	bs.$delete = function( $end, $url ){
 	};
 })();
+//mysql
+(function(){
+	var sql, db, dbtype;
+	bs.sql = bs.q = function( $sel ){return sql[$sel] || ( sql[$sel] = new sql( $sel ) );},
+	sql = function( $sel ){this.sel = $sel;},
+	sql.prototype.$ = function(){
+		var i, j, k, v;
+		i = 0, j = arguments.length;
+		while( i < j ){
+			k = arguments[i++], v = arguments[i++];
+			if( v === undefined ) return this[k];
+			else switch( k ){
+				case'db':case'type':case'record':case'field':case'query':this[k] = v; break;
+				case'run':
+					t0 = v ? bs::$tmpl( this.query, v ) : this.query;
+					if( this.type == 'record' ) return bs.db( this.db ).$( 'record', t0, arguments[i++] );
+					return bs.db( this.db ).$( 'rs', t0, arguments[i++] );
+			}
+		}
+	},
+	bs.db = db = function( $sel, $type ){return db[$sel] || ( db[$sel] = new dbtype[$type||'mysql']( $sel ) );},
+	dbtype = {
+		mysql:(function(){
+			var d, mysql;
+			return d = function( $sel ){this.sel = $sel;},
+			d.prototype.open = function(){return this.__conn || ( this.__conn = ( mysql || ( mysql = require( 'mysql' ) ) ).createConnection( this ) );},
+			d.prototype.close = function(){this.__conn.destroy();},
+			d.prototype.$ = function(){
+				var t0, t1, i, j, k, v;
+				i = 0, j = arguments.length;
+				while( i < j ){
+					k = arguments[i++], v = arguments[i++];
+					if( k == null ){
+						if( this.__conn ) this.close();
+						return delete db[this.sel];
+					}
+					if( v === undefined ) return k == 'url' ? this.host + ':' + this.port :
+						k == 'id' ? this.user :
+						k == 'pw' ? this.password :
+						k == 'db' ? this.database :
+						k == 'open' ? this.open() :
+						k == 'close' ? this.close() :
+						k == 'rollback' ? this.__conn && this.__conn.rollback() :
+						k == 'commit' ? this.__conn && this.__conn.commit() : 0;
+					else switch( k ){
+						case'url':v = v.split(':'), this.host = v[0], this.port = v[1]; break;
+						case'id':this.user = v; break;
+						case'pw':this.password = v; break;
+						case'db':this.database = v; break;
+						default:
+							t0 = this.open();
+							switch( k ){
+							case'ex':return t0.query( $v );
+							case'rs':return t1 = arguments[i++], t0.query( $v, function( e, r ){e ? t1( null, e ) : t1( r );} );
+							case'record':return t1 = arguments[i++], t0.query( $v ).on('result', function( r ){t1( r );} );
+							}
+							throw 1;
+					}
+				}
+			}, d;
+		})()
+	};
+})();
 (function(){
 	var server, sort, flush,
 		application,
@@ -198,6 +261,9 @@ bs.$ex = (function(){
 	head = [], response = [], 
 	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
 	bs.$request = bs.$rq = function( $k ){return $k ? rq[$k] : rq;},
+	bs.$requestGet = bs.$rqG = function( $k ){return $k;},
+	bs.$requestPost = bs.$rqP = function( $k ){return $k;},
+	bs.$requestFile = bs.$rqF = function( $k ){return $k;},
 	bs.$response = bs.$rp = function(){
 		var i, j;
 		for( i = 0, j = arguments.length ; i < j ; i++ ) response[response.length] = arguments[i];
@@ -243,8 +309,8 @@ bs.$ex = (function(){
 					if( !t0 ) throw 1;
 					i = 0, j = t0.length; 
 					while( i < j ) k = t0[i++], require(
-						log = k == 'global' ? root + '/' + t0[i++] :
-						k == 'local' ? root + path + t0[i++] :
+						log = k == 'absolue' ? root + '/' + t0[i++] :
+						k == 'relative' ? root + path + t0[i++] :
 						k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
 						k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
 						k == 'url' ? root + path + file : 0
