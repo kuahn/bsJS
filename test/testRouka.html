@@ -22,9 +22,40 @@
 <div id="test"></div>
 <pre id="display"></pre>
 
-<script src="../bs/bsjs.js"></script>
 <script src="../bs/bsTest.js"></script>
 <script src="./printer.js"></script>
+<script>
+    window.JSON = null;
+    bsTest(printer, "JSON Custom Parser Test #1",
+            " window.JSON = null", window.JSON, null);
+</script>
+
+<script src="../bs/bsjs.js"></script>
+<script>
+
+    !function() {
+
+        "use strict";
+
+        var t0 = { a:'b' }, t1, t2;
+
+        try {
+            t1 = JSON.stringify(t0);
+            t2 = JSON.parse(t1);
+        }
+        catch(ex) {
+            t1 = "Error!";
+            t2 = { a: "Error!" };
+        }
+
+        JSON.stringify(t0);
+        bsTest(printer, "JSON Custom Parser Test #2",
+                "var t0 = { a: 'b' } JSON(by $bs) stringify t1 == JSON.stringify(t0)", JSON.stringify(t0), t1,
+                "var t0 = { a: 'b' } JSON(by $bs) parse JSON.parse(t1).a, t0.a", t2.a, t0.a)
+    }();
+
+</script>
+<script src="../bs/bsjs.js"></script>
 
 <script>
 !function() {

@@ -1515,7 +1515,7 @@ function init(doc){
 			while( i-- ) tween[t0[i]] = 1;
 		})();
 		tween.prototype.init = function( $arg ){
-			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e;
+			var t0, l, i, j, k, v, isDom, v0, o, p, native, t, d, e, n;
 			this.t = t0 = $arg[0].nodeType == 1 ? bs.dom( $arg[0] ) : $arg[0], this.isDom = isDom = t0.isDom,
 			this.delay = this.stop = this.pause = this.css3 = 0,
 			this.time = 1000, this.timeR = .001, this.loop = this.loopC = t = 1,
