@@ -149,7 +149,7 @@ bs.$ex = (function(){
 		var t0, t1, t2;
 		if( $v === undefined ) return clientCookie[$k];
 		t0 = new Date,
-		t1 = 0;
+		t1 = 3600;
 		if( $v == null ) t1 = t0.getMiliseconds() - 3600, t0.setTime( t0.getTime() - 86400000 );
 		t2 = [
 			$k + '=' + ( bs.$escape($v) || '' ),
