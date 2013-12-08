@@ -117,21 +117,15 @@ function init(doc){
 		}
 	})(bs);
 	bs.$ex = (function(){
-		var ra, rc, random, rand, randf;
-		ra = {}, rc = 0;
-		random = function random(){
-			rc++, rc %= 1000;
-			return ra[rc] || ( ra[rc] = Math.random() );
-		};
-		rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; };
-		randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
+		var rc, random;
+		rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
 		return function ex(){
 			var t0, i, j;
 			t0 = arguments[0], i = 1, j = arguments.length;
 			while( i < j ){
 				switch( arguments[i++] ){
-				case'~': t0 = rand( t0, arguments[i++] ); break;
-				case'~f': t0 = randf( t0, arguments[i++] );
+				case'~': return parseInt( random() * ( arguments[i++] - t0 + 1 ) ) + t0;
+				case'~f': return random() * ( arguments[i++] - t0 ) + t0;
 				}
 			}
 			return t0;
@@ -1549,7 +1543,7 @@ function init(doc){
 					else if( k == 'loop' ) this.loop = this.loopC = v;
 					else if( k == 'end' || k == 'update' ) this[k] = v;
 					else if( k == 'id' ) this.id = v;
-					else if( k == 'native' ) n = v;
+					else if( k == 'native' ) native = v;
 				}else{
 					l = this.length;
 					while( l-- )

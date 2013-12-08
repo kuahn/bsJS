@@ -7,27 +7,17 @@
  * GitHub: https://github.com/projectBS/bsJS
  * Facebook group: https://www.facebook.com/groups/bs5js/
  */
-var bs = exports,
-	fs = require('fs'),
-	crypto = require('crypto'),
-	mimeTypes = require('./bsnode.mime.types');
-
+var bs = exports;
 bs.$ex = (function(){
-	var ra, rc, random, rand, randf;
-	ra = {}, rc = 0;
-	random = function random(){
-		rc++, rc %= 1000;
-		return ra[rc] || ( ra[rc] = Math.random() );
-	};
-	rand = function rand( $a, $b ){ return parseInt( random() * ( parseInt( $b ) - $a + 1 ) ) + $a; };
-	randf = function randf( $a, $b ){ return random() * ( parseFloat($b) - parseFloat($a) ) + parseFloat($a); };
+	var rc, random;
+	rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
 	return function ex(){
 		var t0, i, j;
 		t0 = arguments[0], i = 1, j = arguments.length;
 		while( i < j ){
 			switch( arguments[i++] ){
-			case'~': t0 = rand( t0, arguments[i++] ); break;
-			case'~f': t0 = randf( t0, arguments[i++] );
+			case'~': return parseInt( random() * ( arguments[i++] - t0 + 1 ) ) + t0;
+			case'~f': return random() * ( arguments[i++] - t0 ) + t0;
 			}
 		}
 		return t0;
@@ -100,7 +90,7 @@ bs.$ex = (function(){
 		else if( $str.substr($str.length-5) == '.html' ) $str = bs.$get( null, $str );
 		return arg = arguments, bs.$trim( $str.replace( reg, r ) );
 	};
-	function factory( r, v ){	
+	function factory( r, v ){        
 		function f( $v ){
 			var t0, i;
 			if( typeof $v == 'string' ) return $v.replace( r, v );
@@ -123,79 +113,102 @@ bs.$ex = (function(){
 	bs.$trim = factory( /^\s*|\s*$/g, '' );
 })();
 (function(){
-	var url, query;
-	url = require('url'), query = require('querystring'),
+	var url, query, crypto, fs;
+	url = require('url'), query = require('querystring'), crypto = require('crypto'), fs = require('fs');
 	bs.$url = function( $url ){return url.parse( $url );},
 	bs.$escape = function( $val ){return query.escape( $val );},
 	bs.$unescape = function( $val ){return query.unescape( $val );},
 	bs.$cgiParse = function( $val ){return query.parse( $val );},
-	bs.$cgiStringify = function( $val ){return query.stringify( $val );};
+	bs.$cgiStringify = function( $val ){return query.stringify( $val );},
+	bs.$crypt = function( $type, $val ){
+		var t0;
+		switch( $type ){
+		case'sha256': return t0 = crypto.createHash('sha256'), t0.update( $val ), t0.digest('hex');
+		}
+	}
+	bs.$get = function( $end, $url ){
+	},
+	bs.$post = function( $end, $url ){
+	},
+	bs.$put = function( $end, $url ){
+	},
+	bs.$delete = function( $end, $url ){
+	};
 })();
 (function(){
-	var server, head, response, cookie, data, session, skey, bsuuid,
-		sort, flush, getUuid, ckParser,
-		rq, rp, clientCookie;
-	server = require('http'), head = [], response = [], cookie = [],
-	session = {}, skey = 'bsnode.sid', bsuuid = 1,
-
-	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
-	bs.$response = function(){
-		var i, j;
-		i = 0, j = arguments.length;
-		while( i < j ) response[response.length] = arguments[i++];
-	},
-	bs.$request = function( $k ){return $k ? rq[$k] : request;},
-	bs.$cookie = function( $k, $v, $path, $expire, $domain ){
-		var t0, t1, t2;
-		if( $v === undefined ) return clientCookie[$k];
-		t0 = new Date,
-		t1 = 3600;
-		if( $v == null ) t1 = t0.getMiliseconds() - 3600, t0.setTime( t0.getTime() - 86400000 );
-		t2 = [
-			$k + '=' + ( bs.$escape($v) || '' ),
-			'Max-Age=' + t1,
-			'Path=' + ( $path ? $path : '/'),
-			'Expires=' + t0.toUTCString(),
-			'HttpOnly'
-		];
-		if( $domain ) t2.push( 'Domain=' + $domain );
-		cookie[$k] = t2.join('; ');
-	},
-	bs.$session = function( $k, $v ){
-		var uuid = bs.$cookie( skey );
-		if( !session[uuid] ) session[uuid] = {};
-		if( $v === undefined ) return session[uuid][$k];
-		session[uuid][$k] = $v;
-	},
-	bs.$data = function( $k, $v ){return $v === undefined ? data[$k] : data[$k] = $v;},
+	var server, sort, flush,
+		application,
+		session, sessionName, id,
+		cookie, clientCookie, ckParser,
+		head, response, rq, rp,
+		data, staticRoute, mimeTypes,
+		e404;
+	//base	
+	server = require('http'), 
 	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
 	flush = function(){
-		var t0, k;
-		t0 = response.join(''),
-		head.push(
-			['Server', 'projectBS on node.js'],
-			['Content-Type', 'text/html; charset=utf-8'],
-			['Content-Length', Buffer.byteLength( t0, 'utf8' )]
-		);
-		for (k in cookie){
-			head.push( ['Set-Cookie', cookie[k] ] );
-		};
+		var t0;
+		for( t0 in cookie ) head[head.length] = ['Set-Cookie', cookie[k] ];
+		head.push( flush[0], flush[1], ( t0 = response.join(''), flush[2][1] = Buffer.byteLength( t0, 'utf8' ), flush[2] ) ),
 		rp.writeHead( 200, head ), rp.end( t0 );
 	},
-	getUuid = function(){
-		var sha;
-		sha = crypto.createHash('sha256'),
-		sha.update( ["bsNode", Math.random(), bsuuid++].join('') );
-		return sha.digest('hex');
+	flush[0] = ['Server', 'projectBS on node.js'],
+	flush[1] = ['Content-Type', 'text/html; charset=utf-8'],
+	flush[2] = ['Content-Length', 0],
+	//application
+	bs.$application = bs.$app = application = function( $k, $v ){return $v === undefined ? application[$k] : application[$k] = $v;},
+	//session
+	sessionName = '__bsNode', id = 0,
+	bs.$session = bs.$se = session = function( $k, $v ){
+		var t0;
+		t0 = bs.$ck( sessionName );
+		if( $v === undefined ){
+			if( t0 && ( t0 = session[t0] ) ) return t0[$k];
+		}else{
+			if( !t0 ) bs.$ck( '@'+sessionName, t0 = bs.$crypt( 'sha256', bs.$ex( 1000,'~',9999 ) + (id++) + bs.$ex( 1000,'~',9999 ) ) );
+			if( !session[t0] ) session[t0] = {};
+			return session[t0][$k] = $v;
+		}
 	},
-	ckParser = function( $ck ){
-		var t0, cks, ckv, i;
-		t0 = {},
-		cks = $ck.split( ';' );
-		for( i = cks.length; i--; ) ckv = cks[i].split( '=' ), t0[bs.$trim( ckv[0] )] = bs.$trim( ckv[1] );
-		return t0;
+	//cookie
+	cookie = {}, clientCookie = null,
+	ckParser = function(){
+		var t0, t1, i;
+		clientCookie = {};
+		if( t0 = rq.headers.cookie ){
+			t0 = t0.split(';'), i = t0.length;
+			while( i-- ) t0[i] = bs.$trim( t0[i].split('=') ), clientCookie[t0[i][0]] = t0[i][1];
+		}
 	},
-	bs.route = function( $data ){
+	bs.$cookie = bs.$ck = function( $k, $v, $path, $expire, $domain ){
+		var t0, t1;
+		if( $v === undefined ) return clientCookie[$k];
+		if( $k.chatAt(0) == '@' ) t0 = 1, $k = $k.substr(1);
+		t0 = $k + '=' + ( bs.$escape($v) || '' ) + 
+			';Path=' + ( $path || '/' ) + 
+			( t0 ? ';HttpOnly' : '' ) + 
+			( $domain ? ';Domain=' + $domain : '' );
+		if( $v === null ) (t1 = new Date).setTime( t1.getTime() - 86400000 ),
+			t0 += ';expires=' + t0.toUTCString() + ';Max-Age=0';
+		else if( $expire ) (t1 = new Date).setTime( t1.getTime() + $expire * 86400000 ),
+			t0 += ';expires=' + t1.toUTCString() + ';Max-Age=' + ( $expire * 86400 );
+		cookie[$k] = t0;
+	},
+	//head, request, response
+	head = [], response = [], 
+	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
+	bs.$request = bs.$rq = function( $k ){return $k ? rq[$k] : rq;},
+	bs.$response = bs.$rp = function(){
+		var i, j;
+		for( i = 0, j = arguments.length ; i < j ; i++ ) response[response.length] = arguments[i];
+	},
+	//data
+	bs.$data = function( $k, $v ){return $v === undefined ? data[$k] : data[$k] = $v;},
+	//error
+	e404 = function( $v ){rp.writeHead( 404 ), rp.end( $v || '' );},
+	//route
+	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
+	bs.$route = function( $data ){
 		var port, root, index, config, table, rules, rule,
 			t0, i, j, k, l;
 		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
@@ -203,39 +216,24 @@ bs.$ex = (function(){
 		for( k in table ) table[k] = root+'/'+table[k];
 		for( k in rule ) rules[rules.length] = k;
 		rules.sort( sort );
-
+	
 		port = server.createServer( function( $rq, $rp ){
-			var fullPath, path, file, log, fileExt, sysPath,
+			var fullPath, path, file, log, ext,
 				t0, t1, i;
-			fullPath = path = bs.$url( $rq.url ).pathname, fileExt = fullPath.split('.').pop().toLowerCase();
-			
-			if(fileExt == 'bs') i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
+			rq = $rq, rp = $rp,
+			fullPath = path = bs.$url( $rq.url ).pathname, ext = fullPath.split('.').pop().toLowerCase();
+			if( ext == 'bs' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
-			else if( fileExt.indexOf('/') == -1 ) {
-				sysPath = __dirname +'/'+ root+fullPath;
-				fs.exists( sysPath, function( $exist ){
-					if( !$exist ){
-						$rp.writeHead( 404 ),
-						$rp.end();
-						return;
-					}
-					$rp.writeHead( 200, {'Content-Type':mimeTypes[fileExt] || 'Unknown type'} ),
-					fs.createReadStream( sysPath ).pipe($rp);
-					return;
-				});
+			else if( ext.indexOf('/') == -1 ) {
+				if( t0 = bs.$get( null, 'file://'+ root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), t0.pipe( rp );
+				else e404();
 				return;
 			}else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
-			
-			rq = $rq, rp = $rp,
-			clientCookie = ( t0 = $rq.headers.cookie ) ? ckParser( t0 ) : {},
-			head.length = cookie.length = response.length = 0,
-			data = {};
-			
-			if( !bs.$cookie( skey ) ) bs.$cookie( skey, getUuid() );
-			
+				
+			ckParser(), head.length = cookie.length = response.length = 0, data = {};
 			try{
-				if( config ) log = config, require( config ).bs( bs );
-				if( t0 = table[fullPath] ) log = t0, require( t0 ).bs( bs );
+				if( config ) require( log = config ).bs( bs );
+				if( t0 = table[fullPath] ) require( log = t0 ).bs( bs );
 				else{
 					i = rules.length;
 					while( i-- ) if( path.indexOf( rules[i] ) > -1 ){
@@ -244,21 +242,17 @@ bs.$ex = (function(){
 					}
 					if( !t0 ) throw 1;
 					i = 0, j = t0.length; 
-					while( i < j ){
-						k = t0[i++],
-						require(
-							log = k == 'global' ? root + '/' + t0[i++] :
-							k == 'local' ? root + path + t0[i++] :
-							k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
-							k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
-							k == 'url' ? root + path + file : 0
-						).bs( bs );
-					}
+					while( i < j ) k = t0[i++], require(
+						log = k == 'global' ? root + '/' + t0[i++] :
+						k == 'local' ? root + path + t0[i++] :
+						k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
+						k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
+						k == 'url' ? root + path + file : 0
+					).bs( bs );
 				}
 				flush();
 			}catch( $e ){
-				$rp.writeHead( 404, {'Content-Type':'text/html'} ),
-				$rp.end( 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
+				e404( 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 			}
 		}).listen( $data.port || 80 );
 	};
