@@ -21,21 +21,25 @@ if( !Array.prototype.indexOf )
 Date.now || ( Date.now = function(){return +new Date;} );
 
 if( !W['JSON'] ) W['JSON'] = {
-	parse:function( $str ){return (0,eval)( $str );},
+	parse:function( $str ){return (0,eval)( '(' + $str + ')' );},
 	stringify:(function(){
 		function stringify( $obj ){
 			var t0, i, j;
 			switch( t0 = typeof $obj ){
-			case'number':case'boolean':case'function': return $obj.toString();
-			case'undefined':case'null': return t0;
+			case'number':case'boolean':/*case'function':*/ return $obj.toString();
+			case'undefined':case 'null': return t0;
 			case'string': return '"' + $obj + '"';
 			case'object':
 				t0 = '';
-				if( $obj.splice ){
+				if( $obj && $obj.splice ){
 					for( i = 0, j = $obj.length ; i < j ; i++ ) t0 += ',' + stringify( $obj[i] );
 					return '[' + t0.substr(1) + ']';
 				}else{
-					for( i in $obj ) t0 += ',"'+i+'":' + stringify( $obj[i] );
+					for( i in $obj )
+						if ($obj[i] === null )  t0 += ',"'+i+'":' + null;
+						else if ($obj[i] === undefined) continue;
+						else if ('function' == (typeof $obj[i])) continue;
+						else t0 += ',"'+i+'":' + stringify( $obj[i] );
 					return '{' + t0.substr(1) + '}';
 				}
 			}
