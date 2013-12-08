@@ -45,9 +45,20 @@ bs( function(){
 		f: -0.1,
 		g: -.1
 	};
-	
+
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+		
     bsTest( printer, 'stringify number', 
-		'number', JSON.stringify(t0), '{"a":0,"b":1,"c":0.1,"d":0.1,"e":-1,"f":-0.1,"g":-0.1}');
+		'number', t1, '{"a":0,"b":1,"c":0.1,"d":0.1,"e":-1,"f":-0.1,"g":-0.1}');
+    bsTest(printer, 'parse number',
+    	'test 0', t2.a, t0.a,
+    	'test 1', t2.b, t0.b,
+    	'test 0.1', t2.c, t0.c,
+    	'test .1', t2.d, t0.d,
+    	'test -1', t2.e, t0.e,
+    	'test -0.1', t2.f, t0.f,
+    	'test -.1', t2.g, t0.g);
 
     // boolean test
     t0 = {
@@ -55,8 +66,15 @@ bs( function(){
     	b: false
     };
 
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+
     bsTest( printer, 'stringify boolean', 
-		'boolean', JSON.stringify(t0), '{"a":true,"b":false}');
+		'boolean', t1, '{"a":true,"b":false}');
+    bsTest( printer, 'parse boolean', 
+		'boolean true', t2.a, t0.a,
+		'boolean false', t2.b, t0.b);
+
 
     // function test
     t0 = {
@@ -64,8 +82,11 @@ bs( function(){
     	b: function() {var i = 0;}
     };
 
-    bsTest( printer, 'stringify function', 
-		'function', JSON.stringify(t0), '{"a":"a"}');
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+
+    bsTest( printer, 'stringify function : function은 stringify하지 않고 통과하는지 확인', 
+		'function', t1, '{"a":"a"}');
 
     // string test
     t0 = {
@@ -76,16 +97,33 @@ bs( function(){
     	e: 'abc '
     };
 
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+
 	bsTest( printer, 'stringify string', 
-		'string', JSON.stringify(t0), '{"a":"a","b":"abc","c":"a b c","d":" abc","e":"abc "}');
+		'string', t1, '{"a":"a","b":"abc","c":"a b c","d":" abc","e":"abc "}');
+
+	bsTest( printer, 'parse string', 
+		'string "a"', t2.a, t0.a,
+		'string "abc"', t2.b, t0.b,
+		'string "a b c"', t2.c, t0.c,
+		'string " abc"', t2.d, t0.d,
+		'string "abc "', t2.e, t0.e);
+
 
 	// null test
     t0 = {
     	a: null
     };
 
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+
 	bsTest( printer, 'stringify null', 
-		'null', JSON.stringify(t0), '{"a":null}');
+		'null', t1, '{"a":null}');
+
+	bsTest( printer, 'parse null', 
+		'null', t2.a, t0.a);
 
 	// undefined
     t0 = {
@@ -93,8 +131,11 @@ bs( function(){
     	b: undefined
     };
 
-	bsTest( printer, 'stringify undefined', 
-		'undefined', JSON.stringify(t0), '{"a":1}');
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+
+	bsTest( printer, 'stringify undefined : undefined는 stringify하지 않고 통과하는지 확인', 
+		'undefined', t1, '{"a":1}');
 
 	// object test
     t0 = {
@@ -103,8 +144,14 @@ bs( function(){
     	}
     };
 
+	t1 = JSON.stringify(t0);
+    t2 = JSON.parse(t1);
+
 	bsTest( printer, 'stringify objcet', 
-		'object', JSON.stringify(t0), '{"a":{"a0":"123"}}');
+		'object', t1, '{"a":{"a0":"123"}}');
+
+	bsTest( printer, 'parse objcet', 
+		'{a: {a0: \'123\'}', t2.a.a0, t0.a.a0);
 
 
 });
