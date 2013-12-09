@@ -147,7 +147,7 @@ bs.$ex = (function(){
 			k = arguments[i++], v = arguments[i++];
 			if( v === undefined ) return this[k];
 			if( k == 'run' ){
-				t0 = v ? bs::$tmpl( this.query, v ) : this.query;
+				t0 = v ? bs.$tmpl( this.query, v ) : this.query;
 				if( this.type == 'record' ) return bs.db( this.db ).$( 'record', t0, arguments[i++] );
 				return bs.db( this.db ).$( 'rs', t0, arguments[i++] );
 			}else this[k] = v;
@@ -319,5 +319,6 @@ bs.$ex = (function(){
 				e404( 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 			}
 		}).listen( $data.port || 80 );
+		console.log('server started with port ' + ($data.port || 80)); 
 	};
 })();
