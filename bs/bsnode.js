@@ -310,7 +310,7 @@ bs.$ex = (function(){
 	bs.$route = function( $data ){
 		var port, root, index, config, table, rules, rule,
 			t0, i, j, k, l;
-		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
+		root = $data.fileroot, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
 		table = $data.table, rules = [], rule = $data.rules;
 		for( k in table ) table[k] = root+'/'+table[k];
 		for( k in rule ) rules[rules.length] = k;
@@ -324,11 +324,11 @@ bs.$ex = (function(){
 			if( ext == 'bs' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
 			else if( ext.indexOf('/') == -1 ) {
-				if( t0 = bs.$get( null, 'file://'+ root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), t0.pipe( rp );
+				if( t0 = bs.$get( null, 'file://'+ root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), $rp.write( t0 ), $rp.end();
 				else e404();
 				return;
 			}else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
-				
+			
 			ckParser(), head.length = cookie.length = response.length = 0, data = {};
 			try{
 				if( config ) require( log = config ).bs( bs );
