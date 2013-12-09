@@ -2,7 +2,6 @@ exports.route = {
 	port:8001,
 	root:'../noderoot/lab',
 	index:'index.bs',
-	config:'config.bs',
 	upload:null,
 	maxsize:2,
 	table:{
@@ -14,6 +13,12 @@ exports.route = {
 			'relative', 'subConfig.bs',
 			'url',
 			'absolute','foot.bs'
+		],
+		'/mysql':[
+			'relative', 'config.bs',
+			'relative', 'head.bs',
+			'url',
+			'relative','foot.bs'
 		]
 	}
 };

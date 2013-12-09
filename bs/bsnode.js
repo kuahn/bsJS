@@ -319,17 +319,25 @@ bs.$ex = (function(){
 		rules.sort( sort );
 	
 		port = http.createServer( function( $rq, $rp ){
-			var fullPath, path, file, log, ext, router, t0, i;
+			var fullPath, path, file, log, ext, router, t0, i, j;
 			rq = $rq, rp = $rp, t0 = bs.$url( $rq.url ),
 			getData = bs.$cgiParse( t0.query ), postData = postFile = null, 
-			fullPath = path = t0.pathname, ext = fullPath.split('.').pop().toLowerCase();
-			if( ext == 'bs' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
-			else if( path.substr( path.length - 1 ) == '/' ) file = index;
-			else if( ext.indexOf('/') == -1 ) {
-				if( t0 = bs.$get( null, 'file://'+__dirname+'/'+root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), $rp.end( t0 );
-				else err( 404, 'no file<br>file://'+ root+fullPath);
-				return;
-			}else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
+			fullPath = path = t0.pathname;
+			
+			i = path.lastIndexOf( '/' ) + 1, ext = 'bs';
+			if( path.substr( path.length - 1 ) == '/' ) path = path.substring( 0,  i ), file = index;
+			else{
+				t0 = path.substring( i );
+				if( ( j = t0.indexOf( '.' ) ) > -1 ){
+					file = t0, path = path.substring( 0, i );
+					if( ( ext = t0.substr( j + 1 ) ) != 'bs' ){
+						if( t0 = bs.$get( null, 'file://'+__dirname+'/'+root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), $rp.end( t0 );
+						else err( 404, 'no file<br>file://'+ root+fullPath);
+						return;
+					}
+				}else path += '/', file = index;
+			}
+			
 			ckParser(), head.length = cookie.length = response.length = 0, data = {};
 			router = function(){
 				var t0, i, j, k;
