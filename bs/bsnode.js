@@ -7,8 +7,7 @@
  * GitHub: https://github.com/projectBS/bsJS
  * Facebook group: https://www.facebook.com/groups/bs5js/
  */
-var bs = exports,
-	http = require('http');
+var bs = exports;
 
 bs.$ex = (function(){
 	var rc, random;
@@ -115,63 +114,6 @@ bs.$ex = (function(){
 	bs.$trim = factory( /^\s*|\s*$/g, '' );
 })();
 (function(){
-	var url, query, crypto, fs, htop;
-	url = require('url'), query = require('querystring'), crypto = require('crypto'), fs = require('fs'),
-	htop = {
-		hostname: null,
-		port: null,
-		path: null,
-		method: null
-	};
-	bs.$url = function( $url ){return url.parse( $url );},
-	bs.$escape = function( $val ){return query.escape( $val );},
-	bs.$unescape = function( $val ){return query.unescape( $val );},
-	bs.$cgiParse = function( $val ){return query.parse( $val );},
-	bs.$cgiStringify = function( $val ){return query.stringify( $val );},
-	bs.$crypt = function( $type, $val ){
-		var t0;
-		switch( $type ){
-		case'sha256': return t0 = crypto.createHash('sha256'), t0.update( $val ), t0.digest('hex');
-		}
-	}
-	bs.$get = function( $end, $url ){
-		var t0;
-		t0 = url.parse( $url );
-		switch( t0.protocol ){
-		case'http:':
-			if( !$end ) return null;
-			htop.hostname = t0.hostname,
-			htop.port = t0.port || 80,
-			htop.path = t0.path,
-			htop.method = 'GET',
-			t0 = http.request(htop, function(rs) {
-				rs.on( 'data', $end );
-			}),
-			t0.on('error', function(e){$end(e.message);}),
-			t0.end();
-			break;
-		case'file:':
-			t0 = t0.path.replace(/^\/([A-Za-z]{1}:\/)/, '$1');
-			if( !$end ) return fs.existsSync( t0 ) ? fs.readFileSync( t0 ) : null;
-			fs.exists( t0, function( $ex ){
-				if( !$ex ) return $end( null );
-				fs.readFile( t0, function( $e, $d ){
-					if( $e ) return $end( $e );
-					return $end( $d );
-				});
-			});
-			break;
-		}
-	},
-	bs.$post = function( $end, $url ){
-	},
-	bs.$put = function( $end, $url ){
-	},
-	bs.$delete = function( $end, $url ){
-	};
-})();
-//mysql
-(function(){
 	var sql, db, dbtype;
 	bs.sql = bs.q = function( $sel ){return sql[$sel] || ( sql[$sel] = new sql( $sel ) );},
 	sql = function( $sel ){this.sel = $sel;},
@@ -232,13 +174,66 @@ bs.$ex = (function(){
 	};
 })();
 (function(){
-	var sort, flush,
+	var http, form, sort, flush,
 		application,
 		session, sessionName, id,
 		cookie, clientCookie, ckParser,
-		head, response, rq, rp,
+		head, response, rq, rp, getData, postData, postFile,
 		data, staticRoute, mimeTypes,
-		e404;
+		err;
+	http = require('http'), form = require( 'formidable' ),
+	(function( http ){
+		var url, query, crypto, fs, op, freg;
+		url = require('url'), query = require('querystring'), crypto = require('crypto'), fs = require('fs'),
+		bs.$url = function( $url ){return url.parse( $url );},
+		bs.$escape = function( $val ){return query.escape( $val );},
+		bs.$unescape = function( $val ){return query.unescape( $val );},
+		bs.$cgiParse = function( $val ){return query.parse( $val );},
+		bs.$cgiStringify = function( $val ){return query.stringify( $val );},
+		bs.$crypt = function( $type, $val ){
+			var t0;
+			switch( $type ){
+			case'sha256': return t0 = crypto.createHash('sha256'), t0.update( $val ), t0.digest('hex');
+			}
+		},
+		op = function( $url, $method ){
+			op.hostname = $url.hostname, op.method = $method,
+			op.port = $url.port, op.path = $url.path;
+			return op;
+		}, freg = /^\/([A-Za-z]{1}:\/)/;
+		bs.$get = function( $end, $url ){
+			var t0;
+			t0 = url.parse( $url );
+			switch( t0.protocol ){
+			case'http:':
+				if( !$end ) return null;
+				t0 = http.request( op( t0, 'GET' ), function( rs ){
+					var t0 = '';
+					rs.on( 'data', function( $data ){t0 += $data;} ),
+					rs.on( 'end', function(){$end(t0);} );
+				}),
+				t0.on('error', function( $e ){$end( null, $e );});
+				break;
+			case'file:':
+				t0 = t0.path.replace( freg, '$1' );
+				if( !$end ) return fs.existsSync( t0 ) ? fs.readFileSync( t0 ) : null;
+				fs.exists( t0, function( $ex ){
+					if( !$ex ) return $end( null );
+					fs.readFile( t0, function( $e, $d ){
+						if( $e ) return $end( $e );
+						return $end( $d );
+					});
+				});
+				break;
+			}
+		},
+		bs.$post = function( $end, $url ){
+		},
+		bs.$put = function( $end, $url ){
+		},
+		bs.$delete = function( $end, $url ){
+		};
+	})( http ),
 	//base
 	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
 	flush = function(){
@@ -294,9 +289,9 @@ bs.$ex = (function(){
 	head = [], response = [], 
 	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
 	bs.$request = bs.$rq = function( $k ){return $k ? rq[$k] : rq;},
-	bs.$requestGet = bs.$rqG = function( $k ){return $k;},
-	bs.$requestPost = bs.$rqP = function( $k ){return $k;},
-	bs.$requestFile = bs.$rqF = function( $k ){return $k;},
+	bs.$requestGet = bs.$rqG = function( $k ){return getData[$k];},
+	bs.$requestPost = bs.$rqP = function( $k ){return postData[$k];},
+	bs.$requestFile = bs.$rqF = function( $k ){return postFile[$k];},
 	bs.$response = bs.$rp = function(){
 		var i, j;
 		for( i = 0, j = arguments.length ; i < j ; i++ ) response[response.length] = arguments[i];
@@ -304,12 +299,19 @@ bs.$ex = (function(){
 	//data
 	bs.$data = function( $k, $v ){return $v === undefined ? data[$k] : data[$k] = $v;},
 	//error
-	e404 = function( $v ){rp.writeHead( 404, (staticRoute['Content-Type'] = 'text/html', staticRoute) ), rp.end( $v || '' );},
+	err = function( $code, $v ){rp.writeHead( $code, (staticRoute['Content-Type'] = 'text/html', staticRoute) ), rp.end( $v || '' );},
 	//route
 	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
+	onData = function( $data ){postData += $data;},
 	bs.$route = function( $data ){
-		var port, root, index, config, table, rules, rule,
+		var port, root, index, config, table, rules, rule, postForm,
 			t0, i, j, k, l;
+		postForm = new form.IncomingForm,
+		postForm.encoding = 'utf-8',
+		postForm.keepExtensions = true;
+		if( $data.upload ) postForm.uploadDir = $data.upload;
+		if( $data.maxsize ) postForm.maxFieldsSize = parseInt( $data.maxsize * 1024 * 1024 );
+		
 		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
 		table = $data.table, rules = [], rule = $data.rules;
 		for( k in table ) table[k] = root+'/'+table[k];
@@ -317,42 +319,49 @@ bs.$ex = (function(){
 		rules.sort( sort );
 	
 		port = http.createServer( function( $rq, $rp ){
-			var fullPath, path, file, log, ext,
-				t0, t1, i;
-			rq = $rq, rp = $rp,
-			fullPath = path = bs.$url( $rq.url ).pathname, ext = fullPath.split('.').pop().toLowerCase();
+			var fullPath, path, file, log, ext, router, t0, i;
+			rq = $rq, rp = $rp, t0 = bs.$url( $rq.url ),
+			getData = bs.$cgiParse( t0.query ), postData = postFile = null, 
+			fullPath = path = t0.pathname, ext = fullPath.split('.').pop().toLowerCase();
 			if( ext == 'bs' ) i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i);
 			else if( path.substr( path.length - 1 ) == '/' ) file = index;
 			else if( ext.indexOf('/') == -1 ) {
-				if( t0 = bs.$get( null, 'file://'+__dirname+'/'+root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), $rp.write( t0 ), $rp.end();
-				else e404('no file<br>file://'+ root+fullPath);
+				if( t0 = bs.$get( null, 'file://'+__dirname+'/'+root+fullPath ) ) rp.writeHead( 200, ( staticRoute['Content-Type'] = mimeTypes[ext] || 'Unknown type', staticRoute ) ), $rp.end( t0 );
+				else err( 404, 'no file<br>file://'+ root+fullPath);
 				return;
 			}else i = path.lastIndexOf( '/' ) + 1, path = path.substring(i), file = path.substr(i) + '.bs';
-			
 			ckParser(), head.length = cookie.length = response.length = 0, data = {};
-			try{
-				if( config ) require( log = config ).bs( bs );
-				if( t0 = table[fullPath] ) require( log = t0 ).bs( bs );
-				else{
-					i = rules.length;
-					while( i-- ) if( path.indexOf( rules[i] ) > -1 ){
-						t0 = rule[rules[i]];
-						break;
+			router = function(){
+				var t0, i, j, k;
+				try{
+					if( config ) require( log = config ).bs( bs );
+					if( t0 = table[fullPath] ) require( log = t0 ).bs( bs );
+					else{
+						i = rules.length;
+						while( i-- ) if( path.indexOf( rules[i] ) > -1 ){
+							t0 = rule[rules[i]];
+							break;
+						}
+						if( !t0 ) throw 1;
+						i = 0, j = t0.length; 
+						while( i < j ) k = t0[i++], require(
+							log = k == 'absolute' ? root + '/' + t0[i++] :
+							k == 'relative' ? root + path + t0[i++] :
+							k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
+							k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
+							k == 'url' ? root + path + file : 0
+						).bs( bs );	
 					}
-					if( !t0 ) throw 1;
-					i = 0, j = t0.length; 
-					while( i < j ) k = t0[i++], require(
-						log = k == 'absolute' ? root + '/' + t0[i++] :
-						k == 'relative' ? root + path + t0[i++] :
-						k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
-						k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
-						k == 'url' ? root + path + file : 0
-					).bs( bs );	
+					flush();
+				}catch( $e ){
+					err( 500, 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 				}
-				flush();
-			}catch( $e ){
-				e404( 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
-			}
+			};
+			if( $rq.method.toLowerCase() == 'get' ) router();
+			else postForm.parse( $rq, function( $e, $data, $file ){
+				if( $e ) err( 500, 'post Error' + $e );
+				else postData = $data, postFile = $file, router();
+			});
 		}).listen( $data.port || 80 );
 		console.log('server started with port ' + ($data.port || 80)); 
 	};
