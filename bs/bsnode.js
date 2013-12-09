@@ -146,13 +146,11 @@ bs.$ex = (function(){
 		while( i < j ){
 			k = arguments[i++], v = arguments[i++];
 			if( v === undefined ) return this[k];
-			else switch( k ){
-				case'db':case'type':case'record':case'field':case'query':this[k] = v; break;
-				case'run':
-					t0 = v ? bs::$tmpl( this.query, v ) : this.query;
-					if( this.type == 'record' ) return bs.db( this.db ).$( 'record', t0, arguments[i++] );
-					return bs.db( this.db ).$( 'rs', t0, arguments[i++] );
-			}
+			if( k == 'run' ){
+				t0 = v ? bs::$tmpl( this.query, v ) : this.query;
+				if( this.type == 'record' ) return bs.db( this.db ).$( 'record', t0, arguments[i++] );
+				return bs.db( this.db ).$( 'rs', t0, arguments[i++] );
+			}else this[k] = v;
 		}
 	},
 	bs.db = db = function( $sel, $type ){return db[$sel] || ( db[$sel] = new dbtype[$type||'mysql']( $sel ) );},
