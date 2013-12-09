@@ -3,6 +3,6 @@ exports.bs = function( bs ){
 		'<html>',
 		'<head></head>',
 		'<body>',
-		'<div>globalHead.js</div>'
+		'<div>absolute Head</div>'
 	);
 };

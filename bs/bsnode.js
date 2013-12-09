@@ -162,9 +162,9 @@ bs.$ex = (function(){
 						default:
 							t0 = this.open();
 							switch( k ){
-							case'ex':return t0.query( $v );
-							case'rs':return t1 = arguments[i++], t0.query( $v, function( e, r ){e ? t1( null, e ) : t1( r );} );
-							case'record':return t1 = arguments[i++], t0.query( $v ).on('result', function( r ){t1( r );} );
+							case'ex':return t0.query( v );
+							case'rs':return t1 = arguments[i++], t0.query( v, function( e, r ){e ? t1( null, e ) : t1( r );} );
+							case'record':return t1 = arguments[i++], t0.query( v ).on('result', function( r ){t1( r );} );
 							}
 							throw 1;
 					}
@@ -174,7 +174,7 @@ bs.$ex = (function(){
 	};
 })();
 (function(){
-	var http, form, sort, flush,
+	var http, form, sort, next, flush,
 		application,
 		session, sessionName, id,
 		cookie, clientCookie, ckParser,
@@ -236,7 +236,8 @@ bs.$ex = (function(){
 	})( http ),
 	//base
 	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
-	flush = function(){
+	bs.$next = function(){next();},
+	bs.$flush = flush = function(){
 		var t0, i;
 		i = cookie.length;
 		while( i-- ) head[head.length] = ['Set-Cookie', cookie[i]];
@@ -304,7 +305,7 @@ bs.$ex = (function(){
 	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
 	onData = function( $data ){postData += $data;},
 	bs.$route = function( $data ){
-		var port, root, index, config, table, rules, rule, postForm,
+		var port, root, index, config, table, rules, rule, currRule, postForm,
 			t0, i, j, k, l;
 		postForm = new form.IncomingForm,
 		postForm.encoding = 'utf-8',
@@ -319,7 +320,8 @@ bs.$ex = (function(){
 		rules.sort( sort );
 	
 		port = http.createServer( function( $rq, $rp ){
-			var fullPath, path, file, log, ext, router, t0, i, j;
+			var fullPath, path, file, ext, log, router, nextstep, idx, t0, i, j;
+			
 			rq = $rq, rp = $rp, t0 = bs.$url( $rq.url ),
 			getData = bs.$cgiParse( t0.query ), postData = postFile = null, 
 			fullPath = path = t0.pathname;
@@ -338,29 +340,30 @@ bs.$ex = (function(){
 				}else path += '/', file = index;
 			}
 			
-			ckParser(), head.length = cookie.length = response.length = 0, data = {};
+			ckParser(), head.length = cookie.length = response.length = 0, data = {},
+			nextstep = function(){
+				var t0, i;
+				if( idx < currRule.length ){
+					i = currRule[idx++];
+					if( !require( 
+						log = i == 'absolute' ? root + '/' + currRule[idx++] :
+						i == 'relative' ? root + path + currRule[idx++] :
+						i == 'head' ? ( t0 = file.split('.'), root + path + currRule[idx++] + t0[0] + '.' + t0[1] ) :
+						i == 'tail' ? ( t0 = file.split('.'), root + path + t0[0] + currRule[idx++] + '.' + t0[1] ) :
+						i == 'url' ? root + path + file : 0
+					).bs( bs ) ) nextstep();
+				}else flush();
+			},
 			router = function(){
 				var t0, i, j, k;
 				try{
 					if( config ) require( log = config ).bs( bs );
-					if( t0 = table[fullPath] ) require( log = t0 ).bs( bs );
+					if( t0 = table[fullPath] ) require( log = t0 ).bs( bs ), flush();
 					else{
 						i = rules.length;
-						while( i-- ) if( path.indexOf( rules[i] ) > -1 ){
-							t0 = rule[rules[i]];
-							break;
-						}
-						if( !t0 ) throw 1;
-						i = 0, j = t0.length; 
-						while( i < j ) k = t0[i++], require(
-							log = k == 'absolute' ? root + '/' + t0[i++] :
-							k == 'relative' ? root + path + t0[i++] :
-							k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
-							k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
-							k == 'url' ? root + path + file : 0
-						).bs( bs );	
+						while( i-- ) if( path.indexOf( rules[i] ) > -1 ) return currRule = rule[rules[i]], idx = 0, ( next = nextstep )();
+						throw 1;
 					}
-					flush();
 				}catch( $e ){
 					err( 500, 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 				}
