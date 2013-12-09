@@ -294,6 +294,7 @@ bs.$ex = (function(){
 	//head, request, response
 	head = [], response = [], 
 	bs.$head = function( $k, $v ){head[head.length] = [$k, $v];},
+	bs.$method = function(){return rq.method.toLowerCase();},
 	bs.$request = bs.$rq = function( $k ){return $k ? rq[$k] : rq;},
 	bs.$requestGet = bs.$rqG = function( $k ){return getData[$k];},
 	bs.$requestPost = bs.$rqP = function( $k ){return postData[$k];},
@@ -373,7 +374,7 @@ bs.$ex = (function(){
 					err( 500, 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
 				}
 			};
-			if( $rq.method.toLowerCase() == 'get' ) router();
+			if( bs.$method() == 'get' ) router();
 			else postForm.parse( $rq, function( $e, $data, $file ){
 				if( $e ) err( 500, 'post Error' + $e );
 				else postData = $data, postFile = $file, router();
