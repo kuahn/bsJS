@@ -174,6 +174,11 @@ bs.$ex = (function(){
 	};
 })();
 (function(){
+	var os;
+	os = require('os'),
+	bs.$os = function( $k ){return os[$k]();};
+})();
+(function(){
 	var http, form, sort, next, flush,
 		application,
 		session, sessionName, id,
