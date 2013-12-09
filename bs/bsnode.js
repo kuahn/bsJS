@@ -208,8 +208,9 @@ bs.$ex = (function(){
 	server = require('http'), 
 	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
 	flush = function(){
-		var t0;
-		for( t0 in cookie ) head[head.length] = ['Set-Cookie', cookie[k] ];
+		var t0, i;
+		i = cookie.length;
+		while( i-- ) head[head.length] = ['Set-Cookie', cookie[i]];
 		head.push( flush[0], flush[1], ( t0 = response.join(''), flush[2][1] = Buffer.byteLength( t0, 'utf8' ), flush[2] ) ),
 		rp.writeHead( 200, head ), rp.end( t0 );
 	},
@@ -269,7 +270,7 @@ bs.$ex = (function(){
 	//data
 	bs.$data = function( $k, $v ){return $v === undefined ? data[$k] : data[$k] = $v;},
 	//error
-	e404 = function( $v ){rp.writeHead( 404 ), rp.end( $v || '' );},
+	e404 = function( $v ){rp.writeHead( 404, (staticRoute['Content-Type'] = 'text/html', staticRoute) ), rp.end( $v || '' );},
 	//route
 	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
 	bs.$route = function( $data ){
@@ -307,12 +308,12 @@ bs.$ex = (function(){
 					if( !t0 ) throw 1;
 					i = 0, j = t0.length; 
 					while( i < j ) k = t0[i++], require(
-						log = k == 'absolue' ? root + '/' + t0[i++] :
+						log = k == 'absolute' ? root + '/' + t0[i++] :
 						k == 'relative' ? root + path + t0[i++] :
 						k == 'head' ? ( t1 = file.split('.'), root + path + t0[i++] + t1[0] + '.' + t1[1] ) :
 						k == 'tail' ? ( t1 = file.split('.'), root + path + t1[0] + t0[i++] + '.' + t1[1] ) :
 						k == 'url' ? root + path + file : 0
-					).bs( bs );
+					).bs( bs );	
 				}
 				flush();
 			}catch( $e ){
