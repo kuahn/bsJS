@@ -1,0 +1,9 @@
+exports.bs = function( bs ){
+	bs.sql( 'list' ).$( 'run', {userid:"'hika'"}, function( $rs ){
+		var t0, i, j;
+		for( t0 = '', i = 0, j = $rs.length ; i < j ; i++ ) t0 += '<div>key: ' + $rs[i].k + ', val: ' + $rs[i].v + '</div>'
+		bs.$response( t0 );
+		bs.$next();
+	} );
+	return 1;
+};

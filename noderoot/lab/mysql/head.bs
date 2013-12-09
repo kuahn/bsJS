@@ -1,0 +1,7 @@
+exports.bs = function( bs ){
+	bs.$response(
+		'<html>',
+		'<head></head>',
+		'<body>'
+	);
+};

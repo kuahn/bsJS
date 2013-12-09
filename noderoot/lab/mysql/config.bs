@@ -1,0 +1,5 @@
+exports.bs = function( bs ){
+	bs.db( 'local' ).$( 'url', 'localhost:3306', 'id', 'hika01', 'pw', 'xhxhfhn00', 'db', 'hika01' );
+	//bs.db( 'local' ).$( 'url', 'localhost:3306', 'id', 'root', 'pw', '1234', 'db', 'hika01' );
+	bs.sql( 'list' ).$( 'db', 'local', 'query', 'select k,v from web,user where user_rowid=rowid and userid=@userid@' );
+};
