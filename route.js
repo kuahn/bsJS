@@ -1,7 +1,6 @@
 exports.route = {
 	port:8001,
 	root:'../node',
-	fileroot:'c:/__app/bs.dev/node',
 	index:'index.bs',
 	config:'config.bs',
 	
