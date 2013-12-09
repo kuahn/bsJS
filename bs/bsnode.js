@@ -7,7 +7,9 @@
  * GitHub: https://github.com/projectBS/bsJS
  * Facebook group: https://www.facebook.com/groups/bs5js/
  */
-var bs = exports;
+var bs = exports,
+	http = require('http');
+
 bs.$ex = (function(){
 	var rc, random;
 	rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
@@ -113,8 +115,14 @@ bs.$ex = (function(){
 	bs.$trim = factory( /^\s*|\s*$/g, '' );
 })();
 (function(){
-	var url, query, crypto, fs;
-	url = require('url'), query = require('querystring'), crypto = require('crypto'), fs = require('fs');
+	var url, query, crypto, fs, htop;
+	url = require('url'), query = require('querystring'), crypto = require('crypto'), fs = require('fs'),
+	htop = {
+		hostname: null,
+		port: null,
+		path: null,
+		method: null
+	};
 	bs.$url = function( $url ){return url.parse( $url );},
 	bs.$escape = function( $val ){return query.escape( $val );},
 	bs.$unescape = function( $val ){return query.unescape( $val );},
@@ -127,6 +135,33 @@ bs.$ex = (function(){
 		}
 	}
 	bs.$get = function( $end, $url ){
+		var t0;
+		t0 = url.parse( $url );
+		switch( t0.protocol ){
+		case'http:':
+			if( !$end ) return null;
+			htop.hostname = t0.hostname,
+			htop.port = t0.port || 80,
+			htop.path = t0.path,
+			htop.method = 'GET',
+			t0 = http.request(htop, function(rs) {
+				rs.on( 'data', $end );
+			}),
+			t0.on('error', function(e){$end(e.message);}),
+			t0.end();
+			break;
+		case'file:':
+			t0 = t0.path.replace(/^\/([A-Za-z]{1}:\/)/, '$1');
+			if( !$end ) return fs.existsSync( t0 ) ? fs.readFileSync( t0 ) : null;
+			fs.exists( t0, function( $ex ){
+				if( !$ex ) return $end( null );
+				fs.readFile( t0, function( $e, $d ){
+					if( $e ) return $end( $e );
+					return $end( $d );
+				});
+			});
+			break;
+		}
 	},
 	bs.$post = function( $end, $url ){
 	},
@@ -197,15 +232,14 @@ bs.$ex = (function(){
 	};
 })();
 (function(){
-	var server, sort, flush,
+	var sort, flush,
 		application,
 		session, sessionName, id,
 		cookie, clientCookie, ckParser,
 		head, response, rq, rp,
 		data, staticRoute, mimeTypes,
 		e404;
-	//base	
-	server = require('http'), 
+	//base
 	sort = function( a, b ){return a = a.length, b = b.length, a > b ? 1 : a == b ? 0 : -1;},
 	flush = function(){
 		var t0, i;
@@ -282,7 +316,7 @@ bs.$ex = (function(){
 		for( k in rule ) rules[rules.length] = k;
 		rules.sort( sort );
 	
-		port = server.createServer( function( $rq, $rp ){
+		port = http.createServer( function( $rq, $rp ){
 			var fullPath, path, file, log, ext,
 				t0, t1, i;
 			rq = $rq, rp = $rp,
