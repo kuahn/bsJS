@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>testRedcamel</title>
+    <meta name="keywords" content="bs5"/>
+    <meta name="description" content="bs5 Test suite"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi"/>
+    <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+    <img style="position: fixed; top: 0; right: 0; border: 0;"
+         src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<script src="../bs/bsjs.js"></script>
+<script src="../bs/bsTest.js"></script>
+
+<script>
+// 2013.12.10 - 15:11
+// By Redcamel
+// 개발목적 : 발사체에대해서 적절한 위치 계산
+bs(function () {
+    bs.css("body").$('margin', 0, 'overflow', 'hidden', 'background-color', '#ffc3cf ')
+    bs.css("div").$('margin', 0, 'position', 'absolute')
+    bs.css("input").$('margin', 0, 'position', 'absolute', 'border', 'none')
+
+    var inited = false
+    bs.dom('<div></div>').$('<', 'body', 'id', 'title', 'html', '3D Basic(빌보드시스템)', 'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#000', 'top', 20)
+    bs.dom('<div></div>').$('<', 'body', 'id', 'title2', 'html', 'W : forward / S : backward', 'font-size', 11, 'color', '#000', 'top', 60, 'left', 10)
+    bs.dom('<div></div>').$('<', 'body', 'id', 'title3', 'html', 'A : left / D : right', 'font-size', 11, 'color', '#000', 'top', 75, 'left', 10)
+    bs.dom('<div></div>').$('<', 'body', 'id', 'title4', 'html', 'R : up / F : down', 'font-size', 11, 'color', '#000', 'top', 90, 'left', 10)
+    bs.dom('<div></div>').$('<', 'body', 'id', 'title5', 'html', 'Q : panLeft / E : panRight', 'font-size', 11, 'color', '#000', 'top', 105, 'left', 10)
+    bs.dom('<div></div>').$('<', 'body', 'id', 'title5', 'html', 'T : tiltUp / G : tiltDown', 'font-size', 11, 'color', '#000', 'top', 120, 'left', 10)
+
+////////////////////////////////////////////
+// 더 구현해야할것들..
+// 1. 배경시스템...(고정배경 / tilt, pan에 반응하는 배경)
+// 2. 충돌체크 시스템?;;;;
+// 3. 고정 오브젝트(센터에 센죠가 뛰어가는걸 박는다 쳐보자..이걸 어케 차별화할건가..)
+
+////////////////////////////////////////////
+
+
+    bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'font-size', 11, 'color', '#000', '<', 'body', 'this')[0]);
+    bs.dom('<div></div>').$('<', 'body', 'id', 'stage');
+    bs.WIN.sizer(function (w, h) {
+        bs.dom('#stage').$('width', w, 'height', h, 'left', w / 2, 'top', h / 2)
+        if (inited) return
+
+        (function () {
+            bs.dom("<div id='controller'></div>").$('<', 'body', 'top', h - 100, 'left', 10)
+            bs.dom("<input type='button' value='left'>").$('<', '#controller', 'width', 50, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -20,
+                    'down', function ($e) {
+                        bs.KEY['a'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['a'] = false
+                    }
+            )
+            bs.dom("<input type='button' value='right'>").$('<', '#controller', 'width', 50, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'left', 100, 'top', -20,
+                    'down', function ($e) {
+                        bs.KEY['d'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['d'] = false
+                    }
+            )
+            bs.dom("<input type='button' value='forward'>").$('<', '#controller', 'width', 70, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -80, 'left', 40,
+                    'down', function ($e) {
+                        bs.KEY['w'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['w'] = false
+                    }
+            )
+            bs.dom("<input type='button' value='backward'>").$('<', '#controller', 'width', 70, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', 40, 'left', 40,
+                    'down', function ($e) {
+                        bs.KEY['s'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['s'] = false
+                    }
+            )
+
+            bs.dom("<input type='button' value='pan left'>").$('<', '#controller', 'width', 70, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -20, 'left', w - 190,
+                    'down', function ($e) {
+                        bs.KEY['q'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['q'] = false
+                    }
+            )
+            bs.dom("<input type='button' value='pan right'>").$('<', '#controller', 'width', 70, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -20, 'left', w - 90,
+                    'down', function ($e) {
+                        bs.KEY['e'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['e'] = false
+                    }
+            )
+
+            bs.dom("<input type='button' value='tilt up'>").$('<', '#controller', 'width', 70, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -80, 'left', w - 140,
+                    'down', function ($e) {
+                        bs.KEY['t'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['t'] = false
+                    }
+            )
+            bs.dom("<input type='button' value='tilt down'>").$('<', '#controller', 'width', 70, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', 40, 'left', w - 140,
+                    'down', function ($e) {
+                        bs.KEY['g'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['g'] = false
+                    }
+            )
+
+            bs.dom("<input type='button' value='up'>").$('<', '#controller', 'width', 50, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -250, 'left', 50,
+                    'down', function ($e) {
+                        bs.KEY['r'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['r'] = false
+                    }
+            )
+            bs.dom("<input type='button' value='down'>").$('<', '#controller', 'width', 50, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', -190, 'left', 50,
+                    'down', function ($e) {
+                        bs.KEY['f'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['f'] = false
+                    }
+            )
+
+            bs.dom("<input type='button' value='총알발사'>").$('<', '#controller', 'width', 100, 'height', 50, 'background-color', '#fff', 'borderRadius', 10, 'text-align', 'center', 'z-index', 1000000, 'top', 0, 'left', w / 2 - 50,
+                    'down', function ($e) {
+                        bs.KEY['space'] = true
+                    }, 'up', function ($e) {
+                        bs.KEY['space'] = false
+                    }
+            )
+        })()
+
+        /**
+         * 발쏴~
+         */
+        function addFire() {
+            var wh = 100
+            var tx = Math.sin(Math.PI * 2 - camera.pan) * 100 + camera.position.x
+            var tz = Math.cos(Math.PI * 2 - camera.pan) * 100 + camera.position.z
+            planes.position.push({x: tx , y: 0, z: tz})
+
+            var idx = planes.position.length-1
+
+            planes.width[idx] = wh
+            planes.height[idx] = wh
+
+
+            bs.dom("<div><img src=" + planes.img[1] + " width='100%' height='100%'></div>").$(
+                    '<', '#stage', 'id', 'plane' + idx,
+                    'left', planes.position[idx].x,'top', planes.position[idx].y,
+                    'width', planes.width[idx], 'height', planes.height[idx], 'this'
+            );
+
+
+            bs.ANI.tween(planes.position[idx],
+                    'x', Math.sin(Math.PI * 2 - camera.pan) * 5000 + camera.position.x,
+                    'z', Math.cos(Math.PI * 2 - camera.pan) * 5000 + camera.position.z,
+                    'time', 3, 'loop', 1,
+                    'update', function () {
+//                        bs.dom("#plane" + idx).$('left',planes.position[idx].x)
+                    },
+                    'end', function () {
+                        bs.dom("#plane" + idx).$(null)
+                    }
+            )
+        }
+
+
+        // 카메라 설정
+        var camera = {
+            position: {x: 0, y: 0, z: 0}, // 카메라포지셔
+            pan: 0, // 카메라팬
+            tilt: 0, // 카메라높이(? 적절한 단어가-_--) - 값도 가질수있음
+            ANI: function ($time) {
+                var sin = Math.sin(this.pan), cos = Math.cos(this.pan), p = this.position
+                if (bs.KEY['w']) {
+                    p.x -= 10 * sin;
+                    p.z += cos * 10
+                }
+                if (bs.KEY['s']) {
+                    p.x += 10 * sin;
+                    p.z -= cos * 10
+                }
+                if (bs.KEY['a']) p.x -= 10 * cos;
+                if (bs.KEY['a']) p.z -= 10 * sin;
+                if (bs.KEY['d']) p.x += 10 * cos;
+                if (bs.KEY['d']) p.z += 10 * sin;
+
+                if (bs.KEY['r']) p.y -= 10
+                if (bs.KEY['f']) p.y += 10
+
+                if (bs.KEY['q']) this.pan += 0.01
+                if (bs.KEY['e']) this.pan -= 0.01
+                if (bs.KEY['t']) this.tilt += 10
+                if (bs.KEY['g']) this.tilt -= 10
+
+                if (bs.KEY['space']) addFire()
+            }
+        }
+
+
+        var len = bs.DETECT.device == 'tablet' || bs.DETECT.device == 'mobile' ? 15 : 100 // 모바일이나 태블릿환경일때 갯수 분기...아..짜피 모바일 테스트가 안되는구나;;
+        // 플랜 시스템
+        var planes = {
+            position: [],
+            img: ['redcamel_test_demo2_asset/007.png', 'redcamel_test_demo2_asset/008.png'],
+            width: [],
+            height: [],
+            init: function () {
+                for (var i = 0; i < len; i++) {
+                    this.position.push({x: bs.$ex(-w/2, '~', w/2), y: 0, z: bs.$ex(-w * 2, '~', w * 2)})
+//                    this.position.push({x: 0, y: 0, z: bs.$ex(-w * 2, '~', w * 2)})
+                    var wh = bs.$ex(100, "~", 150)
+                    this.width[i] = wh
+                    this.height[i] = wh
+                    bs.dom("<div><img src=" + this.img[i % 2] + " width='100%' height='100%'></div>").$(
+                            '<', '#stage', 'id', 'plane' + i,
+                            'left', this.position[i].x, 'top', this.position[i].y,
+//                                'html+','plane' + i, 'text-align',' center',
+                            'width', this.width[i], 'height', this.height[i], 'this'  // 크기 자동으로 변하게 해야함..,
+                    )
+                }
+            },
+            ANI: function ($time) {
+                var distanceZ = 0, distanceX = 0 , sin = Math.sin(camera.pan) , cos = Math.cos(camera.pan) , pos, tx, tz, pScale, zIndex
+                var cameraX = camera.position.x, cameraY = camera.position.y, cameraZ = camera.position.z, cameraTilt = camera.tilt
+                var lens= this.position.length
+                for (var i = 0; i < lens; i++) {
+                    pos = this.position[i];
+                    distanceX = pos.x - cameraX;
+                    distanceZ = pos.z - cameraZ;
+                    // 카메라를 중심으로 플랜의 위치를 구해야함...
+                    tx = cos * distanceX + sin * distanceZ;
+                    tz = -sin * distanceX + cos * distanceZ;
+
+                    if (tz < 20 || tz > 2500) {
+                        // 카메라 뒤에 있는놈은..안보이게.
+                        // 멀리있는 놈도 안보이게..
+                        bs.dom('#plane' + i).$('display', 'none')
+                    } else {
+                        pScale = w / tz // 대충거리로...크기비율을 결정하고..
+                        zIndex = parseInt(tz * 100000 - tz * 100)  // 대충 안겹치게...제트축만들고... 혹시나 살짤 뺴주자
+                        var tw = this.width[i], th = this.height[i]
+                        bs.dom('#plane' + i).$(
+                                'display', 'block',
+                                // 멀리있는건 거리에 대해 스케일 비율이 달라지니 이것도 변수화해야하나..
+                                'width', pScale *.5 + tw * pScale / 2, 'height', pScale *.5 + th * pScale / 2,
+                                //  가로세로를 적절하게 돌려줌...=
+                                'left', (tx-tw/4) * pScale, 'top', cameraTilt - pScale * cameraY - (pScale *.5 + th * pScale / 2) / 2,
+                                'opacity', (2500 - tz) > 500 ? 1 : (2500 - tz + 500) / 2500,
+                                // z소팅 이건 간단해서 좋네 --
+                                'z-index', parseInt(50 * pScale)
+                        )
+                    }
+                }
+
+            }
+        }
+
+
+        planes.init()
+        bs.ANI.ani(camera)
+        bs.ANI.ani(planes)
+
+        inited = true
+    });
+
+});
+
+
+</script>
+</body>
+</html>
