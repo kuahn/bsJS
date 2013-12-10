@@ -190,7 +190,8 @@ bs.$ex = (function(){
 		session, sessionName, id,
 		cookie, clientCookie, ckParser,
 		head, response, rq, rp, getData, postData, postFile,
-		data, staticRoute, mimeTypes,
+		data, 
+		staticRoute, mimeTypes,
 		err;
 	http = require('http'), form = require( 'formidable' ),
 	(function( http ){
@@ -315,17 +316,14 @@ bs.$ex = (function(){
 	err = function( $code, $v ){rp.writeHead( $code, (staticRoute['Content-Type'] = 'text/html', staticRoute) ), rp.end( $v || '' );},
 	//route
 	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
-	onData = function( $data ){postData += $data;},
 	bs.$route = function( $data ){
 		var port, root, index, config, table, rules, rule, currRule, postForm, 
-			router, nextstep, fullPath, path, file, ext, log, idx,
-			t0, i, j, k, l;
+			router, nextstep, fullPath, path, file, ext, log, idx, onData, k;
 		postForm = new form.IncomingForm,
 		postForm.encoding = 'utf-8',
 		postForm.keepExtensions = true;
 		if( $data.upload ) postForm.uploadDir = $data.upload;
-		if( $data.maxsize ) postForm.maxFieldsSize = parseInt( $data.maxsize * 1024 * 1024 );
-		
+		if( $data.maxsize ) postForm.maxFieldsSize = parseInt( $data.maxsize * 1024 * 1024 );		
 		root = $data.root, index = $data.index || 'index.bs', config = $data.config ? root+'/'+$data.config : 0,
 		table = $data.table, rules = [], rule = $data.rules;
 		for( k in table ) table[k] = root+'/'+table[k];
@@ -355,16 +353,18 @@ bs.$ex = (function(){
 					throw 1;
 				}
 			}catch( $e ){
-				err( 500, 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
+				err( 500, '<h1>server error</h1><div>Error: '+$e+'</div><div>fullpath: '+fullPath+'<br>path: '+path+'<br>file: '+file+'<br>log: '+log +'</div>' );
 			}
+		},
+		onData = function( $e, $data, $file ){
+			if( $e ) err( 500, 'post Error' + $e );
+			else postData = $data, postFile = $file, router();
 		},
 		port = http.createServer( function( $rq, $rp ){
 			var t0, i, j;
-			
 			rq = $rq, rp = $rp, t0 = bs.$url( $rq.url ),
 			getData = bs.$cgiParse( t0.query ), postData = postFile = null, 
-			fullPath = path = t0.pathname;
-			
+			fullPath = path = t0.pathname,
 			i = path.lastIndexOf( '/' ) + 1, ext = 'bs';
 			if( path.substr( path.length - 1 ) == '/' ) path = path.substring( 0,  i ), file = index;
 			else{
@@ -378,14 +378,9 @@ bs.$ex = (function(){
 					}
 				}else path += '/', file = index;
 			}
-			
 			ckParser(), head.length = cookie.length = response.length = 0, data = {};
-			
 			if( bs.$method() == 'get' ) router();
-			else postForm.parse( $rq, function( $e, $data, $file ){
-				if( $e ) err( 500, 'post Error' + $e );
-				else postData = $data, postFile = $file, router();
-			});
+			else postForm.parse( $rq, onData );
 		}).listen( $data.port || 80 );
 		console.log('server started with port ' + ($data.port || 80)); 
 	};
