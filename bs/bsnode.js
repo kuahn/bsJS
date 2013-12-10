@@ -7,8 +7,8 @@
  * GitHub: https://github.com/projectBS/bsJS
  * Facebook group: https://www.facebook.com/groups/bs5js/
  */
-var bs = exports;
-
+var bs, top;
+bs = exports,
 bs.$ex = (function(){
 	var rc, random;
 	rc = 0, random = function(){return rc = ( rc + 1 ) % 1000, random[rc] || ( random[rc] = Math.random() );};
@@ -23,7 +23,7 @@ bs.$ex = (function(){
 		}
 		return t0;
 	};
-})();
+})(),
 (function(){
 	function deco( $v, $t, $f, $r, $isEnd ){
 		var t0 = $v;
@@ -64,7 +64,7 @@ bs.$ex = (function(){
 		}
 		return t0;
 	};
-})();
+})(),
 (function(){
 	var arg, reg;
 	reg = /@[^@]+@/g;
@@ -112,7 +112,7 @@ bs.$ex = (function(){
 	}
 	bs.$stripTag = factory( /[<][^>]+[>]/g, '' );
 	bs.$trim = factory( /^\s*|\s*$/g, '' );
-})();
+})(),
 (function(){
 	var sql, db, dbtype;
 	bs.sql = bs.q = function( $sel ){return sql[$sel] || ( sql[$sel] = new sql( $sel ) );},
@@ -178,12 +178,12 @@ bs.$ex = (function(){
 			}, d;
 		})()
 	};
-})();
+})(),
 (function(){
 	var os;
 	os = require('os'),
 	bs.$os = function( $k ){return os[$k]();};
-})();
+})(),
 (function(){
 	var http, form, sort, next, flush,
 		application,

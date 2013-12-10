@@ -1773,38 +1773,22 @@ function init(doc){
 init.len = 0;
 W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 (function( doc ){
-	var isReady;
+	var isReady, t0;
 	function loaded(){
 		var i, j;
 		if( isReady ) return;
 		if( !doc.body ) return setTimeout( loaded, 1 );
-		isReady = 1;
-		if( doc.addEventListener ){
-			doc.removeEventListener( "DOMContentLoaded", loaded, false );
-			W.removeEventListener( "load", loaded, false );
-		}else{
-			doc.detachEvent( "onreadystatechange", loaded );
-			W.detachEvent( "onload", loaded );
-		}
-		init(doc);
-		for( i = 0, j = init.len ; i < j ; i++ ) init[i]();
+		isReady = 1, clearInterval( t0 );
+		if( doc.addEventListener ) doc.removeEventListener( "DOMContentLoaded", loaded, false ), W.removeEventListener( "load", loaded, false );
+		else if( doc.attachEvent ) doc.detachEvent( "onreadystatechange", loaded ), W.detachEvent( "onload", loaded );
+		for( init(doc), i = 0, j = init.len ; i < j ; i++ ) init[i]();
 	}
-	if( doc.addEventListener ){
-		doc.addEventListener( "DOMContentLoaded", loaded, false );
-		W.addEventListener( "load", loaded, false );
-	}else if( doc.attachEvent ){
-		doc.attachEvent( "onreadystatechange", loaded );
-		W.attachEvent( "onload", loaded );		
-		(function(){
-			var t0, check;
-			try{t0 = W.frameElement == null;}catch(e){}
-			if( doc.documentElement.doScroll && t0 )( check = function(){
-				if( isReady ) return;
-				try{doc.documentElement.doScroll("left");
-				}catch(e){return setTimeout( check, 1 );}
-				loaded();
-			} )();
-		})();
-	}else if( doc.readyState !== "loading" ) loaded();
+	if( doc.readyState !== "loading" ) return loaded();
+	if( doc.addEventListener ) doc.addEventListener( "DOMContentLoaded", loaded, false ), W.addEventListener( "load", loaded, false );
+	else if( doc.attachEvent ) doc.attachEvent( "onreadystatechange", loaded ), W.attachEvent( "onload", loaded );
+	t0 = setInterval( function(){
+		if( isReady ) return;
+		if( doc.body ) clearInterval( t0 ), loaded();
+	}, 1 );
 })( W.document );
 } )( this );
