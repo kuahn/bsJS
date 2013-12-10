@@ -317,7 +317,8 @@ bs.$ex = (function(){
 	staticRoute = {'Content-Type':0}, mimeTypes = require('./bsnode.mime.types'),
 	onData = function( $data ){postData += $data;},
 	bs.$route = function( $data ){
-		var port, root, index, config, table, rules, rule, currRule, postForm,
+		var port, root, index, config, table, rules, rule, currRule, postForm, 
+			router, nextstep, fullPath, path, file, ext, log, idx,
 			t0, i, j, k, l;
 		postForm = new form.IncomingForm,
 		postForm.encoding = 'utf-8',
@@ -329,10 +330,36 @@ bs.$ex = (function(){
 		table = $data.table, rules = [], rule = $data.rules;
 		for( k in table ) table[k] = root+'/'+table[k];
 		for( k in rule ) rules[rules.length] = k;
-		rules.sort( sort );
-	
+		rules.sort( sort ),
+		nextstep = function(){
+			var t0, i;
+			if( idx < currRule.length ){
+				i = currRule[idx++];
+				if( !require( 
+					log = i == 'absolute' ? root + '/' + currRule[idx++] :
+					i == 'relative' ? root + path + currRule[idx++] :
+					i == 'head' ? ( t0 = file.split('.'), root + path + currRule[idx++] + t0[0] + '.' + t0[1] ) :
+					i == 'tail' ? ( t0 = file.split('.'), root + path + t0[0] + currRule[idx++] + '.' + t0[1] ) :
+					i == 'url' ? root + path + file : 0
+				).bs( bs ) ) nextstep();
+			}else flush();
+		},
+		router = function(){
+			var t0, i;
+			try{
+				if( config ) require( log = config ).bs( bs );
+				if( t0 = table[fullPath] ) require( log = t0 ).bs( bs ), flush();
+				else{
+					i = rules.length;
+					while( i-- ) if( path.indexOf( rules[i] ) > -1 ) return currRule = rule[rules[i]], idx = 0, ( next = nextstep )();
+					throw 1;
+				}
+			}catch( $e ){
+				err( 500, 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
+			}
+		},
 		port = http.createServer( function( $rq, $rp ){
-			var fullPath, path, file, ext, log, router, nextstep, idx, t0, i, j;
+			var t0, i, j;
 			
 			rq = $rq, rp = $rp, t0 = bs.$url( $rq.url ),
 			getData = bs.$cgiParse( t0.query ), postData = postFile = null, 
@@ -352,34 +379,8 @@ bs.$ex = (function(){
 				}else path += '/', file = index;
 			}
 			
-			ckParser(), head.length = cookie.length = response.length = 0, data = {},
-			nextstep = function(){
-				var t0, i;
-				if( idx < currRule.length ){
-					i = currRule[idx++];
-					if( !require( 
-						log = i == 'absolute' ? root + '/' + currRule[idx++] :
-						i == 'relative' ? root + path + currRule[idx++] :
-						i == 'head' ? ( t0 = file.split('.'), root + path + currRule[idx++] + t0[0] + '.' + t0[1] ) :
-						i == 'tail' ? ( t0 = file.split('.'), root + path + t0[0] + currRule[idx++] + '.' + t0[1] ) :
-						i == 'url' ? root + path + file : 0
-					).bs( bs ) ) nextstep();
-				}else flush();
-			},
-			router = function(){
-				var t0, i, j, k;
-				try{
-					if( config ) require( log = config ).bs( bs );
-					if( t0 = table[fullPath] ) require( log = t0 ).bs( bs ), flush();
-					else{
-						i = rules.length;
-						while( i-- ) if( path.indexOf( rules[i] ) > -1 ) return currRule = rule[rules[i]], idx = 0, ( next = nextstep )();
-						throw 1;
-					}
-				}catch( $e ){
-					err( 500, 'not exist<br>fullpath:'+fullPath+'<br>path:'+path+'<br>file:'+file+'<br>'+log );
-				}
-			};
+			ckParser(), head.length = cookie.length = response.length = 0, data = {};
+			
 			if( bs.$method() == 'get' ) router();
 			else postForm.parse( $rq, function( $e, $data, $file ){
 				if( $e ) err( 500, 'post Error' + $e );
