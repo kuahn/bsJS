@@ -135,7 +135,13 @@ bs.$ex = (function(){
 		mysql:(function(){
 			var d, mysql;
 			return d = function( $sel ){this.sel = $sel;},
-			d.prototype.open = function(){return this.__conn || ( this.__conn = ( mysql || ( mysql = require( 'mysql' ) ) ).createConnection( this ) );},
+			d.prototype.open = function(){
+				var t0;
+				t0 = this;
+				if( !this.__conn ) this.__conn = ( mysql || ( mysql = require( 'mysql' ) ) ).createConnection( this ),
+					this.__conn.on( 'error', function( $e ){if( $e.code === 'PROTOCOL_CONNECTION_LOST') t0._conn = null;} );
+				return this.__conn;
+			},
 			d.prototype.close = function(){this.__conn.destroy();},
 			d.prototype.$ = function(){
 				var t0, t1, i, j, k, v;
