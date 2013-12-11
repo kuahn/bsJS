@@ -1839,22 +1839,13 @@ function init(doc){
 init.len = 0;
 W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 (function( doc ){
-	var isReady, t0;
-	function loaded(){
-		var i, j;
-		if( isReady ) return;
-		if( !doc.body ) return setTimeout( loaded, 1 );
-		isReady = 1, clearInterval( t0 );
-		if( doc.addEventListener ) doc.removeEventListener( "DOMContentLoaded", loaded, false ), W.removeEventListener( "load", loaded, false );
-		else if( doc.attachEvent ) doc.detachEvent( "onreadystatechange", loaded ), W.detachEvent( "onload", loaded );
-		for( init(doc), i = 0, j = init.len ; i < j ; i++ ) init[i]();
-	}
-	if( doc.readyState !== "loading" ) return loaded();
-	if( doc.addEventListener ) doc.addEventListener( "DOMContentLoaded", loaded, false ), W.addEventListener( "load", loaded, false );
-	else if( doc.attachEvent ) doc.attachEvent( "onreadystatechange", loaded ), W.attachEvent( "onload", loaded );
+	var t0;
 	t0 = setInterval( function(){
-		if( isReady ) return;
-		if( doc.body ) clearInterval( t0 ), loaded();
+		var i, j;
+		if( doc.body ){
+			clearInterval( t0 );
+			for( init(doc), i = 0, j = init.len ; i < j ; i++ ) init[i]();
+		}
 	}, 1 );
 })( W.document );
 } )( this );

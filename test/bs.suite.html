@@ -22,7 +22,7 @@
 bs( function(){
 	bs.$get( function( $data ){
 		$data = bs.$trim( $data );
-		bsTest.suite.apply( null, bs.$trim( $data.split( $data.indexOf( '\n' ) > - 1 ? '\n' : '\r' ) ) );
+		bsTest.suite.apply( null, bs.$reverse( bs.$trim( $data.split( $data.indexOf( '\n' ) > - 1 ? '\n' : '\r' ) ) ) );
 	}, 'suite.txt' );
 } );
 </script>
