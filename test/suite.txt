@@ -15,6 +15,8 @@ bs.vali.html
 testHika.html
 testHuns.html
 testRouka.html
+testWarnee.html
+testWarneeCarousel.html
 testSato.html
 testSewonist.html
 testRedcamel.html
