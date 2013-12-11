@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>bs5 Test suite</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+<a href="https://github.com/projectBS/bsJS">
+	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<div id="stage_01">그냥 이미지 추가하기</div><br/><br/>
+<div id="stage_02">bs.$img 를 이용해서 이미지 추가하기</div><br/>
+<div id="result"></div>
+<div id="test"></div>
+<script>
+</script>
+<script src="../bs/bsjs.js"></script>
+<script src="../bs/bsTest.js"></script>
+<script>
+
+bs( function(){
+
+	
+	bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'font-size', 11, 'color', '#000', '<', 'body', 'this')[0]);
+
+
+	bs.dom('#stage_01')
+	.$('position', 'relative',
+		'margin', '0 auto',
+		//'border', '1px solid red',
+		'width', 196,
+		'height', 400,
+		'overflow', 'hidden');
+
+	bs.dom('<div id="img_stage">')
+	.$('<', '#stage_01',
+		'position', 'relative',
+		'left', 0,
+		'width', 10780,
+		'height', 345);
+
+	bs.dom('<img src="warnee_testimages/001.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/002.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/003.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/004.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/005.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/006.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/007.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/008.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/009.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/010.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/011.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/012.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/013.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/014.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/015.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/016.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/017.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/018.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/019.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/020.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/021.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/022.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/023.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/024.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/025.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/026.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/027.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/028.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/029.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/030.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/031.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/032.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/033.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/034.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/035.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/036.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/037.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/038.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/039.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/040.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/041.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/042.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/043.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/044.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/045.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/046.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/047.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/048.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/049.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/050.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/051.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/052.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/053.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/054.jpg" />').$('<', '#img_stage');
+	bs.dom('<img src="warnee_testimages/055.jpg" />').$('<', '#img_stage');
+
+	bs.ANI.tween( bs.dom("#img_stage"), "left", (- 10584), "time", 55 * 2, 'loop', -1); //2초간 left,top을 변화시킴
+
+	bs.$img(imgloader,
+		'warnee_testimages/001.jpg',
+		'warnee_testimages/002.jpg',
+		'warnee_testimages/003.jpg',
+		'warnee_testimages/004.jpg',
+		'warnee_testimages/005.jpg',
+		'warnee_testimages/006.jpg',
+		'warnee_testimages/007.jpg',
+		'warnee_testimages/008.jpg',
+		'warnee_testimages/009.jpg',
+		'warnee_testimages/010.jpg',
+		'warnee_testimages/011.jpg',
+		'warnee_testimages/012.jpg',
+		'warnee_testimages/013.jpg',
+		'warnee_testimages/014.jpg',
+		'warnee_testimages/015.jpg',
+		'warnee_testimages/016.jpg',
+		'warnee_testimages/017.jpg',
+		'warnee_testimages/018.jpg',
+		'warnee_testimages/019.jpg',
+		'warnee_testimages/020.jpg',
+		'warnee_testimages/021.jpg',
+		'warnee_testimages/022.jpg',
+		'warnee_testimages/023.jpg',
+		'warnee_testimages/024.jpg',
+		'warnee_testimages/025.jpg',
+		'warnee_testimages/026.jpg',
+		'warnee_testimages/027.jpg',
+		'warnee_testimages/028.jpg',
+		'warnee_testimages/029.jpg',
+		'warnee_testimages/030.jpg',
+		'warnee_testimages/031.jpg',
+		'warnee_testimages/032.jpg',
+		'warnee_testimages/033.jpg',
+		'warnee_testimages/034.jpg',
+		'warnee_testimages/035.jpg',
+		'warnee_testimages/036.jpg',
+		'warnee_testimages/037.jpg',
+		'warnee_testimages/038.jpg',
+		'warnee_testimages/039.jpg',
+		'warnee_testimages/040.jpg',
+		'warnee_testimages/041.jpg',
+		'warnee_testimages/042.jpg',
+		'warnee_testimages/043.jpg',
+		'warnee_testimages/044.jpg',
+		'warnee_testimages/045.jpg',
+		'warnee_testimages/046.jpg',
+		'warnee_testimages/047.jpg',
+		'warnee_testimages/048.jpg',
+		'warnee_testimages/049.jpg',
+		'warnee_testimages/050.jpg',
+		'warnee_testimages/051.jpg',
+		'warnee_testimages/052.jpg',
+		'warnee_testimages/053.jpg',
+		'warnee_testimages/054.jpg',
+		'warnee_testimages/055.jpg');
+
+	function imgloader($images) {
+
+		bs.dom('#stage_02')
+		.$('position', 'relative',
+			'margin', '0 auto',
+			//'border', '1px solid red',
+			'width', 196,
+			'height', 400,
+			'overflow', 'hidden');
+
+		bs.dom('<div id="img_stage_02">')
+		.$('<', '#stage_02',
+			'position', 'relative',
+			'left', 0,
+			'width', 10780,
+			'height', 345);
+
+		for (var i = 0; i < $images.length; i++) {
+			bs.dom('#img_stage_02').$('>', $images[i]);
+		};
+
+		bs.ANI.tween( bs.dom("#img_stage_02"), "left", (- 10584), "time", 55 * 2, 'loop', -1); //2초간 left,top을 변화시킴
+	}
+
+
+
+});
+
+
+
+</script>
+</body>
+</html>
