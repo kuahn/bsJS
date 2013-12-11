@@ -1219,20 +1219,18 @@ function init(doc){
 						else{
 							self[$k] = $v;
 							dom['on'+$k] = function( $e ){
-								var type, start, dx, dy, t0, t1, t2, i, j, X, Y;
+								var type, start, dx, dy, t0, t1, t2, id, i, j, X, Y;
 								self.event = $e || ( $e = event ), self.type = $e.type, self.code = $e.keyCode, self.value = dom.value && bs.$trim( dom.value );
 								if( type = evType[$k] ){
 									dx = x( dom ), dy = y( dom );
 									if( type < 3 ){
-										t0 = $e.changedTouches,
-										self.length = i = t0.length;
-										while( i-- )
-											t1 = t0[i],
-											self['lx'+i] = ( self['x'+i] = X = t1[pageX] ) - dx,
-											self['ly'+i] = ( self['y'+i] = Y = t1[pageY] ) - dy,
+										t0 = $e.changedTouches, self.length = i = t0.length;
+										while( i-- ) self[i] = t1 = t0[i], id = t1.identifier,
+											self['lx'+id] = ( self['x'+id] = X = t1[pageX] ) - dx,
+											self['ly'+id] = ( self['y'+id] = Y = t1[pageY] ) - dy,
 											type == 2 ?
-												( self['_x'+i] = X, self['_y'+i] = Y ) :
-												( self['dx'+i] = X - self['_x'+i], self['dy'+i] = Y - self['_y'+i] );
+												( self['_x'+id] = X, self['_y'+id] = Y ) :
+												( self['dx'+id] = X - self['_x'+id], self['dy'+id] = Y - self['_y'+id] );
 										self.x = self.x0, self.y = self.y0, self.lx = self.lx0, self.ly = self.ly0, self.dx = self.dx0, self.dy = self.dy0;
 									}else{
 										self.length = 0,
