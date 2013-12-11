@@ -1,0 +1,5 @@
+exports.bs = function( bs ){
+	bs.$response(
+		'<div>Head</div>'
+	);
+};

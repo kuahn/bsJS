@@ -6,6 +6,7 @@ bs.css.html
 bs.dom.html
 bs.event.html
 bs.function.html
+bs.json.html
 bs.keyevent.html
 bs.keyframe.html
 bs.router.html
@@ -14,6 +15,8 @@ bs.vali.html
 testHika.html
 testHuns.html
 testRouka.html
+testWarnee.html
+testWarneeCarousel.html
 testSato.html
 testSewonist.html
 testRedcamel.html

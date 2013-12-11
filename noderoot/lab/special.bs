@@ -4,5 +4,4 @@ exports.bs = function( bs ){
 		'<div>special</div>',
 		'</body></html>'
 	);
-	bs.$session('pekuid', 'xxx@gmail.com');
 };

@@ -1,4 +1,5 @@
-require('./bs/bsnode').$route( require('./route').route );
+var bs = require('./bs/bsnode');
+bs.$route( require('./noderoot/lab/route').route );
 /*
 var http = require("http");
 http.createServer(function(request, response) {

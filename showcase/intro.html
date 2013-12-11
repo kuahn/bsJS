@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<title>book</title>
+<meta name="keywords" content="bs5" />
+<meta name="description" content="bs5 Test suite" />
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
+<link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head><body>
+<div id="stage"></div>
+<script src="../bs/bsjs.js"></script> 
+<script>
+bs( function(){
+	function digit( $dom, $x, $y, $w, $h, $s, $c, $a ){
+		this.dom = $dom,
+		this.x = $x,
+		this.y = $y,
+		this.w = $w + $x,
+		this.h = $h + $y,
+		this.s = $s,
+		this.px = this.py = 0;
+		this.stat = -1;
+		this.step = 0;
+		this.pcount = 0;
+		this.c = $c;
+		this.a = $a;
+	}
+	digit.div = {length:0};
+	digit.end = function( $target ){
+		digit.div[digit.div.length++] = $target.$('visibility', 'hidden', 'this');
+	};
+	
+	digit.prototype[1] = function(){
+	  this.px = (this.x + this.w)*.5 ;
+	  if( this.step ) if( this.py > this.y ) this.py -= this.s;else this.step = 0;
+	  else if( this.py < this.h ) this.py += this.s;else this.step = 1;
+	};
+	digit.prototype[2] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:if( this.px < this.w ) this.px += this.s;else this.step = 1;break;
+	  case 1:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py < this.h ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 2;break;
+	  case 2:if( this.px < this.w ) this.px += this.s;else this.step = 3;break;
+	  case 3:this.px = this.x, this.py = this.y, this.step = 0;
+	  }
+	};
+	digit.prototype[3] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:if( this.px < this.w ) this.px += this.s;else this.step = 1;break;
+	  case 1:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py < (this.h-this.y)*.5+this.y ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 2;
+	  break;
+	  case 2:
+	  if( this.px < this.w ) this.px += this.s;else this.step = 3;break;
+	  case 3:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py < this.h ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 4;
+	  break;
+	  case 4:
+	  this.px = this.x, this.py = this.y, this.step = 0;
+	  }
+	};
+	digit.prototype[4] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:this.px = this.w, this.py=this.y, this.step = 1;break;
+	  case 1:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py < (this.h-this.y)*.8+this.y ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 2;
+	  break;
+	  case 2:if( this.px < this.w ) this.px += this.s;else this.step = 3;break;
+	  case 3:this.px = this.w, this.py=this.y, this.step = 4;break;
+	  case 4:if( this.py < this.h ) this.py += this.s; else this.step = 0;
+	  }
+	};
+	digit.prototype[5] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:this.px = this.w, this.py=this.y, this.step = 1;break;
+	  case 1:if( this.px > this.x ) this.px -= this.s;else this.step = 2;break;
+	  case 2:if( this.py < (this.h-this.y)*.3+this.y ) this.py += this.s;else this.step = 3;break;
+	  case 3:t0 = 0;
+	  if( this.px < this.w ) this.px += this.s; else t0++;
+	  if( this.py < (this.h-this.y)*.5+this.y ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 4;
+	  break;
+	  case 4:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py < this.h ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 0;
+	  }
+	};
+	digit.prototype[6] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:this.px = this.x, this.py=this.y, this.step = 1;break;
+	  case 1:if( this.py < this.h ) this.py += this.s;else this.step = 2;break;
+	  case 2:if( this.px < this.w ) this.px += this.s; else this.step = 3;break;
+	  case 3:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py > (this.h-this.y)*.6+this.y ) this.py -= this.s; else t0++;
+	  if( t0 == 2 ) this.step = 0;
+	  }
+	};
+	digit.prototype[7] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:this.px = this.x, this.py=this.y, this.step = 1;break;
+	  case 1:if( this.px < this.w ) this.px += this.s;else this.step = 2;break;
+	  case 2:t0 = 0;
+	  if( this.px > this.x ) this.px -= this.s; else t0++;
+	  if( this.py < this.h ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 0;
+	  }
+	};
+	digit.prototype[8] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:this.px = this.w, this.py=this.y, this.step = 1;break;
+	  case 1:if( this.px > this.x ) this.px -= this.s;else this.step = 2;break;
+	  case 2:t0 = 0;
+	  if( this.px < this.w ) this.px += this.s; else t0++;
+	  if( this.py < this.h ) this.py += this.s; else t0++;
+	  if( t0 == 2 ) this.step = 3;
+	  break;
+	  case 3:if( this.px > this.x ) this.px -= this.s;else this.step = 4;break;
+	  case 4:t0 = 0;
+	  if( this.px < this.w ) this.px += this.s; else t0++;
+	  if( this.py > this.y ) this.py -= this.s; else t0++;
+	  if( t0 == 2 ) this.step = 1;
+	  }
+	};
+	digit.prototype[9] = function(){
+	  var t0;
+	  switch( this.step ){
+	  case 0:this.px = this.w, this.py=(this.h-this.y)*.4+this.y, this.step = 1;break;
+	  case 1:if( this.px > this.x ) this.px -= this.s; else this.step = 2;break;
+	  case 2:if( this.py > this.y ) this.py -= this.s; else this.step = 3;break;
+	  case 3:if( this.px < this.w ) this.px += this.s; else this.step = 4;break;
+	  case 4:if( this.py < this.h ) this.py += this.s; else this.step = 0;
+	  }
+	};
+	digit.prototype[0] = function(){
+		var t0;
+		switch( this.step ){
+		case 0:this.px = this.w, this.py = this.y, this.step = 1;break;
+		case 1:if( this.px > this.x ) this.px -= this.s; else this.step = 2; break;
+		case 2:if( this.py < this.h ) this.py += this.s; else this.step = 3; break;
+		case 3:if( this.px < this.w ) this.px += this.s; else this.step = 4; break;
+		case 4:if( this.py > this.y ) this.py -= this.s; else this.step = 1;
+		}
+	};
+	digit.prototype.ani = function( $num ){
+		if( this.stat === $num ){
+			this[$num](),
+			this.dom.$( 'left', this.px, 'top', this.py );
+			if( this.pcount++ % 2 ){
+				var s = bs.$ex( 30, '~', 50 );
+				var d = digit.div.length ? digit.div[--digit.div.length] : bs.d('<div></div>' ).$( 'position','absolute', '<', '#stage', 'this' );
+				d.$( 'visibility', 'visible', 'background', this.c, 
+					'width',10, 'height',10, 'border-radius', 10, 'left',this.px,'top',this.py, 'opacity', 1 
+				);
+				bs.ANI.tween( d,
+					'left', bs.$ex( -this.a, '~', this.a ) + this.px, 'top', bs.$ex( -this.a, '~', this.a ) + this.py,
+					'border-radius', s, 'width', s, 'height',s, 'opacity', 0, 
+					'time', bs.$ex( 1.5, '~f', 2.5 ), 'end', digit.end
+				);
+			}
+		}else this.stat = $num, this.step = 0, this.px = this.x, this.py = this.y;
+	};
+	bs.c('.time').$('position','absolute','width',10,'height',10,'background','#f00','border-radius',5);
+	var time = [
+		new digit( bs.d('<div class="time"></div>').$('<','#stage','this'), 50, 50, 100, 150, 15, '#a66', 20 ),
+		new digit( bs.d('<div class="time"></div>').$('<','#stage','this'), 200, 50, 100, 150, 15, '#a66', 20 ),
+		new digit( bs.d('<div class="time"></div>').$('<','#stage','this'), 50, 250, 80, 120, 12, '#66a', 15 ),
+		new digit( bs.d('<div class="time"></div>').$('<','#stage','this'), 200, 250, 80, 120, 10, '#66a', 15 )
+	];
+	bs.ANI.ani( {ANI:function($time){
+		var h, m, s;
+		var date = new Date;
+		h = '0'+(date.getHours()%12);
+		h = h.substr(h.length-2);
+		m = '0'+date.getMinutes();
+		m = m.substr(m.length-2);
+		time[0].ani(h.charAt(0));
+		time[1].ani(h.charAt(1));
+		time[2].ani(m.charAt(0));
+		time[3].ani(m.charAt(1));
+	} });
+} );
+</script>
+</body>
+</html>
+

@@ -54,4 +54,4 @@ It is supported by the [BSIDESOFT](http://www.bsidesoft.com)(http://www.bsidesof
 ## Contact us
 #### [facebook group](https://www.facebook.com/groups/bs5js/?hc_location=stream)  
 
-Copyright 2013.10 hikaMaeng, bsJS-Team.
+Copyright 2013.10 projectBS committee.

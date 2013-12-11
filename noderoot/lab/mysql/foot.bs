@@ -1,0 +1,3 @@
+exports.bs = function( bs ){
+	bs.$response( '</body></html>' );
+};

@@ -21,21 +21,25 @@ if( !Array.prototype.indexOf )
 Date.now || ( Date.now = function(){return +new Date;} );
 
 if( !W['JSON'] ) W['JSON'] = {
-	parse:function( $str ){return (0,eval)( $str );},
+	parse:function( $str ){return (0,eval)( '(' + $str + ')' );},
 	stringify:(function(){
 		function stringify( $obj ){
 			var t0, i, j;
 			switch( t0 = typeof $obj ){
-			case'number':case'boolean':case'function': return $obj.toString();
-			case'undefined':case'null': return t0;
+			case'number':case'boolean':/*case'function':*/ return $obj.toString();
+			case'undefined':case 'null': return t0;
 			case'string': return '"' + $obj + '"';
 			case'object':
 				t0 = '';
-				if( $obj.splice ){
+				if( $obj && $obj.splice ){
 					for( i = 0, j = $obj.length ; i < j ; i++ ) t0 += ',' + stringify( $obj[i] );
 					return '[' + t0.substr(1) + ']';
 				}else{
-					for( i in $obj ) t0 += ',"'+i+'":' + stringify( $obj[i] );
+					for( i in $obj )
+						if ($obj[i] === null )  t0 += ',"'+i+'":' + null;
+						else if ($obj[i] === undefined) continue;
+						else if ('function' == (typeof $obj[i])) continue;
+						else t0 += ',"'+i+'":' + stringify( $obj[i] );
 					return '{' + t0.substr(1) + '}';
 				}
 			}
@@ -1381,20 +1385,6 @@ function init(doc){
 			};
 			return win;
 		})();
-<<<<<<< HEAD:bs/bs5.js
-        // AutoKeySystem 검증필요?
-        bs.KEY = (function () {
-            var keymap = {'65': 'a', '66': 'b', '67': 'c', '68': 'd', '69': 'e', '70': 'f', '71': 'g', '72': 'h', '73': 'i', '74': 'j', '75': 'k', '76': 'l', '77': 'm', '78': 'n', '79': 'o', '80': 'p', '81': 'q', '82': 'r', '83': 's', '84': 't', '85': 'u', '86': 'v', '87': 'w', '88': 'x', '89': 'y', '90': 'z', '8': 'back', '9': 'tab', '13': 'enter', '16': 'shift', '17': 'control', '18': 'alt', '19': 'pause', '20': 'caps', '27': 'esc', '32': 'space', '33': 'pageup', '34': 'pagedown', '35': 'end', '36': 'home', '37': 'left', '38': 'up', '39': 'right', '40': 'down', '45': 'insert', '46': 'delete', '144': 'numlock', '145': 'scrolllock', '48': '0', '49': '1', '50': '2', '51': '3', '52': '4', '53': '5', '54': '6', '55': '7', '56': '8', '57': '9'};
-            var buffer = {a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, g: 0, h: 0, i: 0, j: 0, k: 0, l: 0, m: 0, n: 0, o: 0, p: 0, q: 0, r: 0, s: 0, t: 0, u: 0, v: 0, w: 0, x: 0, y: 0, z: 0, back: 0, tab: 0, enter: 0, shift: 0, control: 0, alt: 0, pause: 0, caps: 0, esc: 0, space: 0, pageup: 0, pagedown: 0, end: 0, home: 0, left: 0, up: 0, right: 0, down: 0, insert: 0, delete: 0, numlock: 0, scrolllock: 0, 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0}
-            bs.WIN.on("keydown", 'bsKD', function ($e) {
-                bs.KEY[keymap[$e.code]] = 1;
-            });
-            bs.WIN.on("keyup", 'bsKU', function ($e) {
-                bs.KEY[keymap[$e.code]] = 0;
-            });
-            return buffer
-        })();
-=======
 		bs.KEY = (function () {
 			var buffer, keycode;
 			return keycode = bs.keycode, delete bs.keycode, 
@@ -1402,7 +1392,6 @@ function init(doc){
 				bs.WIN.on("keyup", '@bsKU', function($e){buffer[keycode[$e.code]] = 0;}),
 				buffer = {};
 		})();
->>>>>>> origin/gh-pages:bs/bsjs.js
 	})( W.document );
 	bs.ROUTER =(function(){
 		var s, e, t, h, count;
@@ -1784,38 +1773,22 @@ function init(doc){
 init.len = 0;
 W[N||'bs'] = function(){init[init.len++] = arguments[0];};
 (function( doc ){
-	var isReady;
+	var isReady, t0;
 	function loaded(){
 		var i, j;
 		if( isReady ) return;
 		if( !doc.body ) return setTimeout( loaded, 1 );
-		isReady = 1;
-		if( doc.addEventListener ){
-			doc.removeEventListener( "DOMContentLoaded", loaded, false );
-			W.removeEventListener( "load", loaded, false );
-		}else{
-			doc.detachEvent( "onreadystatechange", loaded );
-			W.detachEvent( "onload", loaded );
-		}
-		init(doc);
-		for( i = 0, j = init.len ; i < j ; i++ ) init[i]();
+		isReady = 1, clearInterval( t0 );
+		if( doc.addEventListener ) doc.removeEventListener( "DOMContentLoaded", loaded, false ), W.removeEventListener( "load", loaded, false );
+		else if( doc.attachEvent ) doc.detachEvent( "onreadystatechange", loaded ), W.detachEvent( "onload", loaded );
+		for( init(doc), i = 0, j = init.len ; i < j ; i++ ) init[i]();
 	}
-	if( doc.addEventListener ){
-		doc.addEventListener( "DOMContentLoaded", loaded, false );
-		W.addEventListener( "load", loaded, false );
-	}else if( doc.attachEvent ){
-		doc.attachEvent( "onreadystatechange", loaded );
-		W.attachEvent( "onload", loaded );
-		(function(){
-			var t0, check;
-			try{t0 = W.frameElement == null;}catch(e){}
-			if( doc.documentElement.doScroll && t0 )( check = function(){
-				if( isReady ) return;
-				try{doc.documentElement.doScroll("left");
-				}catch(e){return setTimeout( check, 1 );}
-				loaded();
-			} )();
-		})();
-	}else if( doc.readyState !== "loading" ) loaded();
+	if( doc.readyState !== "loading" ) return loaded();
+	if( doc.addEventListener ) doc.addEventListener( "DOMContentLoaded", loaded, false ), W.addEventListener( "load", loaded, false );
+	else if( doc.attachEvent ) doc.attachEvent( "onreadystatechange", loaded ), W.attachEvent( "onload", loaded );
+	t0 = setInterval( function(){
+		if( isReady ) return;
+		if( doc.body ) clearInterval( t0 ), loaded();
+	}, 1 );
 })( W.document );
 } )( this );

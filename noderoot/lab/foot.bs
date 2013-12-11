@@ -1,6 +1,6 @@
 exports.bs = function( bs ){
 	bs.$response(
-		'<div>globalFoot.js</div>',
+		'<div>absolute Foot</div>',
 		'</body>',
 		'</html>'
 	);
