@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-<title>testHika</title>
+<title>explosion</title>
 <meta name="keywords" content="bs5" />
 <meta name="description" content="bs5 Test suite" />
 <meta charset="utf-8"/>
@@ -11,22 +10,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi" />
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
-</head>
-<body>
-<a href="https://github.com/projectBS/bsJS">
-	<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
-</a>
+</head><body>
+<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"> </a> 
 <div id="stage"></div>
-<script src="../bs/bsjs.js"></script>
-<script src="../bs/bsTest.js"></script>
+<script src="../bs/bsjs.js"></script> 
 <script>
 bs( function(){
 	var s0, inited;
-	bs.sprite( 'explosion' ).$( 'src', 'hika/explosion.png', 'col', 29, 'row', 1 );
+	bs.sprite( 'explosion' ).$( 'src', 'explosion.png', 'col', 29, 'row', 1 );
 	bs.WIN.sizer( function( w, h ){
 		if( inited ) return;
-		inited = 1;
-		bs.d( 'body' ).$( 'margin', 0, 'padding', 0 );
+		inited = 1,
+		bs.d( 'body' ).$( 'margin', 0, 'padding', 0 ),
+		bs.d( '<div></div>' ).$( '<', '#stage', 'html', 'click!!', 'color', '#fff', 'text-align', 'center' ),
 		bs.d( '#stage' ).$( '>', bs.sprite( 'explosion' ).$( '@0', 'position', 'absolute', 'div' ), 
 			'overflow', 'hidden', 'background', '#000', 'width', w, 'height', h,
 			'down', function( $e ){
