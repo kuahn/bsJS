@@ -11,7 +11,7 @@ bs.keyevent.html
 bs.keyframe.html
 bs.router.html
 bs.tmpl.html
-bs.vali.html
+bs.sprite.html
 testHika.html
 testHuns.html
 testRouka.html
