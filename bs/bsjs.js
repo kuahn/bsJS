@@ -1770,7 +1770,7 @@ function init(doc){
 			this.img.$( 'margin-left', -(curr%this.col)*this.width, 'margin-top', -parseInt(curr/this.col)*this.height );
 		},
 		d.$ = function d$(){
-			var t0, i, j, k, v, isRun;
+			var t0, i, j, k, v;
 			if( ( t0 = arguments[0] ).charAt(0) == '@' ){
 				if( !this[t0] ){
 					t0 = this[t0] = {
@@ -1789,14 +1789,15 @@ function init(doc){
 					if( key[k] ) t0[k] = v;
 					else if( k == 'div' ) return t0.div;
 					else if( k == 'img' ) return t0.img;
-					else if( k == '@' ) isRun = 1;
+					else if( k == '@' || k == 'ani' ) return t0.img.$( 'margin-left', 0, 'margin-top', 0,
+						'width', t0.width*t0.col, 'height', t0.height*t0.row ), 
+						t0.div.$( 'width', t0.width, 'height', t0.height, 'display', 'block' ),
+						t0.t = t0.time*1000, t0.d = t0.delay*1000, t0.stime = Date.now() + (t0.delay||0), t0.etime = t0.stime + t0.t,
+						bs.ANI.ani( t0 );
+					else if( k == 'frame') return t0.img.$( 'width', t0.width*t0.col, 'height', t0.height*t0.row, 
+						'margin-left', -(v%t0.col)*t0.width, 'margin-top', -parseInt(v/t0.col)*t0.height ),
+						t0.div.$( 'width', t0.width, 'height', t0.height, 'display', 'block' );
 					else t0.div.$( k, v );
-				}
-				if( isRun ){
-					t0.img.$( 'width', t0.width*t0.col, 'height', t0.height*t0.row, 'margin-left', 0, 'margin-top', 0 ),
-					t0.div.$( 'width', t0.width, 'height', t0.height, 'display', 'block' ),
-					t0.t = t0.time*1000, t0.d = t0.delay*1000, t0.stime = Date.now() + (t0.delay||0), t0.etime = t0.stime + t0.t;
-					bs.ANI.ani( t0 );
 				}
 			}else{
 				i = 0, j = arguments.length;

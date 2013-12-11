@@ -37,7 +37,10 @@ bs( function(){
 					'left', $e.x - s*.5, 'top', $e.y - s*.5, 
 					'@'
 				);
-		} );
+			},
+			'>', bs.sprite( 'explosion' ).$( '@1', 'position', 'absolute', 'div' )
+		),
+		bs.sprite( 'explosion' ).$( '@1', 'width', 70, 'height', 70, 'frame', 15 );
 	} );
 });
 </script>
