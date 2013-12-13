@@ -37,7 +37,6 @@ if( !W['JSON'] ) W['JSON'] = {
 					for( i in $obj ) if( $obj.hasOwnProperty( i ) ){
 						if ($obj[i] === null )  t0 += ',"'+i+'":' + null;
 						else if ($obj[i] === undefined) continue;
-						else if ('function' == (typeof $obj[i])) continue;
 						else t0 += ',"'+i+'":' + stringify( $obj[i] );
 					}
 					return '{' + t0.substr(1) + '}';
@@ -66,7 +65,7 @@ function init(doc){
 				return doc.getElementsByTagName($sel);
 			};
 		}
-		div = doc.createElement( 'div' ), nodes = {};
+		div = doc.createElement( 'div' ), nodes = {},
 		bs = function( $sel, $node ){
 			var r, t0, i, j, k;
 			if( $sel.isDom ) return $sel;
@@ -82,7 +81,7 @@ function init(doc){
 				}
 				return r;
 			}
-		}
+		},
 		bs.sel = sel;
 		return bs;
 	})(doc);
@@ -434,10 +433,7 @@ function init(doc){
 			float:function( $v ){return '' + parseFloat( $v ) === $v;},
 			int:function( $v ){return '' + parseInt( $v, 10 ) === $v;},
 			length:function( $v, $a ){return $v.length === +$a[0];},
-			range:function( $v, $a ){
-				var v = parseFloat( $v );
-				return +$a[0] <= v && v <= +$a[1];
-			},
+			range:function( $v, $a ){return $v = $v.length, +$a[0] <= v && v <= +$a[1];},
 			indexOf:function( $v, $a ){
 				var i, j;
 				i = $a.length;
@@ -476,16 +472,13 @@ function init(doc){
 			$list[$list.length++] = $v;
 		}
 		function parse( $data ){
-			var s, t0, t1, t2, i, j, k, l, cnt;
+			var s, t0, t1, t2, i, j, k, l;
 			s = {}, $data = $data.split('\n'), l = $data.length;
 			while( l-- ){
-				t0 = $data[l].split('='), t1 = {length:0}, cnt = 0;
-				while( cnt++ < 20 && ( j = 0, k = t0[1].indexOf( 'AND' ) ) > -1 || ( j = 1, k = t0[1].indexOf( 'OR' ) ) > -1 ){
-					arg( k, t0[1], t1 ), t1[t1.length++] = j ? ( (k += 2), 'OR' ) : ( (k += 3), 'AND' );
-					t0[1] = t0[1].substr( k );
-				}
-				arg( t0[1].length, t0[1], t1 );
-				t2 = bs.$trim( t0[0].split( ',' ) ), i = t2.length;
+				t0 = $data[l].split('='), t1 = {length:0};
+				while( ( j = 0, k = t0[1].indexOf( 'AND' ) ) > -1 || ( j = 1, k = t0[1].indexOf( 'OR' ) ) > -1 )
+					arg( k, t0[1], t1 ), t1[t1.length++] = j ? ( (k += 2), 'OR' ) : ( (k += 3), 'AND' ), t0[1] = t0[1].substr( k );
+				arg( t0[1].length, t0[1], t1 ), t2 = bs.$trim( t0[0].split( ',' ) ), i = t2.length;
 				while( i-- ) s[t2[i]] = t1;
 			}
 			return rule = s;
@@ -544,16 +537,18 @@ function init(doc){
 						if( !( t2 = t0[t1[m++]] ) ) throw 'no rule';
 						k = 0, l = t2.length, v = val( t1[m++] );
 						while( k < l ){
-							if( !t2[k++]( v, t2[k++] ) ) return;
-							if( t2[k++] == 'OR' ) break;
+							if( !t2[k++]( v, t2[k++] ) ){
+								if( t2[k++] != 'OR' ) return;
+							}else if( t2[k++] == 'OR' ) break;
 						}
 					}
 				}else{
 					if( !( t2 = t0[k] ) ) throw 'no rule';
 					k = 0, l = t2.length, v = val( arguments[i++] );
 					while( k < l ){
-						if( !t2[k++]( v, t2[k++] ) ) return;
-						if( t2[k++] == 'OR' ) break;
+						if( !t2[k++]( v, t2[k++] ) ){
+							if( t2[k++] != 'OR' ) return;
+						}else if( t2[k++] == 'OR' ) break;
 					}
 				}
 			}
@@ -1259,7 +1254,7 @@ function init(doc){
 						var wh, r, s;
 						if( !win.is( '#bsSizer' ) ) bs.d( '<div></div>' ).$( 'id', 'bsSizer', 'display','none','width','100%','height','100%','position','absolute','<','body' );
 						s = bs.d('#bsSizer');
-						switch( bs.DETECT.browser ){
+						switch( bs.DETECT.os ){
 						case'iphone':
 							s.$( 'display', 'block', 'height', '120%' ),
 							W.onscroll = function( $e ){
@@ -1270,7 +1265,7 @@ function init(doc){
 							W.scrollTo( 0, 1000 );
 							break;
 						case'android':case'androidTablet':
-							if( bs.DETECT.sony ) sizer( function(){$end( win.w = s.$('w'), win.h = s.$('h') );} );
+							if( bs.DETECT.sony && bs.DETECT.browser != 'chrome' ) sizer( function(){$end( win.w = s.$('w'), win.h = s.$('h') );} );
 							else r = outerWidth == screen.width || screen.width == s.$('w') ? devicePixelRatio : 1,
 								sizer( function wh(){$end( win.w = outerWidth / r, win.h = outerHeight / r + 1 );} );
 							break;

@@ -29,9 +29,13 @@ bs( function(){
 		bs.$test( 'rule',
 			'Falpha', '/^[a-z]/',
 			'alpha', '/^[a-z]+$/',
+			'num', '/^[0-9]+$/',
 			'alphanum', '/^[a-z0-9]+$/',
 			'len', function( $val, $arg ){
 				return $val.length == parseInt( $arg[0] );
+			},
+			'l6', function( $val, $arg ){
+				return $val.length == 6;
 			}
 		);
 
@@ -53,6 +57,9 @@ bs( function(){
 	bsTest( 'test - Runtime SET',
 		function(){
 			return bs.$test( 'userid, pw = Falpha AND alphanum AND len|6', 'userid', '#id|@value', 'pw', '#pw|@value' );
+		}, 1,
+		function(){
+			return bs.$test( 'or = len|4 OR l6', 'or', '#id|@value' );
 		}, 1
 	);
 
