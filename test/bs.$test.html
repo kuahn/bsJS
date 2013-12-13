@@ -40,13 +40,11 @@ bs( function(){
 			'userid', '#id|@value',
 			'pw', '#pw|@value'
 		);
-
 		// Define SETs
 		bs.$test( 'set',
-			'set1', 'userid, pw = Falpha, alphanum'
+			'set1', 'userid, pw = Falpha AND alphanum'
 		);
 	} );
-
 	bsTest( 'test - SET & GROUP',
 		function(){
 			return bs.$test( 'set1', '@group1' );
@@ -54,14 +52,16 @@ bs( function(){
 	);
 	bsTest( 'test - Runtime SET',
 		function(){
-			return bs.$test( 'userid, pw = Falpha, alphanum, len|6', 'userid', '#id|@value', 'pw', '#pw|@value' );
+			return bs.$test( 'userid, pw = Falpha AND alphanum AND len|6', 'userid', '#id|@value', 'pw', '#pw|@value' );
 		}, 1
 	);
+
 	bsTest( 'test - ext. file SET',
 		function(){
 			return bs.$test( 'bs.vali.set.html', 'userid', '#id|@value', 'pw', '#pw|@value' );
 		}, 1
 	);
+	
 	bsTest( 'test - direct access to RULE',
 		function(){
 			return bs.$test( '@len|6', '#id|@value', '#pw|@value' );

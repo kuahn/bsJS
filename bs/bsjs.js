@@ -463,28 +463,32 @@ function init(doc){
 					v = $v.replace( r, '' );
 					if( v.length != 10 ) return;
 					for( t0 = i = 0 ; i < 8 ; i++ ) t0 += key[i] * v.charAt(i);
-					t1 = "0" + ( key[8] * v.charAt(8) );
-					t1 = t1.substr( t1.length - 2 );
+					t1 = "0" + ( key[8] * v.charAt(8) ), t1 = t1.substr( t1.length - 2 ),
 					t0 += parseInt( t1.charAt(0) ) + parseInt( t1.charAt(1) );
 					return parseInt( v.charAt(9) ) == ( 10 - ( t0 % 10)) % 10;
 				};
 			})()
 		},
 		set = {};
+		function arg( k, $v, $list ){
+			$v = bs.$trim( $v.substring(0,k).split('|') ),
+			$list[$list.length++] = parseRule( $v.shift() ),
+			$list[$list.length++] = $v;
+		}
 		function parse( $data ){
-			var t0, t1, t2, t3, i, j, k;
-			t0 = {}, t1 = $data.split('\n'), i = t1.length;
-			while( i-- ){
-				t1[i] = t1[i].split('=');
-				t2 = bs.$trim( t1[i][1].split( ',' ) ), j = t2.length;
-				while( j-- ){
-					t3 = t2[j].split('|'),
-					t2[j] = {0:parseRule( t3[0] ), 1:t3.slice( 1 )};
+			var s, t0, t1, t2, i, j, k, l, cnt;
+			s = {}, $data = $data.split('\n'), l = $data.length;
+			while( l-- ){
+				t0 = $data[l].split('='), t1 = {length:0}, cnt = 0;
+				while( cnt++ < 20 && ( j = 0, k = t0[1].indexOf( 'AND' ) ) > -1 || ( j = 1, k = t0[1].indexOf( 'OR' ) ) > -1 ){
+					arg( k, t0[1], t1 ), t1[t1.length++] = j ? ( (k += 2), 'OR' ) : ( (k += 3), 'AND' );
+					t0[1] = t0[1].substr( k );
 				}
-				t3 = bs.$trim( t1[i][0].split( ',' ) ), j = t3.length;
-				while( j-- ) t0[t3[j]] = t2;
+				arg( t0[1].length, t0[1], t1 );
+				t2 = bs.$trim( t0[0].split( ',' ) ), i = t2.length;
+				while( i-- ) s[t2[i]] = t1;
 			}
-			return rule = t0;
+			return rule = s;
 		}
 		function parseRule( k ){
 			if( typeof k == 'function' ) return k;
@@ -538,13 +542,19 @@ function init(doc){
 					m = 0, n = t1.length;
 					while( m < n ){
 						if( !( t2 = t0[t1[m++]] ) ) throw 'no rule';
-						l = t2.length, v = val( t1[m++] );
-						while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
+						k = 0, l = t2.length, v = val( t1[m++] );
+						while( k < l ){
+							if( !t2[k++]( v, t2[k++] ) ) return;
+							if( t2[k++] == 'OR' ) break;
+						}
 					}
 				}else{
 					if( !( t2 = t0[k] ) ) throw 'no rule';
-					l = t2.length, v = val( arguments[i++] );
-					while( l-- ) if( !t2[l][0]( v, t2[l][1] ) ) return;
+					k = 0, l = t2.length, v = val( arguments[i++] );
+					while( k < l ){
+						if( !t2[k++]( v, t2[k++] ) ) return;
+						if( t2[k++] == 'OR' ) break;
+					}
 				}
 			}
 			return 1;
