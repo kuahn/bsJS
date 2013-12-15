@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>testRedcamel</title>
+    <meta name="keywords" content="bs5"/>
+    <meta name="description" content="bs5 Test suite"/>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,target-densitydpi=medium-dpi"/>
+    <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+<a href="https://github.com/projectBS/bsJS">
+    <img style="position: fixed; top: 0; right: 0; border: 0;"
+         src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<script src="../bs/bsjs.js"></script>
+<script src="../bs/bsTest.js"></script>
+<div id="stage"></div>
+<script>
+    // 2013.12.15 - 18:00
+    // By Redcamel
+    // 개발목적 : bs.world / bs.plane 구현
+    // 다음목표 :
+    // 1. camera 시스템을 구분해서.. css3와 통합범용으로 사용할 수있게한다.
+    // 2. 현재 plane에서 애니메이션 거는 부분을 전부 camera render로 옮긴다...계산량 줄여야함..
+    // 3. farclip 확장 - opacity모드 / png 중첩모드(중첩을 한다면 farclip거리에서 몇장이나 할건지도 지정해야할듯함)
+    function setTitle(){
+        bs.dom('<div></div>').$('<', 'body', 'id', 'title', 'html', 'Billboard Factory Prototype', 'left',10,'font-size', 30, 'font-family', 'Times New Roman', 'text-align', 'center', 'color', '#000', 'top', 20,'z-index',10000000000)
+        var exStrs = ['W : forward / S : backward','A : left / D : right','R : up / F : down','Q : panLeft / E : panRight','T : tiltUp / G : tiltDown']
+        for (var i = 0; i < 6; i++) bs.dom('<div></div>').$('<', 'body', 'id', 'title' + i, 'html', exStrs[i], 'font-size', 10, 'color', '#000', 'top', 60 + 15 * i, 'left', 10,'z-index',10000000000)
+        bs.ANI.fps(bs.dom('<div></div>').$('id', 'fps', 'font-size', 11, 'color', '#000', '<', 'body', 'this')[0]);
+    }
+    function setDebuger(){
+        // 디버거 세팅
+        var debuger = {
+            ANI:function( $time ){
+                var world =  bs.world('billboard').$('@1')
+                var str =""
+                str += "bs.world('billboard').$('@1') Infomation"
+                str += '<br>camx :' + world.camx
+                str += '<br>camy :' + world.camy
+                str += '<br>camz :' + world.camz
+                str += '<br>pan :' + world.pan
+                str += '<br>tilt :' + world.tilt
+                str += '<br>camspeed :' + world.camspeed
+                str += '<br>farclip :' + world.farclip
+                bs.dom('#debuger').$('html',str)
+            }
+        }
+        bs.dom('<div></div>').$('<','body','id','debuger','left',10,'top',150,'font-size',10, 'background-color','#ffffff','padding',10,'z-index',10000000000)
+        bs.ANI.ani(debuger)
+    }
+
+    function setCameraFlow(){
+        var world =  bs.world('billboard').$('@1');
+        var cameraFlow = {
+            pause : false,
+            ANI:function( $time ){
+                var sin = Math.sin($time/2000) , cos = Math.cos($time/2000)
+                world.camx = sin*1000
+                world.camz = cos*1000
+                world.camy = cos*500
+                world.tilt = sin/2
+                world.pan = sin
+                return this.pause
+            }
+        }
+        bs.ANI.ani(cameraFlow)
+        var msg = '자동플레이에서는 카메라 조작이 되지않습니다.'
+        bs.dom( '<div id="toggle"></div>' ).$( '<', 'body',
+                'html', 'pause '+msg,
+                'position','absolute', 'top', 270, 'left', 10, 'width', 350, 'height', 20, 'border-radius', 15,
+                'background', '#fdd', 'line-height', 20, 'text-align', 'center', 'font-weight', 'bold', 'cursor', 'pointer', 'font-size', 11,'z-index',10000000000,
+                'down', function($e){
+                    cameraFlow.pause = !cameraFlow.pause
+                    if(!cameraFlow.pause) bs.ANI.ani(cameraFlow)
+                    var isPause = cameraFlow.pause
+                    bs.dom("#toggle").$( 'html', isPause ? 'resume '+msg : 'pause '+msg, 'background', isPause ? '#ffd' :'#fdd' );
+                }
+        );
+    }
+
+    bs(function () {
+        bs.css("body").$('margin', 0, 'overflow', 'hidden'), bs.css("div").$('margin', 0,'position', 'absolute')
+        bs.dom('<div></div>').$('<','body','id','stage')
+
+
+        var inited = false
+        bs.WIN.sizer( function( w, h ){
+            // world 고유 속성
+            // width, height,
+            // farclip - 멀리있는 대상을 사라지게만들 거리
+            // pan, tilt, camx, camy, camz,
+            // camspeed - 카메라 이동속도
+            if(inited) bs.world('billboard').$('@1','width',w, 'height',h)
+            else bs.world('billboard').$('@1', '<','#stage', 'position', 'absolute','width',w, 'height',h, 'background-color','#00ee22','farclip',2500)
+            inited=true
+        });
+        setTitle()
+        setDebuger()
+        setCameraFlow()
+        // bs.plane 고유속성
+        // x,y,z,width,height
+        // src - 팩토리 생성시 지정할 기본 이미지 재질
+        // world,@ - 대상 월드와 월드 인스턴스네임
+
+        // plane factory define
+        bs.plane('planeFactory').$('src', 'redcamel_test_demo2_asset/007.png','world','billboard','@','@1')
+        // 007.png를 재질로 하는 플랜을 billboard @1인스턴스에 넣는 팩토리를 작선
+        var len = bs.DETECT.device == 'tablet' || bs.DETECT.device == 'mobile' ? 15 : 100
+        for(var i=0; i<len; i++){
+            var wh = bs.$ex(100, "~",300)
+            //make plane instance
+            bs.plane('planeFactory').$(
+                    '@plane'+i,'x',bs.$ex(-1000, "~",1000),'z',bs.$ex(-2000, "~",2000),'width',wh, 'height',wh,
+                    'down',function($e){ alert($e.dom.id)},'id','test'+i
+            )
+
+            // 인스턴스명 '@plane'+i으로 플랜을 생성 ( 팩토리에 지정한 빌보드 월드 인스턴스로 자동등록
+            //reset img
+            if(i%3==0) bs.plane('planeFactory').$('@plane'+i,'img').$('@src', "redcamel_test_demo2_asset/008.png")
+            // 재질 이미지 변경시 위와 같이 plane의 img를 통해서 생성
+            else if(i%10==0) bs.plane('planeFactory').$('@plane'+i,'div').$('html', '@plane'+i+"을 디자인재정의", 'background-color','#ee22aa')
+            // 재질 없이 그냥 div를 디자인 하고싶다면
+        }
+    });
+</script>
+</body>
+</html>
