@@ -1747,7 +1747,7 @@ function init(doc){
     })(bs) );
     // bs.plane 팩토리 프로토타입
     bs.factory( 'plane', (function( bs ){
-        var d, ani, key, ANI
+        var d, ani, key, ANI,inited=false
         bs.c( '.PLANE' ).$( 'position', 'absolute'),
             bs.c( '.PLANE img' ).$( 'width', '100%', 'height','100%'),
             ANI = bs.ANI.ani,
@@ -1800,7 +1800,8 @@ function init(doc){
                         else if( k == 'img' ) return t0.img;
                         else t0.div.$( k, v );
                     }
-                    ANI(t0);
+                    if(!inited) ANI(t0);
+                    inited = true;
                 }else{
                     i = 0, j = arguments.length;
                     while( i < j ){
