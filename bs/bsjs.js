@@ -1678,7 +1678,7 @@ function init(doc){
     ////////////////////////////////////////////////////////////////////
     // bs.world 팩토리 프로토타입
     bs.factory( 'world', (function( bs ){
-        var d, ani, key, ANI,bskey=bs.KEY, inited=false
+        var d, ani, key, ANI,bskey=bs.KEY, inited=false;
         bs.c( '.WORLD' ).$( 'overflow', 'hidden'),
             ANI = bs.ANI.ani,
             (function(){
@@ -1734,7 +1734,6 @@ function init(doc){
                     }
                     if(!inited) ANI(t0);
                     inited = true;
-
                 }else{
                     i = 0, j = arguments.length;
                     while( i < j ){
@@ -1747,7 +1746,7 @@ function init(doc){
     })(bs) );
     // bs.plane 팩토리 프로토타입
     bs.factory( 'plane', (function( bs ){
-        var d, ani, key, ANI,inited=false
+        var d, ani, key, ANI;
         bs.c( '.PLANE' ).$( 'position', 'absolute'),
             bs.c( '.PLANE img' ).$( 'width', '100%', 'height','100%'),
             ANI = bs.ANI.ani,
@@ -1799,9 +1798,8 @@ function init(doc){
                         else if( k == 'div' ) return t0.div;
                         else if( k == 'img' ) return t0.img;
                         else t0.div.$( k, v );
-                    }
-                    if(!inited) ANI(t0);
-                    inited = true;
+                    };
+                    ANI(t0);
                 }else{
                     i = 0, j = arguments.length;
                     while( i < j ){
