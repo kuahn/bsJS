@@ -1678,7 +1678,7 @@ function init(doc){
     ////////////////////////////////////////////////////////////////////
     // bs.world 팩토리 프로토타입
     bs.factory( 'world', (function( bs ){
-        var d, ani, key, ANI,bskey=bs.KEY
+        var d, ani, key, ANI,bskey=bs.KEY, inited=false
         bs.c( '.WORLD' ).$( 'overflow', 'hidden'),
             ANI = bs.ANI.ani,
             (function(){
@@ -1707,7 +1707,7 @@ function init(doc){
             d.$ = function(){
                 var t0, i, j, k, v;
                 if( ( t0 = arguments[0] ).charAt(0) == '@' ){
-                    if( this[t0] ) t0 = this[t0];
+                    if( this[t0] ) t0 = this[t0]
                     else ( t0 = this[t0] = {
                         ANI:ani,
                         div:bs.d( '<div class="WORLD"></div>'),
@@ -1732,7 +1732,9 @@ function init(doc){
                         else if( k == 'camspeed' ) return t0.camspeed;
                         else t0.div.$( k, v );
                     }
-                    ANI(t0)
+                    if(!inited) ANI(t0);
+                    inited = true;
+
                 }else{
                     i = 0, j = arguments.length;
                     while( i < j ){
@@ -1796,9 +1798,9 @@ function init(doc){
                         if( key[k] ) t0[k] = v;
                         else if( k == 'div' ) return t0.div;
                         else if( k == 'img' ) return t0.img;
-                        else t0.div.$( k, v ); 
+                        else t0.div.$( k, v );
                     }
-                    ANI( t0 );
+                    ANI(t0);
                 }else{
                     i = 0, j = arguments.length;
                     while( i < j ){
