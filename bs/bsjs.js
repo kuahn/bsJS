@@ -1796,7 +1796,7 @@ function init(doc){
                         if( key[k] ) t0[k] = v;
                         else if( k == 'div' ) return t0.div;
                         else if( k == 'img' ) return t0.img;
-                        else t0.div.$( k, v );
+                        else t0.div.$( k, v ); 
                     }
                     ANI( t0 );
                 }else{
